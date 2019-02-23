@@ -11,22 +11,24 @@
         {{form.org_phone(class="form-control", placeholder="Organization Phone Number")}}
     </div>
     <div class="input-group mb-2">
+        {{form.org_open.label}}
         {{form.org_open(class="form-control")}}
+        {{form.org_close.label}}
         {{form.org_close(class="form-control")}}
     </div>
     <div class="card-header">
         User Details
     </div>
     <div class="input-group mb-1">
-        {{form.first_name(class="form-control")}}
-        {{form.last_name(class="form-control")}}
+        {{form.first_name(class="form-control", placeholder="First Name")}}
+        {{form.last_name(class="form-control", placeholder="Last Name")}}
     </div>
     <div class="input-group mb-1">
-        {{form.mobile_number(class="form-control")}}
+        {{form.mobile_number(class="form-control", placeholder="Mobile Number")}}
     </div>
     <div class="input-group mb-1">
-        {{form.password(class="form-control")}}
-        {{form.confirm_password(class="form-control")}}
+        {{form.password(class="form-control", placeholder="Password")}}
+        {{form.confirm_password(class="form-control", placeholder="Confirm password")}}
     </div>
         {{ form.submit(class="btn btn-lg btn-primary btn-block", style="font-size: 1rem;")}}
 
@@ -34,6 +36,7 @@
 
 {# Content that appears after alerts #}
 {% block after_flash %}
+
     <div id="otherButtons">
         <a class="btn btn-primary" href="{{url_for('unauthenticated.register_page')}}">Register</a>
         <a class="btn btn-primary" id="passwordReset" >Reset Password?</a>

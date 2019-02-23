@@ -24,6 +24,11 @@ def login_page():
 @unauthenticated.route('/Register', methods=['GET', 'POST'])
 def register_page():
     register_form = RegisterForm()
+    #
+    # Check if register request is valid
+    if request.method == 'POST' and register_form.validate_on_submit():
+        return 'killyosan'
+
     return render_template('html/register_page.html',
                            form=register_form,
                            page_title="Please Login")
