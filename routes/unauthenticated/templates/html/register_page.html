@@ -1,0 +1,45 @@
+{% extends "html/Base_Template.html" %}
+{# Content that appears before flash #}
+{% block before_flash %}
+    <h1 class="h3 mb-3 font-weight-normal">{{page_title}}</h1>
+    {{ form.hidden_tag()}}
+    <div class="card-header">
+       Organization Details
+    </div>
+    <div class="input-group mb-1">
+        {{form.org_name(class="form-control", placeholder="Organization Name")}}
+        {{form.org_phone(class="form-control", placeholder="Organization Phone Number")}}
+    </div>
+    <div class="input-group mb-2">
+        {{form.org_open(class="form-control")}}
+        {{form.org_close(class="form-control")}}
+    </div>
+    <div class="card-header">
+        User Details
+    </div>
+    <div class="input-group mb-1">
+        {{form.first_name(class="form-control")}}
+        {{form.last_name(class="form-control")}}
+    </div>
+    <div class="input-group mb-1">
+        {{form.mobile_number(class="form-control")}}
+    </div>
+    <div class="input-group mb-1">
+        {{form.password(class="form-control")}}
+        {{form.confirm_password(class="form-control")}}
+    </div>
+        {{ form.submit(class="btn btn-lg btn-primary btn-block", style="font-size: 1rem;")}}
+
+{% endblock before_flash %}
+
+{# Content that appears after alerts #}
+{% block after_flash %}
+    <div id="otherButtons">
+        <a class="btn btn-primary" href="{{url_for('unauthenticated.register_page')}}">Register</a>
+        <a class="btn btn-primary" id="passwordReset" >Reset Password?</a>
+    </div>
+{% endblock after_flash %}
+
+{# Scripts #}
+{% block script %}
+{% endblock script %}
