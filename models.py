@@ -7,6 +7,7 @@ class AccountDetails(ndb.Model):
     last_name = ndb.StringProperty()
     mobile_number = ndb.StringProperty()
     password = ndb.StringProperty()
+    email = ndb.StringProperty()
     # possible roles = 'dev','manager','super-dev','super-admin'
     role = ndb.StringProperty()
     organization = ndb.KeyProperty(kind='OrganizationDetails')
@@ -22,5 +23,5 @@ class AccountDetails(ndb.Model):
 class OrganizationDetails(ndb.Model):
     org_name = ndb.StringProperty()
     org_phone = ndb.StringProperty()
-    org_open = ndb.DateTimeProperty()
-    org_close = ndb.DateTimeProperty()
+    org_open = ndb.TimeProperty()
+    org_close = ndb.TimeProperty()

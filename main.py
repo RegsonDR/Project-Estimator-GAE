@@ -11,7 +11,6 @@ app.register_blueprint(unauthenticated)
 app.register_blueprint(authenticated)
 app.register_blueprint(ajax)
 
-
 if __name__ == '__main__':
     app.run()
 
