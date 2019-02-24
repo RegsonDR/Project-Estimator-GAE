@@ -4,9 +4,9 @@ from wtforms.fields import PasswordField, SubmitField, StringField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
 
 
-def validate_time(open_time, close_time):
-    if open_time < close_time:
-        raise ValidationError(open_time.data , " -: " , close_time.data)
+def validate_time(form,field):
+    if field.data > form.data['org_close']:
+        raise ValidationError("Opening time can not be higher than closing time!")
 
 
 class LoginForm(FlaskForm):

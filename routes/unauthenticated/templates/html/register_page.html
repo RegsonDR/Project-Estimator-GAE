@@ -38,8 +38,7 @@
 {% block after_flash %}
 
     <div id="otherButtons">
-        <a class="btn btn-primary" href="{{url_for('unauthenticated.register_page')}}">Register</a>
-        <a class="btn btn-primary" id="passwordReset" >Reset Password?</a>
+        <div>Already have an account? <a href="{{url_for('unauthenticated.login_page')}}">Sign in!</a></div>
     </div>
 {% endblock after_flash %}
 
