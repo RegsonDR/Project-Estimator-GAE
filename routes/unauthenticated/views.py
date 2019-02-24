@@ -27,7 +27,7 @@ def register_page():
     #
     # Check if register request is valid
     if request.method == 'POST' and register_form.validate_on_submit():
-        return 'killyosan'
+        return 'killy'
 
     return render_template('html/register_page.html',
                            form=register_form,
