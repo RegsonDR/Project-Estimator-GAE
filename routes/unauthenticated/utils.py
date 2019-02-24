@@ -1,12 +1,19 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import OrganizationDetails, AccountDetails
 from flask import flash, request, url_for, render_template
-from google.appengine.api import mail
-from app_statics import APP_NAME
+from google.appengine.api import mail, urlfetch
+from app_statics import APP_NAME, RECAPTCHA_SECRET
 import uuid
+import urllib
+import json
 
 
 def register_org(org_name, org_phone, org_open, org_close, first_name, last_name, mobile_number, password, email):
+    user = get_user_data_by_email(email)
+    if user:
+        flash('Email Address already in use!', 'danger')
+        return False
+
     org_data = OrganizationDetails(
         org_name=org_name,
         org_phone=org_phone,
@@ -27,17 +34,17 @@ def register_org(org_name, org_phone, org_open, org_close, first_name, last_name
     )
     user_data.put()
     flash('Account successfully created, please check email to verify.', 'success')
-    return True
+    return user_data
 
 
-def send_verification_email(email):
-    user = get_user_data(email)
-    VERIFICATION_URL = (request.url_root + url_for('unauthenticated.verify_page').replace("/", "") + "?email=" + email +
+def send_verification_email(user_id):
+    user = get_user_data_by_id(user_id)
+    VERIFICATION_URL = (request.url_root + url_for('unauthenticated.verify_page').replace("/", "") + "?email=" + user.email +
                         "&code=" + user.verification_hash)
     mail.send_mail(
         sender="support@project-application-231720.appspotmail.com",
-        to=email,
-        subject=APP_NAME + "Verification code",
+        to=user.email,
+        subject=APP_NAME + " Verification code",
         body="",
         html=render_template('email/email_verification.html', EMAIL_HEADER="Thanks for signing up!",
                              VERIFICATION_URL=VERIFICATION_URL)
@@ -46,7 +53,7 @@ def send_verification_email(email):
 
 
 def attempt_login(email, password):
-    user = get_user_data(email)
+    user = get_user_data_by_email(email)
 
     if user and check_password_hash(user.password, password):
         return True
@@ -59,5 +66,47 @@ def attempt_login(email, password):
     return False
 
 
-def get_user_data(email):
+def get_user_data_by_email(email):
     return AccountDetails.query(AccountDetails.email == email.lower()).get()
+
+
+def get_user_data_by_id(id):
+    return AccountDetails.get_by_id(id)
+
+
+def check_recaptcha():
+    resp = api_launcher("POST",
+                        "https://www.google.com/recaptcha/api/siteverify",
+                        {"secret": RECAPTCHA_SECRET,
+                         "response": request.form.get("g-recaptcha-response"),
+                         "remoteip": request.remote_addr
+                         }
+                        )
+
+    if not resp['success']:
+        flash('Please tick the reCAPTCHA box.', 'warning')
+        return False
+    return True
+
+
+def api_launcher(method, url_endpoint, params):
+    if method == "GET":
+        p = urllib.urlencode(params) if params else ""
+        resp = urlfetch.fetch(
+            url_endpoint + "?" + p
+        )
+    if method == "POST":
+        resp = urlfetch.fetch(
+            url=url_endpoint,
+            method="POST",
+            payload=urllib.urlencode(params)
+        )
+    if method == "oAuthv2":
+        p = urllib.urlencode(params) if params else ""
+        resp = urlfetch.fetch(
+            url=url_endpoint,
+            method="POST",
+            payload=p,
+        )
+
+    return json.loads(resp.content)

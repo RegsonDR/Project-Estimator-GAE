@@ -31,12 +31,15 @@
         {{form.password(class="form-control", placeholder="Password")}}
         {{form.confirm_password(class="form-control", placeholder="Confirm password")}}
     </div>
-        {{ form.submit(class="btn btn-lg btn-primary btn-block", style="font-size: 1rem;")}}
+       <meter max="4" id="password-meter" style="margin: 0px"></meter>
+        <div id="password-text" style="width: 100%; margin: 5px; font-size:13px;"></div>
 
+    <div class="g-recaptcha" style="display: inline-block;  text-align: center;" data-sitekey="6LeTmZMUAAAAALtb3_C6JxpCVt0q6eu1M4wQqTrn"></div>
 {% endblock before_flash %}
 
 {# Content that appears after alerts #}
 {% block after_flash %}
+        {{ form.submit(class="btn btn-lg btn-primary btn-block", style="font-size: 1rem;")}}
 
     <div id="otherButtons">
         <div>Already have an account? <a href="{{url_for('unauthenticated.login_page')}}">Sign in!</a></div>
@@ -45,4 +48,25 @@
 
 {# Scripts #}
 {% block script %}
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.2.0/zxcvbn.js"></script>
+    <script>
+   $(document).ready(function(){
+
+       var strength = {
+        0: "Bad",
+        1: "Weak",
+        2: "Good",
+        3: "Strong",
+        4: "Strong"
+       }
+
+       $('#password').keyup('click', function() {
+           result = zxcvbn($('#password').val());
+           $('#password-meter').val(result.score);
+           $('#password-text').html("<strong>Strength: " + strength[result.score] + "</strong>");
+       });
+
+});
+</script>
 {% endblock script %}
