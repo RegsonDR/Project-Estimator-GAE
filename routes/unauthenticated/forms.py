@@ -25,6 +25,7 @@ class RegisterForm(FlaskForm):
     first_name = StringField('First Name', validators=[DataRequired()])
     last_name = StringField('Last Name', validators=[DataRequired()])
     mobile_number = TelField('Phone Number', validators=[DataRequired()])
+    email = EmailField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password',
                              validators=[DataRequired(), EqualTo('confirm_password', message="Passwords Must Match")])
     confirm_password = PasswordField('Confirm Password')
