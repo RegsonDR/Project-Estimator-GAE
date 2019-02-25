@@ -15,9 +15,9 @@ class AccountDetails(ndb.Model):
     is_verified = ndb.BooleanProperty()
     verification_hash = ndb.StringProperty()
 
-    def org_name(self):
+    def get_org_data(self):
         org_object = OrganizationDetails.get_by_id(self.organization.id())
-        return org_object.org_name
+        return org_object
 
 
 class OrganizationDetails(ndb.Model):

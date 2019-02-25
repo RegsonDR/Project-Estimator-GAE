@@ -1,6 +1,6 @@
-from flask import Blueprint, render_template, url_for, request, redirect
+from flask import Blueprint, render_template, url_for, request, redirect, session
 from routes.unauthenticated.forms import LoginForm, RegisterForm
-from utils import register_org, attempt_login, send_verification_email, check_recaptcha
+from utils import register_org, attempt_login, send_verification_email, check_recaptcha, verify_account
 
 unauthenticated = Blueprint('unauthenticated', __name__, template_folder='templates')
 
@@ -15,6 +15,8 @@ def login_page():
             submitted_email = request.form.get('email').lower()
             submitted_passw = request.form.get('password')
             if attempt_login(submitted_email, submitted_passw):
+                session['Logged_In'] = True
+                session['Email'] = submitted_email
                 return redirect(url_for('authenticated.homepage'))
     return render_template('html/login_page.html',
                            form=login_form,
@@ -23,7 +25,6 @@ def login_page():
 
 @unauthenticated.route('/Register', methods=['GET', 'POST'])
 def register_page():
-
     register_form = RegisterForm()
     #
     # Check if register request is valid
@@ -45,7 +46,6 @@ def register_page():
                     send_verification_email(user_id.key.id())
                     return redirect(url_for('unauthenticated.login_page'))
 
-
     return render_template('html/register_page.html',
                            form=register_form,
                            page_title="Please Login")
@@ -53,4 +53,16 @@ def register_page():
 
 @unauthenticated.route('/Verify', methods=['GET', 'POST'])
 def verify_page():
+    email = request.args.get('email')
+    code = request.args.get('code')
+    if email and code:
+        verify_account(email, code)
+    return redirect(url_for("unauthenticated.login_page"))
+
+
+# TODO: Password Route
+@unauthenticated.route('/Reset', methods=['GET', 'POST'])
+def reset_password_page():
     return True
+
+

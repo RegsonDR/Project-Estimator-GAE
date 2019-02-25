@@ -27,4 +27,4 @@ def forbidden(e):
 
 @app.errorhandler(401)
 def unauthorised(e):
-    return redirect(url_for('login_page'))
+    return redirect(url_for('unauthenticated.login_page'))

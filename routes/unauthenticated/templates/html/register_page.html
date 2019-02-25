@@ -64,7 +64,7 @@
        $('#password').keyup('click', function() {
            result = zxcvbn($('#password').val());
            $('#password-meter').val(result.score);
-           $('#password-text').html("<strong>Strength: " + strength[result.score] + "</strong>");
+           $('#password-text').html("<strong>Password Strength: " + strength[result.score] + "</strong>");
        });
 
 });

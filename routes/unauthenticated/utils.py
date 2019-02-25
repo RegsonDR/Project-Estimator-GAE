@@ -74,6 +74,18 @@ def get_user_data_by_id(id):
     return AccountDetails.get_by_id(id)
 
 
+def verify_account(email, code):
+    user = get_user_data_by_email(email)
+    if user and user.verification_hash == code:
+        user.is_verified = True
+        user.is_active = True
+        user.put()
+        flash('Email Verified! Please log in to access the site.', 'success')
+        return True
+    flash('Verification URL is invalid', 'danger')
+    return False
+
+
 def check_recaptcha():
     resp = api_launcher("POST",
                         "https://www.google.com/recaptcha/api/siteverify",
