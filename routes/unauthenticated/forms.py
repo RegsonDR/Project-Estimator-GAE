@@ -3,10 +3,10 @@ from wtforms.fields.html5 import EmailField, TelField, TimeField
 from wtforms.fields import PasswordField, SubmitField, StringField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
 
-
-def validate_time(form,field):
-    if field.data > form.data['org_close']:
-        raise ValidationError("Opening time can not be higher than closing time!")
+#
+# def validate_time(form,field):
+#     if field.data > form.data['org_close']:
+#         raise ValidationError("Opening time can not be higher than closing time!")
 
 
 class LoginForm(FlaskForm):
@@ -19,8 +19,6 @@ class RegisterForm(FlaskForm):
     # Organization Details
     org_name = StringField('Organization Name', validators=[DataRequired()])
     org_phone = TelField('Organization Phone Number', validators=[DataRequired()])
-    org_open = TimeField('Opening Time', validators=[DataRequired(), validate_time])
-    org_close = TimeField('Closing Time', validators=[DataRequired()])
     # User Details
     first_name = StringField('First Name', validators=[DataRequired()])
     last_name = StringField('Last Name', validators=[DataRequired()])

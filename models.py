@@ -23,5 +23,3 @@ class AccountDetails(ndb.Model):
 class OrganizationDetails(ndb.Model):
     org_name = ndb.StringProperty()
     org_phone = ndb.StringProperty()
-    org_open = ndb.TimeProperty()
-    org_close = ndb.TimeProperty()

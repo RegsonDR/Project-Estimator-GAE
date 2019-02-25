@@ -34,8 +34,6 @@ def register_page():
                 user_id = register_org(
                     register_form.org_name.data,
                     register_form.org_phone.data,
-                    register_form.org_open.data,
-                    register_form.org_close.data,
                     register_form.first_name.data,
                     register_form.last_name.data,
                     register_form.mobile_number.data,
@@ -48,7 +46,7 @@ def register_page():
 
     return render_template('html/register_page.html',
                            form=register_form,
-                           page_title="Please Login")
+                           page_title="Please Sign Up")
 
 
 @unauthenticated.route('/Verify', methods=['GET', 'POST'])
