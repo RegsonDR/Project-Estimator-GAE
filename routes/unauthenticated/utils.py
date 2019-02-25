@@ -16,9 +16,7 @@ def register_org(org_name, org_phone, org_open, org_close, first_name, last_name
 
     org_data = OrganizationDetails(
         org_name=org_name,
-        org_phone=org_phone,
-        org_open=org_open,
-        org_close=org_close
+        org_phone=org_phone
     )
     user_data = AccountDetails(
         first_name=first_name,

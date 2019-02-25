@@ -18,14 +18,13 @@ class LoggedUser:
         org_data = self.get_from_db().get_org_data()
         self.org_name = org_data.org_name
         self.org_phone = org_data.org_phone
-        self.org_open = org_data.org_open
-        self.org_close = org_data.org_close
 
     def get_full_name(self):
         return self.first_name + ' ' + self.last_name
 
     def get_from_db(self):
         return get_user_data_by_email(self.email)
+
 
 # Permissions decorator, used and re-checked on every page load.
 def permitted_roles(roles):
