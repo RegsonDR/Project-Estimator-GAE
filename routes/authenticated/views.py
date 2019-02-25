@@ -81,4 +81,4 @@ def logout(**kwargs):
     session.clear()
     gc.collect()
     flash("Successfully Logged Out!", "success")
-    return redirect(url_for('login_page'))
+    return redirect(url_for('unauthenticated.login_page'))
