@@ -1,5 +1,5 @@
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import OrganizationDetails, AccountDetails
+from models import AccountDetails
 from flask import flash, request, url_for, render_template
 from google.appengine.api import mail, urlfetch
 from app_statics import APP_NAME, RECAPTCHA_SECRET
@@ -8,27 +8,21 @@ import urllib
 import json
 
 
-def register_org(org_name, org_phone, org_open, org_close, first_name, last_name, mobile_number, password, email):
+def register_org(first_name, last_name, mobile_number, password, email):
     user = get_user_data_by_email(email)
     if user:
         flash('Email Address already in use!', 'danger')
         return False
 
-    org_data = OrganizationDetails(
-        org_name=org_name,
-        org_phone=org_phone
-    )
     user_data = AccountDetails(
         first_name=first_name,
         last_name=last_name,
         mobile_number=mobile_number.replace(' ', ''),
         password=generate_password_hash(password),
         email=email.lower(),
-        role='super-admin',
-        organization=org_data.put(),
         is_active=False,
         is_verified=False,
-        verification_hash=uuid.uuid4().hex
+        verification_code=uuid.uuid4().hex
     )
     user_data.put()
     flash('Account successfully created, please check email to verify.', 'success')
@@ -37,8 +31,8 @@ def register_org(org_name, org_phone, org_open, org_close, first_name, last_name
 
 def send_verification_email(user_id):
     user = get_user_data_by_id(user_id)
-    VERIFICATION_URL = (request.url_root + url_for('unauthenticated.verify_page').replace("/", "") + "?email=" + user.email +
-                        "&code=" + user.verification_hash)
+    VERIFICATION_URL = (request.url_root + url_for('unauthenticated.verify_page').replace("/", "") + "?email=" +
+                        user.email + "&code=" + user.verification_code)
     mail.send_mail(
         sender="support@project-application-231720.appspotmail.com",
         to=user.email,
@@ -68,13 +62,13 @@ def get_user_data_by_email(email):
     return AccountDetails.query(AccountDetails.email == email.lower()).get()
 
 
-def get_user_data_by_id(id):
-    return AccountDetails.get_by_id(id)
+def get_user_data_by_id(datastore_id):
+    return AccountDetails.get_by_id(datastore_id)
 
 
 def verify_account(email, code):
     user = get_user_data_by_email(email)
-    if user and user.verification_hash == code:
+    if user and user.verification_code == code:
         user.is_verified = True
         user.is_active = True
         user.put()

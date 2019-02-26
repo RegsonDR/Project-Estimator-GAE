@@ -32,8 +32,6 @@ def register_page():
         if check_recaptcha():
             if register_form.validate_on_submit():
                 user_id = register_org(
-                    register_form.org_name.data,
-                    register_form.org_phone.data,
                     register_form.first_name.data,
                     register_form.last_name.data,
                     register_form.mobile_number.data,

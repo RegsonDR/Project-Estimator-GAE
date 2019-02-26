@@ -16,9 +16,6 @@ class LoginForm(FlaskForm):
 
 
 class RegisterForm(FlaskForm):
-    # Organization Details
-    org_name = StringField('Organization Name', validators=[DataRequired()])
-    org_phone = TelField('Organization Phone Number', validators=[DataRequired()])
     # User Details
     first_name = StringField('First Name', validators=[DataRequired()])
     last_name = StringField('Last Name', validators=[DataRequired()])
