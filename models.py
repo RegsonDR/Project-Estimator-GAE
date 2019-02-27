@@ -8,13 +8,13 @@ class AccountDetails(ndb.Model):
     mobile_number = ndb.StringProperty()
     password = ndb.StringProperty()
     email = ndb.StringProperty()
-    organizations = ndb.KeyProperty(kind='OrganizationDetails', repeated=True)
     is_active = ndb.BooleanProperty()
     is_verified = ndb.BooleanProperty()
     verification_code = ndb.StringProperty()
-    # def get_org_data(self):
-    #     org_object = OrganizationDetails.get_by_id(self.organization.id())
-    #     return org_object
+
+    def get_all_connected_orgs(self):
+        org_objects = UserProfile.get_by_id(self.id())
+        return org_objects
 
 
 class OrganizationDetails(ndb.Model):
@@ -27,7 +27,6 @@ class UserProfile(ndb.Model):
     Org = ndb.KeyProperty(kind='OrganizationDetails')
     # possible roles = 'dev','manager','super-dev','super-admin'
     role = ndb.StringProperty()
-
 
 # org_one = OrganizationDetails(
 #     org_name="CompanyOne",
