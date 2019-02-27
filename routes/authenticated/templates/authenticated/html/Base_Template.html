@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <title>{{page_title}}</title>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+      <!-- Bootstrap -->
+      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+      <!-- FontAwesome -->
+      <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+      <!-- BaseCSS -->
+      <link href="{{ url_for('static', filename='authenticated/CSS/base.css') }}" rel="stylesheet">
+   </head>
+   <body id="page-top" class="sidebar-toggled">
+      <nav class="navbar navbar-expand navbar-dark bg-dark static-top">
+         <a class="navbar-brand mr-1" href="{{url_for('authenticated.my_workspaces_page')}}">PM Tool</a>
+         <button class="btn btn-link btn-sm text-white order-1 order-sm-0" id="sidebarToggle" href="#">
+         <i class="fas fa-bars"></i>
+         </button>
+         <!-- Positioning -->
+         <form class="ml-auto">
+         </form>
+         <!-- Navbar -->
+          {% include 'authenticated/html/includes/Navbar.html' %}
+      </nav>
+      <div id="wrapper">
+         <!-- Sidebar -->
+           {% include 'authenticated/html/includes/Sidebar.html' %}
+         <div id="content-wrapper">
+            <div class="container-fluid">
+               <!-- Page Content -->
+            <span style="display: flex;">
+               <h1 style="margin-bottom: 0px;" >{{page_title}}</h1>
+                {% include 'authenticated/html/includes/Alerts.html' %}
+            </span>
+               <hr>
+            {% block page_content %}
+            {% endblock page_content %}
+            </div>
+            <!-- /.container-fluid -->
+         </div>
+         <!-- /.content-wrapper -->
+      </div>
+      <!-- /#wrapper -->
+      <!-- Bootstrap core JavaScript-->
+      <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+      <!-- BaseJS -->
+      <script src="{{ url_for('static', filename='authenticated/JS/base.js') }}" rel="stylesheet"></script>
+   {% block script %}
+      {% endblock script %}
+   </body>
+</html>

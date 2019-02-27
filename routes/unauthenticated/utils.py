@@ -8,7 +8,7 @@ import urllib
 import json
 
 
-def register_org(first_name, last_name, mobile_number, password, email):
+def register_user(first_name, last_name, mobile_number, password, email):
     user = get_user_data_by_email(email)
     if user:
         flash('Email Address already in use!', 'danger')
@@ -38,7 +38,7 @@ def send_verification_email(user_id):
         to=user.email,
         subject=APP_NAME + " Verification code",
         body="",
-        html=render_template('email/email_verification.html', EMAIL_HEADER="Thanks for signing up!",
+        html=render_template('unauthenticated/email/email_verification.html', EMAIL_HEADER="Thanks for signing up!",
                              VERIFICATION_URL=VERIFICATION_URL)
     )
     return True

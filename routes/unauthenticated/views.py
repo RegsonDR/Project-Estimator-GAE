@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, url_for, request, redirect, session
 from routes.unauthenticated.forms import LoginForm, RegisterForm
-from utils import register_org, attempt_login, send_verification_email, check_recaptcha, verify_account
+from utils import register_user, attempt_login, send_verification_email, check_recaptcha, verify_account
 
 unauthenticated = Blueprint('unauthenticated', __name__, template_folder='templates')
 
@@ -18,7 +18,7 @@ def login_page():
                 session['Logged_In'] = True
                 session['Email'] = submitted_email
                 return redirect(url_for('authenticated.homepage'))
-    return render_template('html/login_page.html',
+    return render_template('unauthenticated/html/login_page.html',
                            form=login_form,
                            page_title="Please Login")
 
@@ -31,7 +31,7 @@ def register_page():
     if request.method == 'POST':
         if check_recaptcha():
             if register_form.validate_on_submit():
-                user_id = register_org(
+                user_id = register_user(
                     register_form.first_name.data,
                     register_form.last_name.data,
                     register_form.mobile_number.data,
@@ -42,7 +42,7 @@ def register_page():
                     send_verification_email(user_id.key.id())
                     return redirect(url_for('unauthenticated.login_page'))
 
-    return render_template('html/register_page.html',
+    return render_template('unauthenticated/html/register_page.html',
                            form=register_form,
                            page_title="Please Sign Up")
 

@@ -1,0 +1,48 @@
+{% extends "authenticated/html/Base_Template.html" %}
+
+
+{% block page_content %}
+<div class="row">
+  <div class="col-xl-2 col-sm-6 mb-3">
+    <div class="card border-dark o-hidden h-100">
+      <div class="card-body text-dark" style="display:flex; justify-content:center;">
+        <div class="card-body-icon">
+          <i class="fas fa-fw fa-plus"></i>
+        </div>
+        <span style="margin: auto">Add Organization</span>
+      </div>
+        <a href="#" data-toggle="modal" data-target="#NewOrgModal" style="width: 100%;height: 100%;display: inline;top: 0;left: 0;position: absolute;">        </a>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="NewOrgModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalCenterTitle">Please Enter  Details</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+        <form style="font-size:15px;" method="POST" >
+            <div class="modal-body">
+              {{ form.hidden_tag() }}
+              {{form.org_name(class="form-control", placeholder="Organization Name")}}
+              {{form.org_phone(class="form-control", placeholder="Organization Phone Number")}}
+      </div>
+            <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+{#        <button type="button" class="btn btn-primary">Create</button>#}
+          {{ form.submit(class="btn btn-primary")}}
+      </div>
+        </form>
+    </div>
+  </div>
+</div>
+{% endblock page_content %}
+
+{# Scripts #}
+{% block script %}
+{% endblock script %}

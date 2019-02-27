@@ -6,6 +6,8 @@ from routes.ajax.views import ajax
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '586d4f92e93f985f6ceb58729938c52e'
+# app.config['EXPLAIN_TEMPLATE_LOADING'] = True
+
 
 app.register_blueprint(unauthenticated)
 app.register_blueprint(authenticated)

@@ -1,5 +1,7 @@
-from flask import Blueprint, session, flash, abort, redirect, url_for
-from routes.unauthenticated.utils import get_user_data_by_email
+from flask import Blueprint, session, flash, abort, redirect, url_for, render_template, request
+from forms import NewOrganisation
+from utils import create_org
+from routes.authenticated.utils import get_user_data_by_email
 from functools import wraps
 import gc
 
@@ -64,15 +66,27 @@ authenticated = Blueprint('authenticated', __name__, template_folder='templates'
 #
 #     return permission
 
-
 @authenticated.route('/')
-def homepage():
-    return "ffs"
+@authenticated.route('/Workspaces')
+def my_workspaces_page():
+    new_org = NewOrganisation()
+
+    if request.method == 'POST':
+        if new_org.validate_on_submit():
+            org_id = create_org(new_org.org_name.data, new_org.org_phone.data)
+            if org_id:
+                return redirect(url_for('authenticated.org_homepage', org_id=org_id))
+    return render_template('authenticated/html/my_workspaces_page.html',
+                           form=new_org,
+                           page_title="Dashboard")
 
 
-@authenticated.route('/')
-def debug():
-    return session
+@authenticated.route('/Workspace/<org_id>')
+def org_homepage(org_id):
+    return render_template('authenticated/html/Blank.html',
+                           test=org_id,
+                           page_title="Dashboard")
+
 
 @authenticated.route('/Logout')
 def logout():
@@ -80,3 +94,10 @@ def logout():
     gc.collect()
     flash("Successfully Logged Out!", "success")
     return redirect(url_for('unauthenticated.login_page'))
+
+# @authenticated.route('/debug')
+# def debug():
+#     flash('fsa fasdfasd fdsa fasdfas fdas  fasllo','danger')
+#
+#     return render_template('authenticated/html/Blank.html',
+#                            page_title="Dashboard")
