@@ -12,10 +12,6 @@ class AccountDetails(ndb.Model):
     is_verified = ndb.BooleanProperty()
     verification_code = ndb.StringProperty()
 
-    def get_all_connected_orgs(self):
-        org_objects = UserProfile.get_by_id(self.id())
-        return org_objects
-
 
 class OrganizationDetails(ndb.Model):
     org_name = ndb.StringProperty()
@@ -25,8 +21,9 @@ class OrganizationDetails(ndb.Model):
 class UserProfile(ndb.Model):
     User = ndb.KeyProperty(kind='AccountDetails')
     Org = ndb.KeyProperty(kind='OrganizationDetails')
-    # possible roles = 'dev','manager','super-dev','super-admin'
-    role = ndb.StringProperty()
+    org_name = ndb.StringProperty()
+    role = ndb.StringProperty(choices={'dev', 'manager', 'super-dev', 'super-admin'})
+
 
 # org_one = OrganizationDetails(
 #     org_name="CompanyOne",

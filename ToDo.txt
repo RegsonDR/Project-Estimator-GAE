@@ -1,0 +1,11 @@
+Unauthenticated:
+- Password Reset Route
+
+Dashboard:
+- Show all organizations
+
+Organizations:
+- Show all projects
+
+Nav Bar:
+- Auto Generate

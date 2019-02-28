@@ -56,7 +56,7 @@ def verify_page():
     return redirect(url_for("unauthenticated.login_page"))
 
 
-# TODO: Password Route
+# TODO: Password Reset Route
 @unauthenticated.route('/Reset', methods=['GET', 'POST'])
 def reset_password_page():
     return True

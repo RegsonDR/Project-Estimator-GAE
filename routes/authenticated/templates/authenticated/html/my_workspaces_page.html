@@ -1,11 +1,28 @@
 {% extends "authenticated/html/Base_Template.html" %}
 
+{% macro ProduceOrgCard(RequestsObject) -%}
+    {% for request in RequestsObject %}
+    <div class="col-xl-2 col-sm-6 mb-3">
+    <div class="card bg-dark border-dark o-hidden h-100">
+      <div class="card-body text-white" style="display:flex; justify-content:center;">
+        <div class="card-body-icon">
+          <i class="fas fa-fw fa-list"></i>
+        </div>
+        <span style="margin: auto">{{ request.org_name |capitalize}}</span>
+      </div>
+        <a href="{{ url_for('authenticated.org_homepage', org_id=request.Org.id()) }}" style="width: 100%;height: 100%;display: inline;top: 0;left: 0;position: absolute;">        </a>
+    </div>
+  </div>
+
+    {% endfor %}
+{%- endmacro %}
 
 {% block page_content %}
 <div class="row">
+    {{ ProduceOrgCard(permitted_organizations)  }}
   <div class="col-xl-2 col-sm-6 mb-3">
-    <div class="card border-dark o-hidden h-100">
-      <div class="card-body text-dark" style="display:flex; justify-content:center;">
+    <div class="card bg-dark border-dark o-hidden h-100">
+      <div class="card-body text-white" style="display:flex; justify-content:center;">
         <div class="card-body-icon">
           <i class="fas fa-fw fa-plus"></i>
         </div>
@@ -16,7 +33,7 @@
   </div>
 </div>
 
-<!-- Modal -->
+<!-- Create New -->
 <div class="modal fade" id="NewOrgModal" tabindex="-1" role="dialog" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
