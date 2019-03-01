@@ -17,6 +17,9 @@
     {% endfor %}
 {%- endmacro %}
 
+{% block header_content %}
+       {% endblock header_content %}
+
 {% block page_content %}
 <div class="row">
     {{ ProduceOrgCard(permitted_organizations)  }}

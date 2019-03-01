@@ -11,6 +11,8 @@
       <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
       <!-- BaseCSS -->
       <link href="{{ url_for('static', filename='authenticated/CSS/base.css') }}" rel="stylesheet">
+       {% block header_content %}
+       {% endblock header_content %}
    </head>
    <body id="page-top" class="sidebar-toggled">
       <nav class="navbar navbar-expand navbar-dark bg-dark static-top">
@@ -48,7 +50,7 @@
       <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
       <!-- BaseJS -->
       <script src="{{ url_for('static', filename='authenticated/JS/base.js') }}" rel="stylesheet"></script>
-   {% block script %}
+      {% block script %}
       {% endblock script %}
    </body>
 </html>

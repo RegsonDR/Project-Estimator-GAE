@@ -1,0 +1,23 @@
+#running-tab, #closed-tab, #on-hold-tab{
+    margin: 0rem 0.5rem;
+    color: black;
+    border: 1px solid rgba(0,0,0,.5);
+}
+
+.nav-link.active{
+    color: black !important;
+    border: 2px solid rgba(52, 58, 64,1) !important;
+
+}
+
+#running-tab{
+    background-color: #e2f0d9;
+}
+
+#closed-tab{
+    background-color: #fff2cc;
+}
+
+#on-hold-tab{
+    background-color: #fbe5d6;
+}
