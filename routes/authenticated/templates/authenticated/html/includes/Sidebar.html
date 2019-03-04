@@ -1,13 +1,20 @@
 <ul class="sidebar navbar-nav toggled">
-            <li class="nav-item">
-               <a class="nav-link" href="index.html">
-               <i class="fas fa-fw fa-tachometer-alt"></i>
-               <span>Dashboard</span>
-               </a>
-            </li>
-            <li class="nav-item">
-               <a class="nav-link" href="charts.html">
-               <i class="fas fa-fw fa-chart-area"></i>
-               <span>Charts</span></a>
-            </li>
-         </ul>
+
+    <li class="nav-item">
+       <a class="nav-link" href="{{(url_for('authenticated.my_workspaces_page'))}}">
+       <i class="fas fa-fw fa-home"></i>
+       <span>Workspaces</span>
+       </a>
+    </li>
+
+    {%  if SIDEBAR %}
+    {% for option in SIDEBAR[user_data.get_role()] %}
+        <li class="nav-item">
+           <a class="nav-link" href="{{(url_for(option.view,org_id=org_data.key.id()))}}">
+           <i class="fas fa-fw fa-{{ option.icon }}"></i>
+           <span>{{ option.label }}</span></a>
+        </li>
+    {% endfor %}
+    {% endif %}
+
+</ul>

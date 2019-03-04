@@ -33,7 +33,8 @@
             <div class="container-fluid">
                <!-- Page Content -->
             <span style="display: flex;">
-               <h1 style="margin-bottom: 0px;" >{{page_title}}</h1>
+                {% block page_header %}
+                {% endblock page_header %}
                 {% include 'authenticated/html/includes/Alerts.html' %}
             </span>
                <hr>

@@ -25,6 +25,14 @@ class UserProfile(ndb.Model):
     role = ndb.StringProperty(choices={'dev', 'manager', 'super-dev', 'super-admin'})
 
 
+class ProjectDetails(ndb.Model):
+    Org = ndb.KeyProperty(kind='OrganizationDetails')
+    project_name = ndb.StringProperty()
+    project_description = ndb.StringProperty()
+    project_status = ndb.StringProperty(choices={'Running', 'Closed', 'On Hold'})
+    project_stage = ndb.StringProperty()
+
+
 # org_one = OrganizationDetails(
 #     org_name="CompanyOne",
 #     org_phone="432423"

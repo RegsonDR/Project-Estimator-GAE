@@ -1,12 +1,18 @@
-{% extends "authenticated/html/Base_Template.html" %}
+{% extends "authenticated/html/includes/Base_Template.html" %}
 
 {% block header_content %}
       <link href="{{ url_for('static', filename='authenticated/CSS/org_homepage.css') }}" rel="stylesheet">
 {% endblock header_content %}
 
+
+{% block page_header %}
+    <h1 style="margin-bottom: 0px;" >{{org_data.org_name}}</h1>
+{% endblock page_header %}
+
+
 {% block page_content %}
 
-    {% include "authenticated/html/"+user_role+"/org_homepage.html" %}
+    {% include "authenticated/html/"+user_data.get_role()+"/org_homepage.html" %}
 
 
 {% endblock page_content %}

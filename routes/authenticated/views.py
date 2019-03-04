@@ -1,8 +1,9 @@
 from flask import Blueprint, session, flash, abort, redirect, url_for, render_template, request
-from forms import NewOrganisation
+from forms import NewOrganisation, NewProject
 from models import AccountDetails
+from app_statics import SIDEBAR
 from routes.authenticated.utils import create_org, get_user_data_by_email, get_user_data_by_id, check_access, \
-    get_org_data_by_id, get_organizations
+    get_org_data_by_id, get_organizations, create_project, get_projects
 from functools import wraps
 import gc
 import time
@@ -33,6 +34,9 @@ class LoggedUser:
 
     def get_permitted_organizations(self):
         return get_organizations(self.user_key)
+
+    def get_projects(self):
+        return get_projects(self.org_key)
 
 
 # Permissions decorator, used and re-checked on every page load, first check login, account active, then org + role.
@@ -83,29 +87,39 @@ def my_workspaces_page(**kwargs):
                 time.sleep(1)
                 return redirect(url_for('authenticated.org_homepage', org_id=org_id.key.id()))
 
-    permitted_organizations = kwargs['user'].get_permitted_organizations()
     return render_template('authenticated/html/my_workspaces_page.html',
                            form=new_org,
-                           permitted_organizations=permitted_organizations,
-                           page_title="Dashboard")
+                           user_data=kwargs['user'])
 
 
 @authenticated.route('/Workspace/<int:org_id>', methods=['GET', 'POST'])
 @login_required('super-admin')
 def org_homepage(org_id, **kwargs):
-    org_data = kwargs['user'].get_org_data()
+    # todo: create projects on front end
 
     return render_template('authenticated/html/org_homepage.html',
-                           user_role=kwargs['user'].get_role(),
-                           page_title=org_data.org_name)
+                           user_data=kwargs['user'],
+                           org_data=kwargs['user'].get_org_data(),
+                           SIDEBAR=SIDEBAR)
 
 
 @authenticated.route('/Workspace/<int:org_id>/NewProject', methods=['GET', 'POST'])
 @login_required('super-admin')
 def new_project_page(org_id, **kwargs):
+    new_project = NewProject()
 
-    return render_template('authenticated/html/Blank.html',
-                                      page_title="Dashboard")
+    if request.method == 'POST':
+        if new_project.validate_on_submit():
+            project_id = create_project(kwargs['user'].org_key,new_project.project_name.data,new_project.project_description.data)
+            if project_id:
+                return redirect(url_for('authenticated.org_homepage', org_id=org_id))
+
+    return render_template('authenticated/html/new_project_page.html',
+                           form=new_project,
+                           user_data=kwargs['user'],
+                           org_data=kwargs['user'].get_org_data(),
+                           SIDEBAR=SIDEBAR)
+
 
 @authenticated.route('/Logout')
 def logout():

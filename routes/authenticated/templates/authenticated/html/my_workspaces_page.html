@@ -1,4 +1,4 @@
-{% extends "authenticated/html/Base_Template.html" %}
+{% extends "authenticated/html/includes/Base_Template.html" %}
 
 {% macro ProduceOrgCard(RequestsObject) -%}
     {% for request in RequestsObject %}
@@ -18,11 +18,15 @@
 {%- endmacro %}
 
 {% block header_content %}
-       {% endblock header_content %}
+{% endblock header_content %}
+
+{% block page_header %}
+    <h1 style="margin-bottom: 0px;" >Dashboard</h1>
+{% endblock page_header %}
 
 {% block page_content %}
 <div class="row">
-    {{ ProduceOrgCard(permitted_organizations)  }}
+    {{ ProduceOrgCard(user_data.get_permitted_organizations())  }}
   <div class="col-xl-2 col-sm-6 mb-3">
     <div class="card bg-dark border-dark o-hidden h-100">
       <div class="card-body text-white" style="display:flex; justify-content:center;">

@@ -1,8 +1,14 @@
-{% extends "authenticated/html/Base_Template.html" %}
+{% extends "authenticated/html/includes/Base_Template.html" %}
 
+{% block header_content %}
+{% endblock header_content %}
+
+{% block page_header %}
+    <h1 style="margin-bottom: 0px;" >{{org_data.org_name}}</h1>
+{% endblock page_header %}
 
 {% block page_content %}
-{{ test }}
+
 {% endblock page_content %}
 
 {# Scripts #}

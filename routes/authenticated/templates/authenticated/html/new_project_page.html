@@ -1,0 +1,24 @@
+{% extends "authenticated/html/includes/Base_Template.html" %}
+
+{% block header_content %}
+{% endblock header_content %}
+
+{% block page_header %}
+    <h1 style="margin-bottom: 0px;" >{{org_data.org_name}}</h1>
+{% endblock page_header %}
+
+{% block page_content %}
+    <div class="container">
+          <form method="POST" >
+    {{ form.hidden_tag()}}
+    {{ form.project_name(class="form-control", placeholder="Project Name")}}
+    {{ form.project_description(class="form-control", placeholder="Project Description")}}
+    {{ form.submit(class="btn btn-lg btn-primary btn-block", style="font-size: 1rem;") }}
+          </form>
+    </div>
+
+{% endblock page_content %}
+
+{# Scripts #}
+{% block script %}
+{% endblock script %}
