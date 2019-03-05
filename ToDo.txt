@@ -1,11 +1,14 @@
 Unauthenticated:
 - Password Reset Route
+- Register label, "e.g {{placeholder}}"
 
-Dashboard:
-- Show all organizations
+Workspace:
+- Project, get latest 10, then ajax on scroll
 
-Organizations:
-- Show all projects
+View Project
+Create Project, Task
+Project Settings
+Calender
+User Profile
 
-Nav Bar:
-- Auto Generate
+Overall Permissions

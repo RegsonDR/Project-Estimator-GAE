@@ -7,7 +7,6 @@
 .nav-link.active{
     color: black !important;
     border: 2px solid rgba(52, 58, 64,1) !important;
-
 }
 
 #running-tab{
@@ -20,4 +19,40 @@
 
 #on-hold-tab{
     background-color: #fbe5d6;
+}
+
+.card-body{
+    display:flex;
+    justify-content:center;
+    padding: 0.25rem 1.25rem;
+    min-height: 3rem;
+}
+
+.my-card{
+    border-radius: 1rem;
+    background-color: rgba(0,0,0,.03);
+    min-height: 9rem;
+}
+
+.cover-card{
+    width: 100%;
+    height: 100%;
+    display: inline;
+    top: 0;
+    left: 0;
+    position: absolute;
+}
+
+.my-card-header {
+    border-bottom: 0px;
+    background-color: transparent ;
+    padding: 0rem 0rem;
+
+}
+
+.current-stage {
+    border-color:#343a40!important;
+    border: 2px solid rgba(0,0,0,.125);
+    border-radius: 1rem;
+    padding: 0.75rem 1rem;
 }

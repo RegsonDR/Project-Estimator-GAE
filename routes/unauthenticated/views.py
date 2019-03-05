@@ -17,7 +17,7 @@ def login_page():
             if attempt_login(submitted_email, submitted_passw):
                 session['Logged_In'] = True
                 session['Email'] = submitted_email
-                return redirect(url_for('authenticated.homepage'))
+                return redirect(url_for('authenticated.my_workspaces_page'))
     return render_template('unauthenticated/html/login_page.html',
                            form=login_form,
                            page_title="Please Login")

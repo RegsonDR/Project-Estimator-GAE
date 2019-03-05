@@ -62,6 +62,6 @@ def get_organizations(user_key):
     return org_objects
 
 
-def get_projects(org_key):
-    project_objects = ProjectDetails.query(ProjectDetails.User == org_key).fetch()
+def get_projects(org_key, project_status):
+    project_objects = ProjectDetails.query(ProjectDetails.Org == org_key, ProjectDetails.project_status == project_status).fetch()
     return project_objects
