@@ -10,7 +10,7 @@
     {%  if SIDEBAR %}
     {% for option in SIDEBAR[user_data.get_role()] %}
         <li class="nav-item">
-           <a class="nav-link" href="{{(url_for(option.view,org_id=org_data.key.id()))}}">
+           <a class="nav-link" href="{{(url_for(option.view,wks_id=wks_data.key.id()))}}">
            <i class="fas fa-fw fa-{{ option.icon }}"></i>
            <span>{{ option.label }}</span></a>
         </li>

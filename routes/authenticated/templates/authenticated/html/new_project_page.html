@@ -1,24 +1,109 @@
 {% extends "authenticated/html/includes/Base_Template.html" %}
 
 {% block header_content %}
+    <link href="{{ url_for('static', filename='authenticated/CSS/new_project_page.css') }}" rel="stylesheet">
+
 {% endblock header_content %}
 
 {% block page_header %}
-    <h1 style="margin-bottom: 0px;" >{{org_data.org_name}}</h1>
+    <h1 style="margin-bottom: 0px;">{{ wks_data.workspace_name }}</h1>
 {% endblock page_header %}
 
 {% block page_content %}
     <div class="container">
-          <form method="POST" >
-    {{ form.hidden_tag()}}
-    {{ form.project_name(class="form-control", placeholder="Project Name")}}
-    {{ form.project_description(class="form-control", placeholder="Project Description")}}
-    {{ form.submit(class="btn btn-lg btn-primary btn-block", style="font-size: 1rem;") }}
-          </form>
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            {{ form.project_name(class="form-control", placeholder="Project Name") }}
+            {{ form.project_description(class="form-control", placeholder="Project Description") }}
+            {{ form.project_deadline(class="form-control", placeholder="Deadline Date", data_provide="datepicker-inline") }}
+            <div id="taskPanel" style="overflow: auto; max-height: 400px">
+                <div class="col-lg-11 my-3" style="margin: auto;">
+                    <div class="card my-card border-dark o-hidden h-100">
+                        <div class="card-header my-card-header d-flex justify-content-between">
+                            <h6 class="d-flex align-items-start bd-highlight" style="padding: .25rem .50rem;"> Create integration</h6>
+                        </div>
+                        <div class="card-body my-card-body">
+                            <span class="card-text" style="flex-grow: 1;"> Github -&gt; trello</span>
+                            <div class="d-flex justify-content-between">
+                            <span class="d-flex align-items-start">fasd</span>
+                            <span class="d-flex align-items-end">test</span>
+                            </div>
+                        </div>
+
+{#                        <a class="cover-card" href=""></a>#}
+                    </div>
+                </div>
+            </div>
+            <a href="#" data-toggle="modal" data-target="#NewTask1" data-task-number="1" id="create-task" class="btn btn-info">Add Task+</a>
+
+            {{ form.submit(class="btn btn-lg btn-primary btn-block", style="font-size: 1rem;") }}
+        </form>
+    </div>
+
+    <div id="modelFrame">
+        <div class="modal" id="NewTask1" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalCenterTitle">Please Enter  Details</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+            <div class="modal-body">
+            <input type="text">
+      </div>
+            <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <a class="addTask" type="button" class="btn btn-secondary" data-dismiss="modal">Add</a>
+            </div>
+    </div>
+  </div>
+</div>
     </div>
 
 {% endblock page_content %}
-
 {# Scripts #}
 {% block script %}
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css">
+    <script>
+        $(document).ready(function () {
+            function produceNewModel(task_number){
+                return '       <div class="modal" id="NewTask'+task_number+'" tabindex="-1" role="dialog" aria-hidden="true">\n' +
+                    '  <div class="modal-dialog modal-dialog-centered" role="document">\n' +
+                    '    <div class="modal-content">\n' +
+                    '      <div class="modal-header">\n' +
+                    '        <h5 class="modal-title" id="exampleModalCenterTitle">Please Enter  Details</h5>\n' +
+                    '        <button type="button" class="close" data-dismiss="modal" aria-label="Close">\n' +
+                    '          <span aria-hidden="true">&times;</span>\n' +
+                    '        </button>\n' +
+                    '      </div>\n' +
+                    '            <div class="modal-body">\n' +
+                    '            <input type="text">\n' +
+                    '      </div>\n' +
+                    '            <div class="modal-footer">\n' +
+                    '        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>\n' +
+                    '        <a class="addTask" type="button" class="btn btn-secondary" data-dismiss="modal">Add</a>\n' +
+                    '            </div>\n' +
+                    '    </div>\n' +
+                    '  </div>\n' +
+                    '</div>';
+            }
+            $('#modelFrame').on('click','.addTask', function () {
+                task_number = parseInt($('#create-task').attr('data-task-number'))+1;
+                $('#create-task').attr('data-target','#NewTask'+task_number);
+                $('#create-task').attr('data-task-number',task_number);
+                $('#modelFrame').append(produceNewModel(task_number));
+            });
+
+            $('#project_deadline').datepicker({
+                format: 'mm/dd/yyyy',
+                startDate: '-3d'
+            });
+
+        });
+    </script>
 {% endblock script %}

@@ -2,6 +2,7 @@ from flask import Flask, redirect, url_for
 from routes.authenticated.views import authenticated
 from routes.unauthenticated.views import unauthenticated
 from routes.ajax.views import ajax
+from routes.api.views import api
 
 
 app = Flask(__name__)
@@ -12,6 +13,8 @@ app.config['SECRET_KEY'] = '586d4f92e93f985f6ceb58729938c52e'
 app.register_blueprint(unauthenticated)
 app.register_blueprint(authenticated)
 app.register_blueprint(ajax)
+app.register_blueprint(api)
+
 
 if __name__ == '__main__':
     app.run()

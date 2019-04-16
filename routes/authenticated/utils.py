@@ -1,20 +1,19 @@
-from models import OrganizationDetails, AccountDetails, UserProfile, ProjectDetails
+from models import WorkspaceDetails, AccountDetails, UserProfile, ProjectDetails
 from flask import flash
 
 
-def create_org(org_name, org_phone, user_key):
-    org_data = OrganizationDetails(
-        org_name=org_name,
-        org_phone=org_phone
+def create_wks(workspace_name, user_key):
+    workspace_data = WorkspaceDetails(
+        workspace_name=workspace_name
     )
-    if not org_data.put():
+    if not workspace_data.put():
         flash('Organization not created.', 'danger')
         return False
 
     user_profile = UserProfile(
         User=user_key,
-        org_name=org_name,
-        Org=org_data.key,
+        workspace_name=workspace_name,
+        Wks=workspace_data.key,
         role='super-admin'
     )
     if not user_profile.put():
@@ -22,12 +21,12 @@ def create_org(org_name, org_phone, user_key):
         return False
 
     flash('Organization successfully created.', 'success')
-    return org_data
+    return workspace_data
 
 
-def create_project(org_key, project_name, project_description):
+def create_project(wks_key, project_name, project_description):
     project_data = ProjectDetails(
-        Org=org_key,
+        Wks=wks_key,
         project_name=project_name,
         project_description=project_description,
         project_status="Running",
@@ -49,19 +48,19 @@ def get_user_data_by_id(datastore_id):
     return AccountDetails.get_by_id(datastore_id)
 
 
-def get_org_data_by_id(datastore_id):
-    return OrganizationDetails.get_by_id(datastore_id)
+def get_wks_data_by_id(datastore_id):
+    return WorkspaceDetails.get_by_id(datastore_id)
 
 
-def check_access(org_key, user_key):
-    return UserProfile.query(UserProfile.Org == org_key, UserProfile.User == user_key).get()
+def check_access(wks_key, user_key):
+    return UserProfile.query(UserProfile.Wks == wks_key, UserProfile.User == user_key).get()
 
 
-def get_organizations(user_key):
-    org_objects = UserProfile.query(UserProfile.User == user_key).fetch()
-    return org_objects
+def get_workspaces(user_key):
+    wks_objects = UserProfile.query(UserProfile.User == user_key).fetch()
+    return wks_objects
 
 
-def get_projects(org_key, project_status):
-    project_objects = ProjectDetails.query(ProjectDetails.Org == org_key, ProjectDetails.project_status == project_status).fetch()
+def get_projects(wks_key, project_status):
+    project_objects = ProjectDetails.query(ProjectDetails.Wks == wks_key, ProjectDetails.project_status == project_status).fetch()
     return project_objects

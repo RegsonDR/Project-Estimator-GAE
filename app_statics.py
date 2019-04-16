@@ -4,7 +4,7 @@ SIDEBAR = {
     'super-admin':[
         {
             "label":"Projects",
-            "view": "authenticated.org_homepage",
+            "view": "authenticated.workspace_homepage",
             "icon": "tachometer-alt",
         },
         {

@@ -8,9 +8,9 @@
         <div class="card-body-icon">
           <i class="fas fa-fw fa-list"></i>
         </div>
-        <span style="margin: auto">{{ request.org_name |capitalize}}</span>
+        <span style="margin: auto">{{ request.workspace_name |capitalize}}</span>
       </div>
-        <a href="{{ url_for('authenticated.org_homepage', org_id=request.Org.id()) }}" style="width: 100%;height: 100%;display: inline;top: 0;left: 0;position: absolute;">        </a>
+        <a href="{{ url_for('authenticated.workspace_homepage', wks_id=request.Wks.id()) }}" style="width: 100%;height: 100%;display: inline;top: 0;left: 0;position: absolute;">        </a>
     </div>
   </div>
 
@@ -26,22 +26,22 @@
 
 {% block page_content %}
 <div class="row">
-    {{ ProduceOrgCard(user_data.get_permitted_organizations())  }}
+    {{ ProduceOrgCard(user_data.get_permitted_workspaces())  }}
   <div class="col-xl-2 col-sm-6 mb-3">
     <div class="card bg-dark border-dark o-hidden h-100">
       <div class="card-body text-white" style="display:flex; justify-content:center;">
         <div class="card-body-icon">
           <i class="fas fa-fw fa-plus"></i>
         </div>
-        <span style="margin: auto">Add Organization</span>
+        <span style="margin: auto">Create Workspace</span>
       </div>
-        <a href="#" data-toggle="modal" data-target="#NewOrgModal" style="width: 100%;height: 100%;display: inline;top: 0;left: 0;position: absolute;">        </a>
+        <a href="#" data-toggle="modal" data-target="#NewWorkspace" style="width: 100%;height: 100%;display: inline;top: 0;left: 0;position: absolute;">        </a>
     </div>
   </div>
 </div>
 
 <!-- Create New -->
-<div class="modal fade" id="NewOrgModal" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal" id="NewWorkspace" tabindex="-1" role="dialog" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -53,12 +53,10 @@
         <form style="font-size:15px;" method="POST" >
             <div class="modal-body">
               {{ form.hidden_tag() }}
-              {{form.org_name(class="form-control", placeholder="Organization Name")}}
-              {{form.org_phone(class="form-control", placeholder="Organization Phone Number")}}
+              {{form.workspace_name(class="form-control", placeholder="Workspace Name")}}
       </div>
             <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-{#        <button type="button" class="btn btn-primary">Create</button>#}
           {{ form.submit(class="btn btn-primary")}}
       </div>
         </form>

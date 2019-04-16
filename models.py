@@ -13,49 +13,19 @@ class AccountDetails(ndb.Model):
     verification_code = ndb.StringProperty()
 
 
-class OrganizationDetails(ndb.Model):
-    org_name = ndb.StringProperty()
-    org_phone = ndb.StringProperty()
-
+class WorkspaceDetails(ndb.Model):
+    workspace_name = ndb.StringProperty()
 
 class UserProfile(ndb.Model):
     User = ndb.KeyProperty(kind='AccountDetails')
-    Org = ndb.KeyProperty(kind='OrganizationDetails')
-    org_name = ndb.StringProperty()
+    Wks = ndb.KeyProperty(kind='WorkspaceDetails')
+    workspace_name = ndb.StringProperty()
     role = ndb.StringProperty(choices={'dev', 'manager', 'super-dev', 'super-admin'})
 
 
 class ProjectDetails(ndb.Model):
-    Org = ndb.KeyProperty(kind='OrganizationDetails')
+    Wks = ndb.KeyProperty(kind='WorkspaceDetails')
     project_name = ndb.StringProperty()
     project_description = ndb.StringProperty()
     project_status = ndb.StringProperty(choices={'Running', 'Closed', 'On Hold'})
     project_stage = ndb.StringProperty()
-
-
-# org_one = OrganizationDetails(
-#     org_name="CompanyOne",
-#     org_phone="432423"
-# )
-#
-#
-# org_two = OrganizationDetails(
-#     org_name="CompanyTwo",
-#     org_phone="432434223"
-# )
-#
-# user_data = AccountDetails(
-#     first_name="TestFirst",
-#     last_name="TestLast",
-#     mobile_number="MN".replace(' ', ''),
-#     password="1",
-#     email="regson@test.com".lower(),
-#     role='super-admin',
-#     is_active=False,
-#     is_verified=False,
-#     verification_code="123"
-# )
-#
-# user_data.organizations.append(org_one.put())
-# user_data.organizations.append(org_two.put())
-# user_data.put()

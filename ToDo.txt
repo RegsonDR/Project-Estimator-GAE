@@ -6,9 +6,12 @@ Workspace:
 - Project, get latest 10, then ajax on scroll
 
 View Project
-Create Project, Task
-Project Settings
-Calender
+Create Project, Task Creation, Task Assignment
+Project Settings, add to project
+Calender View
 User Profile
+Workspace Settings, invite to workspace
+
 
 Overall Permissions
+Custom 403

@@ -44,7 +44,7 @@ def register_page():
 
     return render_template('unauthenticated/html/register_page.html',
                            form=register_form,
-                           page_title="Please Sign Up")
+                           page_title="Please provide your details")
 
 
 @unauthenticated.route('/Verify', methods=['GET', 'POST'])

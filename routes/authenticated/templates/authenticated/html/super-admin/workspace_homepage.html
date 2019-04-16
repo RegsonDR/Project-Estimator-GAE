@@ -16,7 +16,7 @@
         <div class="card-body d-flex justify-content-between">
            <span class="card-text"> {{request.project_description|capitalize}}</span>
         </div>
-        <a class="cover-card" href="{{ url_for('authenticated.view_project_page', org_id=user_data.get_org_data().key.id(), project_id=request.key.id()) }}"></a>
+        <a class="cover-card" href="{{ url_for('authenticated.view_project_page', wks_id=user_data.get_wks_data().key.id(), project_id=request.key.id()) }}"></a>
      </div>
   </div>
   {% endfor %}
