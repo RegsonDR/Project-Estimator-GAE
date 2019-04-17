@@ -109,10 +109,22 @@ def workspace_homepage(wks_id, **kwargs):
 def new_project_page(wks_id, **kwargs):
     new_project = NewProject()
 
-    if request.method == 'POST' and new_project.validate_on_submit():
-        project_id = create_project(kwargs['user'].wks_key,new_project.project_name.data,new_project.project_description.data)
-        if project_id:
-            return redirect(url_for('authenticated.workspace_homepage', wks_id=wks_id))
+    # if request.method == 'POST' and new_project.validate_on_submit():
+        # project_id = create_project(kwargs['user'].wks_key,
+        #                             new_project.project_name.data,
+        #                             new_project.project_description.data,
+        #                             new_project.project_deadline.data,
+        #                             request.form['task[][Title]'],
+        #                             request.form['task[][aMinutes]'],
+        #                             request.form['task[][Description]'],
+        #                             request.form['task[][Skills]'],
+        #                             request.form['task[][Developers]']
+        #                             )
+        # if project_id:
+            # return redirect(url_for('authenticated.workspace_homepage', wks_id=wks_id))
+    # print request.form['Title[]']
+    # print request.form['Developers[][]']
+    print request.form.keys()
 
     return render_template('authenticated/html/new_project_page.html',
                            form=new_project,

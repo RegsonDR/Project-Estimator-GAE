@@ -1,7 +1,8 @@
 .my-card{
     border-radius: 1rem;
-    background-color: rgba(0,0,0,.03);
+    background-color: #f8f9fa;
     min-height: 9rem;
+    color: #495057;
 }
 .my-card-header {
     border-bottom: 0px;
@@ -25,4 +26,27 @@
     top: 0;
     left: 0;
     position: absolute;
+}
+
+.chosen-choices{
+    display: block;
+    width: 100%;
+    min-height: calc(2.25rem + 2px) !important;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+.search-choice {
+padding: 8px 20px 8px 5px !important;
+}
+
+.deleteTask{
+background-color: #bd2130;
 }
