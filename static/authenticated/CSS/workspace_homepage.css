@@ -1,5 +1,5 @@
 #running-tab, #closed-tab, #on-hold-tab{
-    margin: 0rem 0.5rem;
+    margin: 0 0.5rem;
     color: black;
     border: 1px solid rgba(0,0,0,.5);
 }
@@ -21,11 +21,18 @@
     background-color: #fbe5d6;
 }
 
-.card-body{
-    display:flex;
-    justify-content:center;
-    padding: 0.25rem 1.25rem;
-    min-height: 3rem;
+/*.card-body{*/
+    /*display:flex;*/
+    /*justify-content:center;*/
+    /*padding: 0.25rem 1.25rem;*/
+    /*min-height: 3rem;*/
+/*}*/
+
+.my-card-body {
+    padding-top: 0;
+    padding-bottom: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 .my-card{
@@ -44,9 +51,9 @@
 }
 
 .my-card-header {
-    border-bottom: 0px;
+    border-bottom: 0;
     background-color: transparent ;
-    padding: 0rem 0rem;
+    padding: 0 0;
 
 }
 

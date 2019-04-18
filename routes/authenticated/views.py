@@ -1,4 +1,5 @@
-from flask import Blueprint, session, flash, abort, redirect, url_for, render_template, request
+# coding=utf-8
+from flask import Blueprint, session, flash, abort, redirect, url_for, render_template, request, jsonify
 from forms import NewWorkspace, NewProject
 from routes.authenticated.utils import *
 from models import AccountDetails
@@ -6,8 +7,15 @@ from app_statics import SIDEBAR
 from functools import wraps
 import time
 import gc
+import json
 
 authenticated = Blueprint('authenticated', __name__, template_folder='templates')
+
+
+class Vividict(dict):
+    def __missing__(self, key):
+        value = self[key] = type(self)()  # retain local pointer to value
+        return value  # faster to return than dict lookup
 
 
 class LoggedUser:
@@ -36,6 +44,12 @@ class LoggedUser:
 
     def get_projects(self, project_status):
         return get_projects(self.wks_key, project_status)
+
+    def get_open_task_number(self, project_key):
+        return get_open_task_number(project_key)
+
+    def get_total_task_number(self, project_key):
+        return get_total_task_number(project_key)
 
 
 # Permissions decorator, used and re-checked on every page load, first check login, account active, then workspace + role.
@@ -109,22 +123,31 @@ def workspace_homepage(wks_id, **kwargs):
 def new_project_page(wks_id, **kwargs):
     new_project = NewProject()
 
-    # if request.method == 'POST' and new_project.validate_on_submit():
-        # project_id = create_project(kwargs['user'].wks_key,
-        #                             new_project.project_name.data,
-        #                             new_project.project_description.data,
-        #                             new_project.project_deadline.data,
-        #                             request.form['task[][Title]'],
-        #                             request.form['task[][aMinutes]'],
-        #                             request.form['task[][Description]'],
-        #                             request.form['task[][Skills]'],
-        #                             request.form['task[][Developers]']
-        #                             )
-        # if project_id:
-            # return redirect(url_for('authenticated.workspace_homepage', wks_id=wks_id))
-    # print request.form['Title[]']
-    # print request.form['Developers[][]']
-    print request.form.keys()
+    if request.method == 'POST':
+        if new_project.validate_on_submit():
+            project_data = Vividict()
+            taskid_list = []
+            # Get all data
+            for key in request.form.keys():
+                # Extract ID
+                component = [p[:-1] for p in key.split('[')][1:]
+                if len(component) is 0:
+                    project_data[key] = request.form[key]
+                else:
+                    task_id = component[0]
+                    element = component[1]
+
+                    if task_id not in taskid_list:
+                        taskid_list.extend(task_id)
+                    dic_position = taskid_list.index(task_id)
+
+                    if element == "Skills" or element == "Developers":
+                        project_data['Task'][dic_position][element] = request.form.getlist(
+                            'Task[' + task_id + '][' + element + ']')
+                    else:
+                        project_data['Task'][dic_position][element] = request.form[
+                            'Task[' + task_id + '][' + element + ']']
+            project_id = create_project(kwargs['user'].wks_key, project_data)
 
     return render_template('authenticated/html/new_project_page.html',
                            form=new_project,
@@ -136,7 +159,7 @@ def new_project_page(wks_id, **kwargs):
 @authenticated.route('/Workspace/<int:wks_id>/Project/<int:project_id>', methods=['GET', 'POST'])
 @login_required('super-admin')
 # check permission
-def view_project_page(wks_id, project_id,**kwargs):
+def view_project_page(wks_id, project_id, **kwargs):
     return "sfdsfds"
 
 
@@ -147,9 +170,7 @@ def logout():
     flash("Successfully Logged Out!", "success")
     return redirect(url_for('unauthenticated.login_page'))
 
-# @authenticated.route('/debug')
-# def debug():
-#     flash('fsa fasdfasd fdsa fasdfas fdas  fasllo','danger')
-#
-#     return render_template('authenticated/html/Blank.html',
-#                            page_title="Dashboard")
+
+@authenticated.route('/debug', methods=['GET', 'POST'])
+def debug(**kwargs):
+    return render_template('authenticated/html/Blank.html')

@@ -1,4 +1,4 @@
-from models import WorkspaceDetails, AccountDetails, UserProfile, ProjectDetails
+from models import WorkspaceDetails, AccountDetails, UserProfile, ProjectDetails, TaskDetails
 from flask import flash
 
 
@@ -24,18 +24,34 @@ def create_wks(workspace_name, user_key):
     return workspace_data
 
 
-def create_project(wks_key, project_name, project_description):
+def create_project(wks_key, form_data):
     project_data = ProjectDetails(
         Wks=wks_key,
-        project_name=project_name,
-        project_description=project_description,
+        project_name=form_data['project_name'],
+        project_description=form_data['project_description'],
+        project_deadline=form_data['project_deadline'],
         project_status="Running",
         project_stage="Planning"
     )
-
     if not project_data.put():
         flash('Project not created.', 'danger')
         return False
+
+    for task in form_data['Task']:
+        if form_data['Task'][task]['Developers']:
+            print form_data['Task'][task]
+            task_data = TaskDetails(
+                Project=project_data.key,
+                task_name=form_data['Task'][task]['Title'],
+                task_description=form_data['Task'][task]['Description'],
+                task_skills= map(int, form_data['Task'][task]['Skills']),
+                task_developers= map(int, form_data['Task'][task]['Developers']),
+                task_aminutes=int(form_data['Task'][task]['aMinutes']),
+                task_status="Open"
+            )
+
+            task_data.put()
+
     flash('Project successfully created.', 'success')
     return project_data
 
@@ -62,5 +78,14 @@ def get_workspaces(user_key):
 
 
 def get_projects(wks_key, project_status):
-    project_objects = ProjectDetails.query(ProjectDetails.Wks == wks_key, ProjectDetails.project_status == project_status).fetch()
+    project_objects = ProjectDetails.query(ProjectDetails.Wks == wks_key,
+                                           ProjectDetails.project_status == project_status).fetch()
     return project_objects
+
+
+def get_open_task_number(project_key):
+    return TaskDetails.query(TaskDetails.Project == project_key, TaskDetails.task_status == "Open").count()
+
+def get_total_task_number(project_key):
+    return TaskDetails.query(TaskDetails.Project == project_key).count()
+

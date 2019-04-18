@@ -6,19 +6,24 @@
   <div class="col-lg-11 my-3" style="margin: auto;">
      <div class="card my-card border-dark o-hidden h-100">
         <div class="card-header my-card-header d-flex justify-content-between">
-           <h6 class="d-flex align-items-start bd-highlight" style="padding: .75rem 1.25rem;"> {{request.project_name|capitalize}}</h6>
-           <h6 class="d-flex align-items-baseline" style="min-width: fit-content;">
+           <h6 class="d-flex align-items-start bd-highlight" style="padding: .75rem 1.25rem .0rem 1.25rem; "> {{request.project_name|capitalize}}</h6>
+           <h6 class="d-flex align-items-baseline" style="min-width: fit-content; margin-bottom: 0px;">
               <span class="current-stage">
               Stage: {{request.project_stage }}
               </span>
            </h6>
         </div>
-        <div class="card-body d-flex justify-content-between">
-           <span class="card-text"> {{request.project_description|capitalize}}</span>
+             <div class="card-body my-card-body">
+        <span name="description" data-task-number="1" class="card-text" style="flex-grow: 1; text-align: start!important;">{{request.project_description|capitalize}}</span>
+        <div class="d-flex justify-content-between">
+        <span class="d-flex align-items-start"><div><i class="fas fa-tasks"></i>  {{user_data.get_open_task_number(request.key)}}/{{user_data.get_total_task_number(request.key)}}</div></span>
+        <span class="d-flex align-items-end"><div><i class="far fa-calendar-alt"></i> {{request.project_deadline}} </div></span>
         </div>
+    </div>
         <a class="cover-card" href="{{ url_for('authenticated.view_project_page', wks_id=user_data.get_wks_data().key.id(), project_id=request.key.id()) }}"></a>
      </div>
   </div>
+
   {% endfor %}
 {%- endmacro %}
 

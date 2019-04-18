@@ -27,5 +27,16 @@ class ProjectDetails(ndb.Model):
     Wks = ndb.KeyProperty(kind='WorkspaceDetails')
     project_name = ndb.StringProperty()
     project_description = ndb.StringProperty()
+    project_deadline = ndb.StringProperty()
     project_status = ndb.StringProperty(choices={'Running', 'Closed', 'On Hold'})
     project_stage = ndb.StringProperty()
+
+
+class TaskDetails(ndb.Model):
+    Project = ndb.KeyProperty(kind='ProjectDetails')
+    task_name = ndb.StringProperty()
+    task_description = ndb.StringProperty()
+    task_aminutes = ndb.IntegerProperty()
+    task_skills = ndb.IntegerProperty(repeated=True)
+    task_developers = ndb.IntegerProperty(repeated=True)
+    task_status = ndb.StringProperty()
