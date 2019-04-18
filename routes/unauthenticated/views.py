@@ -56,9 +56,11 @@ def verify_page():
     return redirect(url_for("unauthenticated.login_page"))
 
 
-# TODO: Password Reset Route
-@unauthenticated.route('/Reset', methods=['GET', 'POST'])
+@unauthenticated.route('/ResetPassword', methods=['GET', 'POST'])
 def reset_password_page():
-    return True
+    email = request.args.get('email')
+    code = request.args.get('code')
+
+    return "fsdfa"
 
 

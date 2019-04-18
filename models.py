@@ -11,20 +11,44 @@ class AccountDetails(ndb.Model):
     is_active = ndb.BooleanProperty()
     is_verified = ndb.BooleanProperty()
     verification_code = ndb.StringProperty()
+    reset_code = ndb.StringProperty()
 
+    def change_email(self, new_email):
+        profiles = UserProfile.query(UserProfile.UserEmail == self.email)
+        for account in profiles.fetch():
+            account.UserEmail = new_email
+        ndb.put_multi(profiles)
+        self.email = new_email
+        self.put()
+        return True
 
 class WorkspaceDetails(ndb.Model):
     workspace_name = ndb.StringProperty()
 
 class UserProfile(ndb.Model):
-    User = ndb.KeyProperty(kind='AccountDetails')
+    # User = ndb.KeyProperty(kind='AccountDetails')
+    UserEmail = ndb.StringProperty()
     Wks = ndb.KeyProperty(kind='WorkspaceDetails')
     workspace_name = ndb.StringProperty()
-    role = ndb.StringProperty(choices={'dev', 'manager', 'super-dev', 'super-admin'})
+    role = ndb.StringProperty(choices={'dev', 'manager', 'super-dev', 'admin'})
+    invitation_token = ndb.StringProperty()
+    invitation_accepted = ndb.BooleanProperty()
+    disabled = ndb.BooleanProperty()
 
+    # Super admin owns all
+    # Super dev can log time anywhere
+    # Manager can create own projects
+    # Deve can only log time
+
+
+
+class TaskProfile(ndb.Model):
+    email = ndb.StringProperty()
+    Task = ndb.KeyProperty(kind='TaskDetails')
 
 class ProjectDetails(ndb.Model):
     Wks = ndb.KeyProperty(kind='WorkspaceDetails')
+    project_manager = ndb.StringProperty()
     project_name = ndb.StringProperty()
     project_description = ndb.StringProperty()
     project_deadline = ndb.StringProperty()

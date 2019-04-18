@@ -1,0 +1,30 @@
+{% extends "authenticated/html/includes/Base_Template.html" %}
+
+{% block header_content %}
+            <link href="{{ url_for('static', filename='authenticated/CSS/open_invitation.css') }}" rel="stylesheet" xmlns="http://www.w3.org/1999/html">
+{% endblock header_content %}
+
+{% block page_header %}
+    <h1 style="margin-bottom: 0px;" >Invitation</h1>
+{% endblock page_header %}
+
+{% block page_content %}
+    <div class="container">
+    <div class="my-page">
+        <div class="page-text">You have been invited to join the following workspace:</div>
+        <div class="workspace-name">{{ wks_data.workspace_name }}</div>
+        <br>
+        <form method="post" style="justify-content: center">
+            <input type="submit" name="accepted" class="btn btn-lg accept-btn" value="Click here to accept the invite!">
+        </form>
+    </div>
+    </div>
+    
+{% endblock page_content %}
+
+{# Scripts #}
+{% block script %}
+    <script>
+
+    </script>
+{% endblock script %}

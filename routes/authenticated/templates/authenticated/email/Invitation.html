@@ -1,0 +1,12 @@
+{% extends "unauthenticated/email/Base_Template.html" %}
+{% block content %}
+ <div style="line-height: 24px;">
+    <span style="font-family: Arial, Helvetica, sans-serif; font-size: 15px; color: #57697e;">
+        To confirm your invitation please visit the following URL:
+        <br>
+        <a href="{{VERIFICATION_URL}}">{{VERIFICATION_URL}}</a>
+        <br>
+        Please note that if you don't have an account, you will need to create one first!
+    </span>
+ </div>
+{% endblock content %}

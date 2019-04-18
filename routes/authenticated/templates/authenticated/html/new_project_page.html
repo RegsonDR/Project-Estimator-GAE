@@ -38,10 +38,10 @@
             <!-- Button to create new task -->
                 <div class="col-2" style="min-width: 80px;">
 
-            <a href="#" data-toggle="modal" data-target="#NewTask1" data-task-number="1" id="create-task" class="btn btn-lg btn-info btn-block"  style="font-size: 1rem;"><i class="fas fa-plus"></i> Task</a>
+            <a href="#" data-toggle="modal" data-target="#NewTask1" data-task-number="1" id="create-task" class="btn btn-lg btn-block"  style="font-size: 1rem;"><i class="fas fa-plus"></i> Task</a>
                     </div>
                 <div class="col-2" style="min-width: 80px;">
-            {{ form.submit(class="btn btn-lg btn-primary btn-block", style="font-size: 1rem;") }}
+            {{ form.submit(class="btn btn-lg btn-block create-button", style="font-size: 1rem;") }}
                 </div>
             </div>
     </div>
@@ -237,7 +237,7 @@
               next_task_number = current_task_number + 1;
               // Modify Current Modal
               $(this).after('<button type="button" class="btn btn-secondary updateTask" data-task-number="'+current_task_number+'" data-dismiss="modal">Update</button>');
-              $(this).after('<button type="button" class="btn btn-secondary deleteTask" data-task-number="'+current_task_number+'" data-dismiss="modal">Delete</button>');
+              $(this).after('<button type="button" class="btn deleteTask" data-task-number="'+current_task_number+'" data-dismiss="modal"><i class="far fa-trash-alt"></i> Delete</button>');
               $(this).remove();
               // Update Add Button
               $('#create-task').attr('data-target','#NewTask'+next_task_number);

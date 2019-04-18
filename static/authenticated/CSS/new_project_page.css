@@ -48,5 +48,30 @@ padding: 8px 20px 8px 5px !important;
 }
 
 .deleteTask{
-background-color: #bd2130;
+    color: #fff;
+    background-color: #bd2130;
+}
+
+#create-task{
+    color: black;
+    background-color: #c8e4ff;
+    border: 1px solid rgba(0,0,0,.5);;
+}
+
+.create-button{
+    color: black;
+    background-color: #e2f0d9;
+    border: 1px solid rgba(0,0,0,.5);;
+}
+
+#create-task:hover{
+    color: grey;
+}
+
+.create-button:hover{
+    color: grey;
+}
+
+.addTask{
+
 }

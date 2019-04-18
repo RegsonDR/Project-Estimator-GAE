@@ -36,7 +36,7 @@ def send_verification_email(user_id):
     mail.send_mail(
         sender="support@project-application-231720.appspotmail.com",
         to=user.email,
-        subject=APP_NAME + " Verification code",
+        subject=APP_NAME + " Verification Link",
         body="",
         html=render_template('unauthenticated/email/email_verification.html', EMAIL_HEADER="Thanks for signing up!",
                              VERIFICATION_URL=VERIFICATION_URL)

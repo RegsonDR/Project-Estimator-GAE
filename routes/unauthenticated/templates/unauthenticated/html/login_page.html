@@ -18,4 +18,22 @@
 
 {# Scripts #}
 {% block script %}
+    <script>
+   $(document).ready(function(){
+       $('#passwordReset').on('click', function() {
+           if ($('#email').val() != null){
+               console.log("fds");
+               $.post("{{url_for('ajax.reset_password_email')}}",
+               {
+                   reset_email:$('#email').val(),
+               },
+               alert("Instructions on resetting your password has been sent to your email!")
+           );
+           } else {
+              alert("Please type in your email address first!")
+           }
+
+       });
+   });
+</script>
 {% endblock script %}

@@ -12,7 +12,70 @@
 
 {% block page_content %}
 
-    {% include "authenticated/html/"+user_data.get_role()+"/workspace_homepage.html" %}
+{% macro ProduceProjectCards(ProjectsObject) -%}
+    {% if not ProjectsObject %}
+       {{ ProduceNoRequestAlert() }}
+    {% endif %}
+  {% for request in ProjectsObject %}
+  <div class="col-lg-11 my-3" style="margin: auto;">
+     <div class="card my-card border-dark o-hidden h-100">
+        <div class="card-header my-card-header d-flex justify-content-between">
+           <h6 class="d-flex align-items-start bd-highlight" style="padding: .75rem 1.25rem .0rem 1.25rem; "> {{request.project_name|capitalize}}</h6>
+           <h6 class="d-flex align-items-baseline" style="min-width: fit-content; margin-bottom: 0px;">
+              <span class="current-stage">
+              Stage: {{request.project_stage }}
+              </span>
+           </h6>
+        </div>
+             <div class="card-body my-card-body">
+        <span name="description" data-task-number="1" class="card-text" style="flex-grow: 1; text-align: start!important;">{{request.project_description|capitalize}}</span>
+        <div class="d-flex justify-content-between">
+        <span class="d-flex align-items-start"><div><i class="fas fa-tasks"></i>  {{user_data.get_open_task_number(request.key)}}/{{user_data.get_total_task_number(request.key)}}</div></span>
+        <span class="d-flex align-items-end"><div><i class="far fa-calendar-alt"></i> {{request.project_deadline}} </div></span>
+        </div>
+    </div>
+        <a class="cover-card" href="{{ url_for('authenticated.view_project_page', wks_id=user_data.get_wks_data().key.id(), project_id=request.key.id()) }}"></a>
+     </div>
+  </div>
+
+  {% endfor %}
+{%- endmacro %}
+
+{% macro ProduceNoRequestAlert() -%}
+    <div class="col-lg-11 my-3" style="margin: auto;">
+<div class="alert alert-info alert-dismissible fade show", style="margin-top: 1rem;   margin-bottom: 1rem;">
+   There are no requests in this category.
+</div>
+    </div>
+{%- endmacro %}
+<div class="container">
+<div class="card text-center" style=" border: 1px solid rgba(0,0,0,0.5);">
+   <div class="card-header">
+      <ul class="nav nav-pills nav-fill" id="Projects" role="tablist">
+         <li class="nav-item">
+            <a class="nav-link active" id="running-tab" data-toggle="tab" href="#running" role="tab" aria-selected="true">Running</a>
+         </li>
+         <li class="nav-item">
+            <a class="nav-link" id="closed-tab" data-toggle="tab" href="#closed" role="tab" aria-selected="false">Closed</a>
+         </li>
+         <li class="nav-item">
+            <a class="nav-link" id="on-hold-tab" data-toggle="tab" href="#on-hold" role="tab" aria-selected="false">On Hold</a>
+         </li>
+      </ul>
+   </div>
+   <div class="tab-content" id="RequestsContent" >
+      <div class="tab-pane tab-cards fade show active" id="running" role="tabpanel" aria-labelledby="running-tab" >
+        {{ ProduceProjectCards(user_data.get_projects("Running")) }}
+      </div>
+      <div class="tab-pane tab-cards fade" id="closed" role="tabpanel" aria-labelledby="closed-tab">
+        {{ ProduceProjectCards(user_data.get_projects("Closed")) }}
+      </div>
+      <div class="tab-pane tab-cards fade" id="on-hold" role="tabpanel" aria-labelledby="on-hold-tab">
+        {{ ProduceProjectCards(user_data.get_projects("On Hold")) }}
+      </div>
+   </div>
+</div>
+</div>
 
 
 {% endblock page_content %}

@@ -10,6 +10,7 @@ body {
   align-items: center;
   padding-top: 40px;
   padding-bottom: 40px;
+    background-color: #e0e0e0;
 }
 
 .main-form {
@@ -20,6 +21,7 @@ body {
   border-radius: 25px;
   font-size:15px;
   background-color: #f5f5f5;
+    border: 1px solid rgba(0,0,0,0.5);
 }
 .main-form .checkbox {
   font-weight: 400;

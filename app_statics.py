@@ -1,9 +1,26 @@
 APP_NAME = "Project Estimator"
 RECAPTCHA_SECRET = "6LeTmZMUAAAAAPsfXDZJWpxP2Q1A2e9XhOCA1zlf"
 SIDEBAR = {
-    'super-admin':[
+    'admin':[
         {
             "label":"Projects",
+            "view": "authenticated.workspace_homepage",
+            "icon": "tachometer-alt",
+        },
+        {
+            "label": "Add Users",
+            "view": "authenticated.add_users_page",
+            "icon": "users",
+        },
+        {
+            "label": "New Project",
+            "view": "authenticated.new_project_page",
+            "icon": "plus",
+        }
+    ],
+    'manager': [
+        {
+            "label": "Projects",
             "view": "authenticated.workspace_homepage",
             "icon": "tachometer-alt",
         },
@@ -11,6 +28,8 @@ SIDEBAR = {
             "label": "New Project",
             "view": "authenticated.new_project_page",
             "icon": "plus",
-        },
-    ]
+        }
+    ],
+
+
 }

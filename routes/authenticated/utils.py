@@ -1,8 +1,11 @@
 from models import WorkspaceDetails, AccountDetails, UserProfile, ProjectDetails, TaskDetails
-from flask import flash
+from flask import flash, request, url_for, render_template
+from google.appengine.api import mail
+from app_statics import APP_NAME
+import uuid
 
 
-def create_wks(workspace_name, user_key):
+def create_wks(workspace_name, user_email):
     workspace_data = WorkspaceDetails(
         workspace_name=workspace_name
     )
@@ -11,10 +14,11 @@ def create_wks(workspace_name, user_key):
         return False
 
     user_profile = UserProfile(
-        User=user_key,
+        UserEmail=user_email,
         workspace_name=workspace_name,
         Wks=workspace_data.key,
-        role='super-admin'
+        role='admin',
+        invitation_accepted=True
     )
     if not user_profile.put():
         flash('Organization not created.', 'danger')
@@ -24,9 +28,10 @@ def create_wks(workspace_name, user_key):
     return workspace_data
 
 
-def create_project(wks_key, form_data):
+def create_project(wks_key, user_email, form_data):
     project_data = ProjectDetails(
         Wks=wks_key,
+        project_manager=user_email,
         project_name=form_data['project_name'],
         project_description=form_data['project_description'],
         project_deadline=form_data['project_deadline'],
@@ -44,8 +49,8 @@ def create_project(wks_key, form_data):
                 Project=project_data.key,
                 task_name=form_data['Task'][task]['Title'],
                 task_description=form_data['Task'][task]['Description'],
-                task_skills= map(int, form_data['Task'][task]['Skills']),
-                task_developers= map(int, form_data['Task'][task]['Developers']),
+                task_skills=map(int, form_data['Task'][task]['Skills']),
+                task_developers=map(int, form_data['Task'][task]['Developers']),
                 task_aminutes=int(form_data['Task'][task]['aMinutes']),
                 task_status="Open"
             )
@@ -68,24 +73,94 @@ def get_wks_data_by_id(datastore_id):
     return WorkspaceDetails.get_by_id(datastore_id)
 
 
-def check_access(wks_key, user_key):
-    return UserProfile.query(UserProfile.Wks == wks_key, UserProfile.User == user_key).get()
+def check_access(wks_key, user_email):
+    return UserProfile.query(UserProfile.Wks == wks_key, UserProfile.invitation_accepted == True,
+                             UserProfile.UserEmail == user_email).get()
 
 
-def get_workspaces(user_key):
-    wks_objects = UserProfile.query(UserProfile.User == user_key).fetch()
+def check_task_access():
+    return ""
+
+
+def get_workspaces(user_email):
+    wks_objects = UserProfile.query(UserProfile.UserEmail == user_email,
+                                    UserProfile.invitation_accepted == True).fetch()
     return wks_objects
 
 
-def get_projects(wks_key, project_status):
-    project_objects = ProjectDetails.query(ProjectDetails.Wks == wks_key,
-                                           ProjectDetails.project_status == project_status).fetch()
+def get_projects(wks_key, role, user_email, project_status):
+    if role == "admin":
+        project_objects = ProjectDetails.query(
+            ProjectDetails.Wks == wks_key,
+            ProjectDetails.project_status == project_status
+        ).fetch()
+    else:
+        project_objects = ProjectDetails.query(
+            ProjectDetails.Wks == wks_key,
+            ProjectDetails.project_status == project_status,
+            ProjectDetails.project_manager == user_email
+        ).fetch()
+
     return project_objects
 
 
 def get_open_task_number(project_key):
     return TaskDetails.query(TaskDetails.Project == project_key, TaskDetails.task_status == "Open").count()
 
+
 def get_total_task_number(project_key):
     return TaskDetails.query(TaskDetails.Project == project_key).count()
 
+
+def get_project_data_by_id(project_id):
+    return ProjectDetails.get_by_id(project_id)
+
+
+def get_all_users(wks_key):
+    return UserProfile.query(UserProfile.Wks == wks_key).fetch()
+
+
+def add_user(wks_key, workspace_name, UserEmail, role):
+    if UserProfile.query(UserProfile.Wks == wks_key, UserProfile.UserEmail == UserEmail).get():
+        flash('User: ' + UserEmail + ' already invited to this workspace!', 'danger')
+        return False
+
+    token = uuid.uuid4().hex
+    user_data = UserProfile(
+        Wks=wks_key,
+        workspace_name=workspace_name,
+        UserEmail=UserEmail,
+        role=role,
+        invitation_token=token,
+        invitation_accepted=False
+    )
+    if not user_data.put():
+        flash('Error occurred, User: ' + UserEmail + ' not created.', 'danger')
+        return False
+
+    send_invitation_email(token, UserEmail)
+    flash('User: ' + UserEmail + ' invited!', 'success')
+    return True
+
+
+def send_invitation_email(verification_code, email):
+    VERIFICATION_URL = (request.url_root + url_for('authenticated.open_invitation').replace("/", "") + "?email=" +
+                        email + "&code=" + verification_code)
+    mail.send_mail(
+        sender="support@project-application-231720.appspotmail.com",
+        to=email,
+        subject=APP_NAME + " Invitation Link",
+        body="",
+        html=render_template('authenticated/email/Invitation.html', EMAIL_HEADER="You've been invited to a workspace!",
+                             VERIFICATION_URL=VERIFICATION_URL)
+    )
+
+    return True
+
+
+def verify_invite(code, email):
+    user_profile = UserProfile.query(UserProfile.UserEmail == email, UserProfile.invitation_token == code).get()
+    if user_profile:
+        return user_profile
+    flash('Invitation is invalid', 'danger')
+    return False

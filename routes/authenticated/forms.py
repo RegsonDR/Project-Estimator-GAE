@@ -1,7 +1,9 @@
 from flask_wtf import FlaskForm
-from wtforms.fields import SubmitField, StringField, DateField, TextAreaField
+from wtforms.fields import SubmitField, StringField, SelectField, PasswordField
+from wtforms.fields.html5 import EmailField, TelField
 from wtforms.widgets import TextArea
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, Email, EqualTo
+
 
 
 class NewWorkspace(FlaskForm):
@@ -14,3 +16,17 @@ class NewProject(FlaskForm):
     project_description = StringField('Project Description', widget=TextArea(), validators=[DataRequired()])
     project_deadline = StringField('Project Deadline', validators=[DataRequired()])
     submit = SubmitField('Create')
+
+class NewUser(FlaskForm):
+    user_email = EmailField("User's Email", validators=[DataRequired()])
+    role = SelectField("Role",choices=[("dev","Developer"),("super-dev","Super Developer"),("manager","Manager")], validators=[DataRequired()])
+    submit = SubmitField('Add')
+
+class ProfileUser(FlaskForm):
+    first_name = StringField('First Name', validators=[DataRequired()])
+    last_name = StringField('Last Name', validators=[DataRequired()])
+    mobile_number = TelField('Phone Number', validators=[DataRequired()])
+    email = EmailField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[EqualTo('confirm_password', message="Passwords Must Match")])
+    confirm_password = PasswordField('Confirm Password')
+    submit = SubmitField('Save')
