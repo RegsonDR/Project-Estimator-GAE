@@ -1,7 +1,3 @@
-Unauthenticated:
-- Password Reset Route
-- Register label, "e.g {{placeholder}}"
-
 Workspace:
 - Project, get latest 10, then ajax on scroll
 
@@ -10,7 +6,7 @@ Create Project, Task Creation, Task Assignment
 Project Settings, add to project
 Calender View
 User Profile
-Workspace Settings, invite to workspace
+Workspace Settings
 
 
 Overall Permissions

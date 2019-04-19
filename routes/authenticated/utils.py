@@ -72,14 +72,23 @@ def get_user_data_by_id(datastore_id):
 def get_wks_data_by_id(datastore_id):
     return WorkspaceDetails.get_by_id(datastore_id)
 
+def get_project_data_by(datastore_id):
+    return ProjectDetails.get_by_id(datastore_id)
+
 
 def check_access(wks_key, user_email):
     return UserProfile.query(UserProfile.Wks == wks_key, UserProfile.invitation_accepted == True,
                              UserProfile.UserEmail == user_email).get()
 
 
-def check_task_access():
-    return ""
+def check_project_access(projects_data, user_email, role):
+    if role == "admin":
+        return True
+    if role == "manager":
+        if projects_data.project_manager == user_email:
+            return True
+
+    return False
 
 
 def get_workspaces(user_email):

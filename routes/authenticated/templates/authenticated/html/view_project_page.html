@@ -1,16 +1,59 @@
 {% extends "authenticated/html/includes/Base_Template.html" %}
 
 {% block header_content %}
+          <link href="{{ url_for('static', filename='authenticated/CSS/view_project_page.css') }}" rel="stylesheet">
 {% endblock header_content %}
 
 {% block page_header %}
-    <h1 style="margin-bottom: 0px;">{{ wks_data.workspace_name }}</h1>
+    <h1 style="margin-bottom: 0px;">{{ project_data.project_name }}</h1>
 {% endblock page_header %}
-
 {% block page_content %}
+    <div class="container">
+    <div class="my-page">
+
+        {{ form.project_name}}
+        {{ form.project_description}}
+        {{ form.project_deadline}}
+        {{ form.project_status}}
+        {{ form.project_manager}}
+        {{ form.project_stage}}
 
 
-    
+  <div class="card text-center remove-border">
+   <div class="card-header remove-border">
+      <ul class="nav nav-pills nav-fill" id="Tasks" role="tablist">
+         <li class="nav-item">
+            <a class="nav-link active" id="all-tab" data-toggle="tab" href="#All" role="tab" aria-selected="true">All Tasks</a>
+         </li>
+         <li class="nav-item">
+            <a class="nav-link" id="open-tab" data-toggle="tab" href="#Open" role="tab" aria-selected="false">Open Tasks</a>
+         </li>
+         <li class="nav-item">
+            <a class="nav-link" id="closed-tab" data-toggle="tab" href="#Closed" role="tab" aria-selected="false">Closed Tasks</a>
+         </li>
+      </ul>
+   </div>
+   <div class="tab-content" id="RequestsContent" >
+      <div class="tab-pane tab-cards fade show active" id="All" role="tabpanel" aria-labelledby="All-tab">
+          fdasfdasfa
+          fsadfdsafdsa
+          fdasfads
+      </div>
+      <div class="tab-pane tab-cards fade" id="Open" role="tabpanel" aria-labelledby="Open-tab">
+          fdasfdasfa
+          fsadfdsafdsa
+          fdasfads
+      </div>
+      <div class="tab-pane tab-cards fade" id="Closed" role="tabpanel" aria-labelledby="Closed-tab">
+          fdasfdasfa
+          fsadfdsafdsa
+          fdasfads
+      </div>
+   </div>
+</div>
+        </div>
+
+    </div>
 {% endblock page_content %}
 
 {# Scripts #}

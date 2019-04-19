@@ -34,11 +34,15 @@ class LoggedUser:
         if projects_data:
             self.projects_data = projects_data
 
+
     def get_user_data(self):
         return self.user_data
 
     def get_wks_data(self):
         return self.wks_data
+
+    def get_project_data(self):
+        return self.projects_data
 
     def get_tasks_data_by_project_id(self, project_id):
         return project_id
@@ -80,7 +84,7 @@ def login_required(roles=None):
                 wks_data = None
                 projects_data = None
                 access_data = None
-                if kwargs and kwargs['wks_id']:
+                if 'wks_id' in kwargs.keys():
                     wks_data = get_wks_data_by_id(kwargs['wks_id'])
                     if not wks_data:
                         abort(403)
@@ -88,8 +92,13 @@ def login_required(roles=None):
                     # Check Permissions for workspace
                     if not access_data and not roles or access_data.role not in roles:
                         abort(403)
-                    # Check Permission for page
-                    # if kwargs['project_id']:
+                    # Check Permission for project
+                    if 'project_id' in kwargs.keys():
+                        projects_data = get_project_data_by(kwargs['project_id'])
+                        if not projects_data:
+                            abort(403)
+                        if not check_project_access(projects_data,session.get('Email'),access_data.role):
+                            abort(403)
 
                 kwargs['user'] = LoggedUser(user_data, session.get('Email'), wks_data, projects_data, access_data)
             else:
@@ -100,6 +109,22 @@ def login_required(roles=None):
         return wrapper
 
     return decorator
+
+
+@authenticated.route('/Workspace/<int:wks_id>/Project/<int:project_id>', methods=['GET', 'POST'])
+@login_required({'admin','manager'})
+def view_project_page(wks_id, project_id, **kwargs):
+    project = Project()
+
+
+    return render_template('authenticated/html/view_project_page.html',
+                           user_data=kwargs['user'],
+                           wks_data=kwargs['user'].get_wks_data(),
+                           form = project,
+                           project_data=kwargs['user'].get_project_data(),
+                           SIDEBAR=SIDEBAR)
+
+
 
 
 @authenticated.route('/')
@@ -119,7 +144,7 @@ def my_workspaces_page(**kwargs):
                            user_data=kwargs['user'])
 
 @authenticated.route('/MyProfile', methods=['GET', 'POST'])
-@login_required('admin')
+@login_required()
 def my_profile_page(**kwargs):
     user_profile = ProfileUser()
 
@@ -156,9 +181,6 @@ def my_profile_page(**kwargs):
 @authenticated.route('/Workspace/<int:wks_id>', methods=['GET', 'POST'])
 @login_required({'admin', 'manager'})
 def workspace_homepage(wks_id, **kwargs):
-    # # todo: create projects on front end
-    # print kwargs['user'].get_projects()
-
     return render_template('authenticated/html/workspace_homepage.html',
                            user_data=kwargs['user'],
                            wks_data=kwargs['user'].get_wks_data(),
@@ -166,7 +188,7 @@ def workspace_homepage(wks_id, **kwargs):
 
 
 @authenticated.route('/Workspace/<int:wks_id>/NewProject', methods=['GET', 'POST'])
-@login_required('admin')
+@login_required({'admin','manager'})
 def new_project_page(wks_id, **kwargs):
     new_project = NewProject()
 
@@ -204,16 +226,6 @@ def new_project_page(wks_id, **kwargs):
                            SIDEBAR=SIDEBAR)
 
 
-@authenticated.route('/Workspace/<int:wks_id>/Project/<int:project_id>', methods=['GET', 'POST'])
-@login_required('admin')
-def view_project_page(wks_id, project_id, **kwargs):
-    return render_template('authenticated/html/view_project_page.html',
-                           user_data=kwargs['user'],
-                           wks_data=kwargs['user'].get_wks_data(),
-                           project_data=get_project_data_by_id(project_id),
-                           SIDEBAR=SIDEBAR)
-
-
 @authenticated.route('/Workspace/<int:wks_id>/AddUsers', methods=['GET', 'POST'])
 @login_required('admin')
 def add_users_page(wks_id, **kwargs):
@@ -231,7 +243,7 @@ def add_users_page(wks_id, **kwargs):
 
 
 @authenticated.route('/Invitation', methods=['GET', 'POST'])
-@login_required('admin')
+@login_required()
 def open_invitation(**kwargs):
     code = request.args.get('code')
     email = request.args.get('email')
@@ -255,7 +267,8 @@ def open_invitation(**kwargs):
 
 
 @authenticated.route('/Logout')
-def logout():
+@login_required()
+def logout(**kwargs):
     session.clear()
     gc.collect()
     flash("Successfully Logged Out!", "success")

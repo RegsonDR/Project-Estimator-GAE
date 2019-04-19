@@ -30,3 +30,13 @@ class ProfileUser(FlaskForm):
     password = PasswordField('Password', validators=[EqualTo('confirm_password', message="Passwords Must Match")])
     confirm_password = PasswordField('Confirm Password')
     submit = SubmitField('Save')
+
+class Project(FlaskForm):
+    project_name = StringField('Project Name', validators=[DataRequired()])
+    project_description = StringField('Project Description', widget=TextArea(), validators=[DataRequired()])
+    project_deadline = StringField('Project Deadline', validators=[DataRequired()])
+    project_status = SelectField('Project Status',choices=[("Running","Running"),("Closed","Closed"),("On Hold","On Hold")], validators=[DataRequired()])
+    project_manager = SelectField('Project Manager',choices=[("Running","Running"),("Closed","Closed"),("On Hold","On Hold")], validators=[DataRequired()])
+    project_stage = StringField('Project Stage', validators=[DataRequired()])
+    submit = SubmitField('Create')
+
