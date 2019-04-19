@@ -7,14 +7,18 @@ from routes.api.views import api
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '586d4f92e93f985f6ceb58729938c52e'
-# app.config['EXPLAIN_TEMPLATE_LOADING'] = True
-
-
 app.register_blueprint(unauthenticated)
 app.register_blueprint(authenticated)
 app.register_blueprint(ajax)
 app.register_blueprint(api)
 
+# JINJA2 : Decodes base64
+def decode_base64(string):
+    if isinstance(string, str):
+        string = string.decode('utf-8').strip()
+    return base64.b64decode(string)
+
+app.jinja_env.filters['decodeb64'] = decode_base64
 
 if __name__ == '__main__':
     app.run()

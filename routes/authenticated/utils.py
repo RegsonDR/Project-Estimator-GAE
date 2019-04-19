@@ -10,7 +10,7 @@ def create_wks(workspace_name, user_email):
         workspace_name=workspace_name
     )
     if not workspace_data.put():
-        flash('Organization not created.', 'danger')
+        flash('Workspace not created.', 'danger')
         return False
 
     user_profile = UserProfile(
@@ -18,13 +18,14 @@ def create_wks(workspace_name, user_email):
         workspace_name=workspace_name,
         Wks=workspace_data.key,
         role='admin',
-        invitation_accepted=True
+        invitation_accepted=True,
+        disabled=False
     )
     if not user_profile.put():
-        flash('Organization not created.', 'danger')
+        flash('Workspace not created.', 'danger')
         return False
 
-    flash('Organization successfully created.', 'success')
+    flash('Workspace successfully created.', 'success')
     return workspace_data
 
 
@@ -77,7 +78,7 @@ def get_project_data_by(datastore_id):
 
 
 def check_access(wks_key, user_email):
-    return UserProfile.query(UserProfile.Wks == wks_key, UserProfile.invitation_accepted == True,
+    return UserProfile.query(UserProfile.Wks == wks_key, UserProfile.invitation_accepted == True, UserProfile.disabled == False,
                              UserProfile.UserEmail == user_email).get()
 
 
@@ -92,7 +93,7 @@ def check_project_access(projects_data, user_email, role):
 
 
 def get_workspaces(user_email):
-    wks_objects = UserProfile.query(UserProfile.UserEmail == user_email,
+    wks_objects = UserProfile.query(UserProfile.UserEmail == user_email,  UserProfile.disabled == False,
                                     UserProfile.invitation_accepted == True).fetch()
     return wks_objects
 
@@ -141,7 +142,8 @@ def add_user(wks_key, workspace_name, UserEmail, role):
         UserEmail=UserEmail,
         role=role,
         invitation_token=token,
-        invitation_accepted=False
+        invitation_accepted=False,
+        disabled=False
     )
     if not user_data.put():
         flash('Error occurred, User: ' + UserEmail + ' not created.', 'danger')

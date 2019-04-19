@@ -34,7 +34,6 @@ class LoggedUser:
         if projects_data:
             self.projects_data = projects_data
 
-
     def get_user_data(self):
         return self.user_data
 
@@ -90,14 +89,14 @@ def login_required(roles=None):
                         abort(403)
                     access_data = check_access(wks_data.key, session.get('Email'))
                     # Check Permissions for workspace
-                    if not access_data and not roles or access_data.role not in roles:
+                    if not access_data or access_data.role not in roles:
                         abort(403)
                     # Check Permission for project
                     if 'project_id' in kwargs.keys():
                         projects_data = get_project_data_by(kwargs['project_id'])
                         if not projects_data:
                             abort(403)
-                        if not check_project_access(projects_data,session.get('Email'),access_data.role):
+                        if not check_project_access(projects_data, session.get('Email'), access_data.role):
                             abort(403)
 
                 kwargs['user'] = LoggedUser(user_data, session.get('Email'), wks_data, projects_data, access_data)
@@ -112,19 +111,62 @@ def login_required(roles=None):
 
 
 @authenticated.route('/Workspace/<int:wks_id>/Project/<int:project_id>', methods=['GET', 'POST'])
-@login_required({'admin','manager'})
+@login_required({'admin', 'manager'})
 def view_project_page(wks_id, project_id, **kwargs):
-    project = Project()
+    project_form = Project()
+    project_form.project_manager.choices = [(user.UserEmail, user.get_name()) for user in
+                                            UserProfile.query(UserProfile.role != "dev",
+                                                              UserProfile.invitation_accepted == True).fetch(
+                                                projection=[UserProfile.UserEmail])]
 
+    manager_data = [(user.UserEmail, user.get_name(), user.disabled) for user in
+                                            UserProfile.query(UserProfile.role != "dev",
+                                                              UserProfile.invitation_accepted == True).fetch(
+                                                projection=[UserProfile.UserEmail, UserProfile.disabled])]
+
+    project_data = kwargs['user'].get_project_data()
+    if request.method == "POST" and project_form.validate_on_submit():
+        if project_form.project_name.data:
+            project_data.project_name = project_form.project_name.data
+        if project_form.project_deadline.data:
+            project_data.project_deadline = project_form.project_deadline.data
+        if project_form.project_description.data:
+            project_data.project_description = project_form.project_description.data
+        if project_form.project_manager.data:
+            project_data.project_manager = project_form.project_manager.data
+        if project_form.project_status.data:
+            project_data.project_status = project_form.project_status.data
+        if project_form.project_stage.data:
+            project_data.project_stage = project_form.project_stage.data
+        if project_data.put():
+            flash('Project details updated!', 'success')
+            return redirect(url_for('authenticated.view_project_page', wks_id=wks_id, project_id=project_id))
+        flash('Error occurred, please try again!', 'danger')
+
+    project_form.project_name.data = project_data.project_name
+    project_form.project_deadline.data = project_data.project_deadline
+    project_form.project_description.data = project_data.project_description
+    project_form.project_manager.data = project_data.project_manager
+    project_form.project_status.data = project_data.project_status
+    project_form.project_stage.data = project_data.project_stage
 
     return render_template('authenticated/html/view_project_page.html',
                            user_data=kwargs['user'],
                            wks_data=kwargs['user'].get_wks_data(),
-                           form = project,
-                           project_data=kwargs['user'].get_project_data(),
+                           form=project_form,
+                           project_data=project_data,
+                           manager_data=manager_data,
                            SIDEBAR=SIDEBAR)
 
+@authenticated.route('/Workspace/<int:wks_id>/Project/<int:project_id>/Chat/', methods=['GET', 'POST'])
+@login_required({'admin', 'manager'})
+def project_chat(wks_id, project_id, **kwargs):
 
+    return render_template('authenticated/html/project_chat.html',
+                    user_data=kwargs['user'],
+                    wks_data=kwargs['user'].get_wks_data(),
+                    project_data=kwargs['user'].get_project_data(),
+                    SIDEBAR=SIDEBAR)
 
 
 @authenticated.route('/')
@@ -142,6 +184,7 @@ def my_workspaces_page(**kwargs):
     return render_template('authenticated/html/my_workspaces_page.html',
                            form=new_wks,
                            user_data=kwargs['user'])
+
 
 @authenticated.route('/MyProfile', methods=['GET', 'POST'])
 @login_required()
@@ -162,7 +205,7 @@ def my_profile_page(**kwargs):
         if user_profile.mobile_number.data and user_profile.mobile_number.data is not user_data.mobile_number:
             user_data.mobile_number = user_profile.mobile_number.data
         if user_data.put():
-            flash('Profile updated!','success')
+            flash('Profile updated!', 'success')
             return redirect(url_for('authenticated.my_profile_page'))
         flash('Error occurred, please try again!', 'danger')
 
@@ -170,7 +213,6 @@ def my_profile_page(**kwargs):
     user_profile.last_name.data = user_data.last_name
     user_profile.email.data = user_data.email
     user_profile.mobile_number.data = user_data.mobile_number
-
 
     return render_template('authenticated/html/my_profile_page.html',
                            form=user_profile,
@@ -188,7 +230,7 @@ def workspace_homepage(wks_id, **kwargs):
 
 
 @authenticated.route('/Workspace/<int:wks_id>/NewProject', methods=['GET', 'POST'])
-@login_required({'admin','manager'})
+@login_required({'admin', 'manager'})
 def new_project_page(wks_id, **kwargs):
     new_project = NewProject()
 

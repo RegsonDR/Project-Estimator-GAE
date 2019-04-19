@@ -1,7 +1,7 @@
 {% extends "authenticated/html/includes/Base_Template.html" %}
 
 {% block header_content %}
-          <link href="{{ url_for('static', filename='authenticated/CSS/view_project_page.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='authenticated/CSS/view_project_page.css') }}" rel="stylesheet">
 {% endblock header_content %}
 
 {% block page_header %}
@@ -9,56 +9,132 @@
 {% endblock page_header %}
 {% block page_content %}
     <div class="container">
-    <div class="my-page">
+        <form method="POST" autocomplete="off" class="my-page">
+            {{ form.hidden_tag() }}
 
-        {{ form.project_name}}
-        {{ form.project_description}}
-        {{ form.project_deadline}}
-        {{ form.project_status}}
-        {{ form.project_manager}}
-        {{ form.project_stage}}
+             <div class="form-row" style="justify-content:center">
+            <div class="col-8 input-group mb-2">
+                <div class="input-group-prepend">
+                    {{ form.project_name.label(class="input-group-text") }}
+                </div>
+                {{ form.project_name(class="form-control") }}
+            </div>
 
+            <div class="col-3 input-group mb-2">
+                <div class="input-group-prepend">
+                    {{ form.project_deadline.label(class="input-group-text") }}
+                </div>
+                {{ form.project_deadline(class="form-control") }}
+            </div>
+             </div>
 
-  <div class="card text-center remove-border">
-   <div class="card-header remove-border">
-      <ul class="nav nav-pills nav-fill" id="Tasks" role="tablist">
-         <li class="nav-item">
-            <a class="nav-link active" id="all-tab" data-toggle="tab" href="#All" role="tab" aria-selected="true">All Tasks</a>
-         </li>
-         <li class="nav-item">
-            <a class="nav-link" id="open-tab" data-toggle="tab" href="#Open" role="tab" aria-selected="false">Open Tasks</a>
-         </li>
-         <li class="nav-item">
-            <a class="nav-link" id="closed-tab" data-toggle="tab" href="#Closed" role="tab" aria-selected="false">Closed Tasks</a>
-         </li>
-      </ul>
-   </div>
-   <div class="tab-content" id="RequestsContent" >
-      <div class="tab-pane tab-cards fade show active" id="All" role="tabpanel" aria-labelledby="All-tab">
-          fdasfdasfa
-          fsadfdsafdsa
-          fdasfads
-      </div>
-      <div class="tab-pane tab-cards fade" id="Open" role="tabpanel" aria-labelledby="Open-tab">
-          fdasfdasfa
-          fsadfdsafdsa
-          fdasfads
-      </div>
-      <div class="tab-pane tab-cards fade" id="Closed" role="tabpanel" aria-labelledby="Closed-tab">
-          fdasfdasfa
-          fsadfdsafdsa
-          fdasfads
-      </div>
-   </div>
-</div>
+            <div class="form-row"  style="justify-content:center">
+                <div class="col-11 input-group mb-2">
+                    <div class="input-group-prepend">
+                        {{ form.project_description.label(class="input-group-text") }}
+                    </div>
+                    {{ form.project_description(class="form-control") }}
+                </div>
+            </div>
+
+            <div class="form-row"  style="justify-content:center">
+                <div class="col-4 input-group mb-2">
+                    <div class="input-group-prepend">
+                        {{ form.project_manager.label(class="input-group-text") }}
+                    </div>
+                    <select class="custom-select" id="{{ form.project_manager.name }}"  name="{{ form.project_manager.name }}" required>
+                    {% for option in manager_data %}
+                    <option
+                        {% if option[2] == True %}
+                        disabled
+                        {% endif %}
+                        {% if option[0] == form.project_manager.data %}
+                        selected
+                        {% endif %}
+                            value="{{option[0]}}">{{option[1]}}</option>
+                        {% endfor %}
+                      </select>
+                </div>
+                <div class="col-3 input-group mb-2">
+                    <div class="input-group-prepend">
+                        {{ form.project_status.label(class="input-group-text") }}
+                    </div>
+                    {{ form.project_status(class="custom-select") }}
+                </div>
+                <div class="col-4 input-group mb-2">
+                    <div class="input-group-prepend">
+                        {{ form.project_stage.label(class="input-group-text") }}
+                    </div>
+                    {{ form.project_stage(class="form-control") }}
+                </div>
+            </div>
+
+            {{form.submit(class="fa btn save-button", value='')}}
+
+            <div class="card text-center remove-border">
+                <div class="card-header remove-border">
+                    <ul class="nav nav-pills nav-fill" id="Tasks" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="all-tab" data-toggle="tab" href="#All" role="tab"
+                               aria-selected="true">All Tasks</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="open-tab" data-toggle="tab" href="#Open" role="tab"
+                               aria-selected="false">Open Tasks</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="closed-tab" data-toggle="tab" href="#Closed" role="tab"
+                               aria-selected="false">Closed Tasks</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="tab-content" id="RequestsContent">
+                    <div class="tab-pane tab-cards fade show active" id="All" role="tabpanel" aria-labelledby="All-tab">
+                        fdasfdasfa
+                        fsadfdsafdsa
+                        fdasfads
+                    </div>
+                    <div class="tab-pane tab-cards fade" id="Open" role="tabpanel" aria-labelledby="Open-tab">
+                        fdasfdasfa
+                        fsadfdsafdsa
+                        fdasfads
+                    </div>
+                    <div class="tab-pane tab-cards fade" id="Closed" role="tabpanel" aria-labelledby="Closed-tab">
+                        fdasfdasfa
+                        fsadfdsafdsa
+                        fdasfads
+                    </div>
+                </div>
+            </div>
+                <div style="margin: 5px 5px 0px 5px; text-align: right;">
+                    {% set key = user_data.get_project_data().key %}
+            {{user_data.get_open_task_number(key)}}/{{user_data.get_total_task_number(key)}} Tasks Open
+        </div>
+        <div class="fa btn chat-button" style="display: table;">
+            <a style="display: table-cell; vertical-align: middle;" href="{{url_for('authenticated.project_chat',wks_id=wks_data.key.id(),project_id=project_data.key.id())}}">
+                <i class="fas fa-comments"></i>
+            </a>
         </div>
 
+
+        </form>
     </div>
 {% endblock page_content %}
 
 {# Scripts #}
 {% block script %}
-    <script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css">
+{#    <script type="text/javascript" src="https://cdn.jsdelivr.net/g/bootstrap.material-design@0.5.9(js/material.min.js+js/ripples.min.js)"></script>#}
 
+    <script>
+           $(document).ready(function () {
+            $('#project_deadline').datepicker({
+                format: 'dd/mm/yyyy',
+                startDate: '0d',
+                todayHighlight:'true',
+                todayBtn:'true'
+            });
+        });
     </script>
 {% endblock script %}

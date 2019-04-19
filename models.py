@@ -22,29 +22,36 @@ class AccountDetails(ndb.Model):
         self.put()
         return True
 
+
 class WorkspaceDetails(ndb.Model):
     workspace_name = ndb.StringProperty()
+
 
 class UserProfile(ndb.Model):
     # User = ndb.KeyProperty(kind='AccountDetails')
     UserEmail = ndb.StringProperty()
     Wks = ndb.KeyProperty(kind='WorkspaceDetails')
     workspace_name = ndb.StringProperty()
-    role = ndb.StringProperty(choices={'dev', 'manager', 'super-dev', 'admin'})
+    role = ndb.StringProperty(choices={'dev', 'manager', 'admin'})
     invitation_token = ndb.StringProperty()
     invitation_accepted = ndb.BooleanProperty()
     disabled = ndb.BooleanProperty()
 
+    def get_name(self):
+        account_data = AccountDetails.query(AccountDetails.email == self.UserEmail).get()
+        if account_data:
+            return account_data.first_name + " " + account_data.last_name
+        return False
+
     # Super admin owns all
     # Super dev can log time anywhere
-    # Manager can create own projects
     # Deve can only log time
-
 
 
 class TaskProfile(ndb.Model):
     email = ndb.StringProperty()
     Task = ndb.KeyProperty(kind='TaskDetails')
+
 
 class ProjectDetails(ndb.Model):
     Wks = ndb.KeyProperty(kind='WorkspaceDetails')
