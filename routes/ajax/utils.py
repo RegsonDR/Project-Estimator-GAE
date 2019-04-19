@@ -30,6 +30,8 @@ def send_reset_email(email):
         reset_code = uuid.uuid4().hex
         if account.reset_code:
             reset_code = account.reset_code
+        account.reset_code = reset_code
+        account.put()
         RESET_URL = (
                 request.url_root + url_for('unauthenticated.reset_password_page').replace("/", "") +
                 "?email=" + email +

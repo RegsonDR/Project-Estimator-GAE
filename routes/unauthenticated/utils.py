@@ -114,3 +114,18 @@ def api_launcher(method, url_endpoint, params):
         )
 
     return json.loads(resp.content)
+
+
+def verify_token(email, code):
+    user = get_user_data_by_email(email)
+    if user and user.reset_code == code:
+        return user
+    return False
+
+
+def update_password(user, password):
+    user.password = generate_password_hash(password)
+    user.reset_code = None
+    if user.put():
+        return True
+    return False

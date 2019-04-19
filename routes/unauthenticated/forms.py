@@ -25,3 +25,9 @@ class RegisterForm(FlaskForm):
                              validators=[DataRequired(), EqualTo('confirm_password', message="Passwords Must Match")])
     confirm_password = PasswordField('Confirm Password')
     submit = SubmitField('Register')
+
+class PasswordResetForm(FlaskForm):
+    password = PasswordField('Password',
+                             validators=[DataRequired(), EqualTo('confirm_password', message="Passwords Must Match")])
+    confirm_password = PasswordField('Confirm Password')
+    submit = SubmitField('Change')

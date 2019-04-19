@@ -1,7 +1,7 @@
 {% extends "unauthenticated/html/Base_Template.html" %}
 {# Content that appears before flash #}
 {% block before_flash %}
-    <h1 class="h3 mb-3 font-weight-normal">{{page_title}}</h1>
+    <h1 class="h3 mb-3 font-weight-normal">Please Login</h1>
     {{ form.hidden_tag()}}
     {{ form.email(class="form-control", placeholder="Email address", value=request.form.email)}}
     {{ form.password( class="form-control", placeholder="Password", value=request.form.password)}}
