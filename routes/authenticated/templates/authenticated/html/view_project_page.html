@@ -8,10 +8,40 @@
     <h1 style="margin-bottom: 0px;">{{ project_data.project_name }}</h1>
 {% endblock page_header %}
 {% block page_content %}
+{% macro ProduceTaskCards(TasksObject, Status) -%}
+      {% for task in TasksObject if task.task_status == Status or Status == "All" %}
+          <div class="col-lg-11 my-3" style="margin: auto;">
+              <div class="card my-card o-hidden h-100">
+                  <div class="main-card">
+                      <div class="card-header my-card-header">
+                          <h6>{{ task.task_name }}</h6>
+                      </div>
+                      <div class="card-body my-card-body">
+                          <span class="card-text" style="flex-grow: 1;">{{ task.task_description }}</span>
+                      </div>
+                      <div class="my-card-footer">
+                          <i class="fa fa-users">{{ task.task_developers }} </i>
+                      </div>
+                  </div>
+                  <div class="side-card">
+                          <div>Allocated: {{ task.task_aminutes | int_to_minhour }}</div>
+                          <div>Logged:</div>
+                  </div>
+                  <a class="cover-card"
+                     href="{{ url_for('authenticated.view_task_page',wks_id=wks_data.key.id(),project_id=project_data.key.id(),task_id=task.key.id()) }}"></a>
+              </div>
+          </div>
+        {% else %}
+        <div class="alert alert-info col-lg-11">
+            There are no tasks in this category.
+        </div>
+    {% endfor %}
+{%- endmacro %}
+
+
     <div class="container">
         <form method="POST" autocomplete="off" class="my-page">
             {{ form.hidden_tag() }}
-
              <div class="form-row" style="justify-content:center">
             <div class="col-8 input-group mb-2">
                 <div class="input-group-prepend">
@@ -90,21 +120,17 @@
                 </div>
                 <div class="tab-content" id="RequestsContent">
                     <div class="tab-pane tab-cards fade show active" id="All" role="tabpanel" aria-labelledby="All-tab">
-                                {{ tasks }}
+                        {{ ProduceTaskCards(tasks, "All")}}
                     </div>
                     <div class="tab-pane tab-cards fade" id="Open" role="tabpanel" aria-labelledby="Open-tab">
-                        fdasfdasfa
-                        fsadfdsafdsa
-                        fdasfads
+                        {{ ProduceTaskCards(tasks, "Open")}}
                     </div>
                     <div class="tab-pane tab-cards fade" id="Closed" role="tabpanel" aria-labelledby="Closed-tab">
-                        fdasfdasfa
-                        fsadfdsafdsa
-                        fdasfads
+                        {{ ProduceTaskCards(tasks, "Closed")}}
                     </div>
                 </div>
             </div>
-                <div style="margin: 5px 5px 0px 5px; text-align: right;">
+                <div style="margin: 5px 5px 0px 5px; text-align: right; color:#495057;">
                     {% set key = user_data.get_project_data().key %}
             {{user_data.get_open_task_number(key)}}/{{user_data.get_total_task_number(key)}} Tasks Open
         </div>
@@ -123,7 +149,6 @@
 {% block script %}
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css">
-{#    <script type="text/javascript" src="https://cdn.jsdelivr.net/g/bootstrap.material-design@0.5.9(js/material.min.js+js/ripples.min.js)"></script>#}
 
     <script>
            $(document).ready(function () {

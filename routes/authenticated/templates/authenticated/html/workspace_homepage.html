@@ -17,12 +17,12 @@
        {{ ProduceNoRequestAlert() }}
     {% endif %}
   {% for request in ProjectsObject %}
-  <div class="col-lg-11 my-3" style="margin: auto;">
-     <div class="card my-card border-dark o-hidden h-100">
+  <div class="col-lg-11 my-3" style="margin: auto; color:#495057;">
+     <div class="card my-card o-hidden h-100">
         <div class="card-header my-card-header d-flex justify-content-between">
-           <h6 class="d-flex align-items-start bd-highlight" style="padding: .75rem 1.25rem .0rem 1.25rem; "> {{request.project_name|capitalize}}</h6>
-           <h6 class="d-flex align-items-baseline" style="min-width: fit-content; margin-bottom: 0px;">
-              <span class="current-stage">
+           <h6 class="d-flex align-items-start bd-highlight" style="padding: .75rem 1.25rem .0rem 1.25rem;text-decoration: underline; "> {{request.project_name|capitalize}}</h6>
+                       <h6 class="d-flex align-items-baseline" style="min-width: fit-content; margin-bottom: 0;">
+                           <span class="current-stage">
               Stage: {{request.project_stage }}
               </span>
            </h6>

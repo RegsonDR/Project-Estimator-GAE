@@ -19,7 +19,13 @@ def decode_base64(string):
         string = string.decode('utf-8').strip()
     return base64.b64decode(string)
 
+def int_to_minhour(minutes):
+    if isinstance(minutes, int):
+        return '{:02d}:{:02d}'.format(*divmod(minutes, 60))
+
 app.jinja_env.filters['decodeb64'] = decode_base64
+app.jinja_env.filters['int_to_minhour'] = int_to_minhour
+
 
 if __name__ == '__main__':
     app.run()

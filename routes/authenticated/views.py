@@ -12,10 +12,11 @@ import json
 
 authenticated = Blueprint('authenticated', __name__, template_folder='templates')
 
-class Vividict(dict):
+class DictMissKey(dict):
+    # Create key if doesn't exist
     def __missing__(self, key):
-        value = self[key] = type(self)()  # retain local pointer to value
-        return value  # faster to return than dict lookup
+        value = self[key] = type(self)()
+        return value
 
 
 class LoggedUser:
@@ -162,6 +163,11 @@ def view_project_page(wks_id, project_id, **kwargs):
                            manager_data=manager_data,
                            SIDEBAR=SIDEBAR)
 
+@authenticated.route('/Workspace/<int:wks_id>/Project/<int:project_id>/Task/<int:task_id>', methods=['GET', 'POST'])
+@login_required({'admin', 'manager'})
+def view_task_page(wks_id, project_id, task_id,**kwargs):
+    return render_template('authenticated/html/includes/Blank.html')
+
 @authenticated.route('/Workspace/<int:wks_id>/Project/<int:project_id>/Chat/', methods=['GET', 'POST'])
 @login_required({'admin', 'manager'})
 def project_chat(wks_id, project_id, **kwargs):
@@ -171,7 +177,6 @@ def project_chat(wks_id, project_id, **kwargs):
                     old_messages=get_chat_messages(project_id),
                     project_data=kwargs['user'].get_project_data(),
                     SIDEBAR=SIDEBAR)
-
 
 @authenticated.route('/')
 @authenticated.route('/Workspaces', methods=['GET', 'POST'])
@@ -240,7 +245,7 @@ def new_project_page(wks_id, **kwargs):
 
     if request.method == 'POST':
         if new_project.validate_on_submit():
-            project_data = Vividict()
+            project_data = DictMissKey()
             taskid_list = []
             # Get all data
             for key in request.form.keys():
@@ -322,5 +327,6 @@ def logout(**kwargs):
 
 
 @authenticated.route('/debug', methods=['GET', 'POST'])
+@login_required()
 def debug(**kwargs):
     return render_template('authenticated/html/Blank.html')

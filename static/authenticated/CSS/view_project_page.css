@@ -31,10 +31,6 @@
     border-radius: 0rem 0rem 0.30rem 0.30rem;
 }
 
-.card-header, .card{
-    background-color: unset;
-}
-
 .chat-button{
     z-index: 1;
     bottom: 85px;
@@ -78,4 +74,76 @@ a { color: inherit; }
     background-color: rgba(153,153,153,.2);
     text-decoration: none;
     color: #4caf50;
+}
+
+.my-card{
+    border-radius: 1rem;
+    border: 1px solid #ced4da;
+    background-color: rgba(0,0,0,.03);
+    color: #495057;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content:space-between;
+    /*position: unset;*/
+    /*display: unset;*/
+    /*flex-direction: unset;*/
+}
+.my-card-header {
+    border-bottom: 0px;
+    background-color: transparent ;
+    text-decoration: underline;
+    padding: .75rem 1.25rem .0rem 1.25rem;
+}
+
+.my-card-body {
+    padding-top: 0;
+    padding-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    min-height: 4rem;
+}
+
+.my-card-footer{
+    text-align: left;
+    padding: .75rem 1.25rem .0rem 1.25rem;
+}
+
+
+.cover-card{
+    width: 100%;
+    height: 100%;
+    display: inline;
+    top: 0;
+    left: 0;
+    position: absolute;
+}
+
+.main-card{
+    flex-grow:2;
+    order:1;
+    text-align: left;
+}
+
+.side-card{
+    order: 2;
+    flex-grow:1;
+    max-width:15%;
+    min-width: 125px;
+    border-radius: 1rem;
+    border: 1px solid #ced4da;
+    text-align: center;
+    display: flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    flex-wrap: wrap;
+}
+
+.alert{
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        margin-left: auto;
+        margin-right: auto;
 }

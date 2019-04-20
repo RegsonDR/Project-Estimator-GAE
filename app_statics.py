@@ -10,7 +10,7 @@ SIDEBAR = {
         {
             "label": "Add Users",
             "view": "authenticated.add_users_page",
-            "icon": "users",
+            "icon": "user-plus",
         },
         {
             "label": "New Project",

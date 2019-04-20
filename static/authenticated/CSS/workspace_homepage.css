@@ -54,11 +54,9 @@
     border-bottom: 0;
     background-color: transparent ;
     padding: 0 0;
-
 }
 
 .current-stage {
-    border-color:#343a40!important;
     border: 2px solid rgba(0,0,0,.125);
     border-radius: 1rem;
     padding: 0.75rem 1rem;
