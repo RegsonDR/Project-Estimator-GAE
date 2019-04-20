@@ -71,3 +71,12 @@ class TaskDetails(ndb.Model):
     task_skills = ndb.IntegerProperty(repeated=True)
     task_developers = ndb.IntegerProperty(repeated=True)
     task_status = ndb.StringProperty()
+
+class ProjectChat(ndb.Model):
+    project_id = ndb.IntegerProperty()
+    username = ndb.StringProperty()
+    message = ndb.StringProperty()
+    message_time = ndb.DateTimeProperty()
+    email = ndb.StringProperty()
+    role = ndb.StringProperty()
+
