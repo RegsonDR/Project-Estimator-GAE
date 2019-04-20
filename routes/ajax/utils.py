@@ -73,16 +73,7 @@ def create_pusher_auth_signature(timestamp, md5):
     string = "POST\n/apps/" + app_id + "/events\nauth_key=" + key + "&auth_timestamp=" + timestamp + "&auth_version=1.0&body_md5=" + md5
     return hmac.new(secret, string, hashlib.sha256).hexdigest()
 
-def push_message(project_id,username,message,message_time,email,role):
-    parameters = json.dumps({
-        "data":
-            "{\"email\":\"" + email + "\","
-            "\"message\":\"" + message + "\","
-            "\"role\":\"" + role + "\","
-            "\"username\":\"" + username + "\","
-            "\"message_time\":\"" + message_time.strftime('%H:%M | %d-%m-%Y') + "\"}",
-        "name": "new-message",
-        "channel": str(project_id) + "-channel"})
+def pusher_request(parameters):
     body_md5 = hashlib.md5(parameters).hexdigest()
     auth_timestamp = '%.0f' % time.time()
     auth_signature = create_pusher_auth_signature(auth_timestamp, body_md5)
@@ -99,3 +90,16 @@ def push_message(project_id,username,message,message_time,email,role):
         headers={"Content-Type": "application/json"}
     )
     return resp.content
+
+
+def push_chat_message(project_id,username,message,message_time,email,role):
+    parameters = json.dumps({
+        "data":
+            "{\"email\":\"" + email + "\","
+            "\"message\":\"" + message + "\","
+            "\"role\":\"" + role + "\","
+            "\"username\":\"" + username + "\","
+            "\"message_time\":\"" + (message_time).strftime('%H:%M | %d-%m-%Y') + "\"}",
+        "name": "new-message",
+        "channel": str(project_id) + "-channel"})
+    return pusher_request(parameters)

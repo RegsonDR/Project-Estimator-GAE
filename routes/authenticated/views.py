@@ -12,7 +12,6 @@ import json
 
 authenticated = Blueprint('authenticated', __name__, template_folder='templates')
 
-
 class Vividict(dict):
     def __missing__(self, key):
         value = self[key] = type(self)()  # retain local pointer to value
@@ -33,6 +32,7 @@ class LoggedUser:
             self.access_key = access_data.key
         if projects_data:
             self.projects_data = projects_data
+            self.projects_key = projects_data.key
 
     def get_user_data(self):
         return self.user_data
@@ -43,18 +43,19 @@ class LoggedUser:
     def get_project_data(self):
         return self.projects_data
 
-    def get_tasks_data_by_project_id(self, project_id):
-        return project_id
-
     def get_role(self):
         return self.access_data.role
 
     def get_permitted_workspaces(self):
         return get_workspaces(self.user_email)
 
+    def get_tasks(self):
+        return get_tasks(self.projects_key)
+
     def get_projects(self, project_status):
         return get_projects(self.wks_key, self.get_role(), self.user_email, project_status)
 
+    # This is used to get number on any task, not the one the page is on.
     def get_open_task_number(self, project_key):
         return get_open_task_number(project_key)
 
@@ -84,6 +85,8 @@ def login_required(roles=None):
                 projects_data = None
                 access_data = None
                 if 'wks_id' in kwargs.keys():
+                    if kwargs['wks_id'] == 0:
+                        return redirect(url_for('authenticated.my_workspaces_page'))
                     wks_data = get_wks_data_by_id(kwargs['wks_id'])
                     if not wks_data:
                         abort(403)
@@ -115,12 +118,12 @@ def login_required(roles=None):
 def view_project_page(wks_id, project_id, **kwargs):
     project_form = Project()
     project_form.project_manager.choices = [(user.UserEmail, user.get_name()) for user in
-                                            UserProfile.query(UserProfile.role != "dev",
+                                            UserProfile.query(UserProfile.role != "developer",
                                                               UserProfile.invitation_accepted == True).fetch(
                                                 projection=[UserProfile.UserEmail])]
 
     manager_data = [(user.UserEmail, user.get_name(), user.disabled) for user in
-                                            UserProfile.query(UserProfile.role != "dev",
+                                            UserProfile.query(UserProfile.role != "developer",
                                                               UserProfile.invitation_accepted == True).fetch(
                                                 projection=[UserProfile.UserEmail, UserProfile.disabled])]
 
@@ -151,6 +154,7 @@ def view_project_page(wks_id, project_id, **kwargs):
     project_form.project_stage.data = project_data.project_stage
 
     return render_template('authenticated/html/view_project_page.html',
+                           tasks =kwargs['user'].get_tasks(),
                            user_data=kwargs['user'],
                            wks_data=kwargs['user'].get_wks_data(),
                            form=project_form,
@@ -161,10 +165,10 @@ def view_project_page(wks_id, project_id, **kwargs):
 @authenticated.route('/Workspace/<int:wks_id>/Project/<int:project_id>/Chat/', methods=['GET', 'POST'])
 @login_required({'admin', 'manager'})
 def project_chat(wks_id, project_id, **kwargs):
-
     return render_template('authenticated/html/project_chat.html',
                     user_data=kwargs['user'],
                     wks_data=kwargs['user'].get_wks_data(),
+                    old_messages=get_chat_messages(project_id),
                     project_data=kwargs['user'].get_project_data(),
                     SIDEBAR=SIDEBAR)
 

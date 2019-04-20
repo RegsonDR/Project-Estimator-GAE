@@ -32,7 +32,7 @@ class UserProfile(ndb.Model):
     UserEmail = ndb.StringProperty()
     Wks = ndb.KeyProperty(kind='WorkspaceDetails')
     workspace_name = ndb.StringProperty()
-    role = ndb.StringProperty(choices={'dev', 'manager', 'admin'})
+    role = ndb.StringProperty(choices={'developer', 'manager', 'admin'})
     invitation_token = ndb.StringProperty()
     invitation_accepted = ndb.BooleanProperty()
     disabled = ndb.BooleanProperty()

@@ -3,6 +3,7 @@ from routes.authenticated.views import authenticated
 from routes.unauthenticated.views import unauthenticated
 from routes.ajax.views import ajax
 from routes.api.views import api
+import base64
 
 
 app = Flask(__name__)

@@ -1,4 +1,4 @@
-from models import WorkspaceDetails, AccountDetails, UserProfile, ProjectDetails, TaskDetails
+from models import WorkspaceDetails, AccountDetails, UserProfile, ProjectDetails, TaskDetails, ProjectChat
 from flask import flash, request, url_for, render_template
 from google.appengine.api import mail
 from app_statics import APP_NAME
@@ -175,3 +175,13 @@ def verify_invite(code, email):
         return user_profile
     flash('Invitation is invalid', 'danger')
     return False
+
+def get_chat_messages(project_id):
+    messages = ProjectChat.query(ProjectChat.project_id == project_id).order(ProjectChat.message_time).fetch(projection=[ProjectChat.username,
+                                                                                         ProjectChat.message,ProjectChat.message_time,ProjectChat.email,ProjectChat.role])
+    return messages
+
+
+def get_tasks(project_key):
+    return TaskDetails.query(TaskDetails.Project == project_key).fetch()
+

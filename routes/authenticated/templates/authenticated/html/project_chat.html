@@ -12,32 +12,24 @@
 {% block page_content %}
     <div class="container">
     <div class="my-page">
-
-        <div class="inbox_msg">
-            <div class="mesgs">
-                <div id="messageBox" class="msg_history">
-                    {#                {% for message in old_messages %}#}
-                    {#              {% if message.email == session.get('UserID') %}#}
-                    <div class="outgoing_msg">
-                        <div class="sent_msg">
-                            {#                    <span class="time_date"><b>{{message.username}}</b></span>#}
-                            {#                   <p>{{message.message | b64 }}</p>#}
-                            {#                   <span class="time_date">{{message.message_time.strftime('%H:%M | %d-%m-%Y')}}</span>#}
+        <div class="chat-window">
+            <div class="messages">
+                <div class="chat_log">
+                    {% for message in old_messages %}
+                    {% if message.email == session.get('Email') %}
+                        <div class="sent_message">
+                            <span class="time_date"><b>{{message.username}}</b><span class="role"> ({{message.role}})</span></span>
+                           <p>{{message.message | decodeb64 }}</p>
+                           <span class="time_date">{{message.message_time.strftime('%H:%M | %d-%m-%Y')}}</span>
                         </div>
-                    </div>
-                    {#              {% else %}#}
-                    <div class="incoming_msg">
-                        <div class="received_msg">
-                            {#                    <span class="time_date"><b>{{message.username}}</b></span>#}
-                            <div class="received_withd_msg">
-                                {#                      <p>{{message.message  | b64 }}#}
-                                {#                      </p>#}
-                                {#                      <span class="time_date"> {{message.message_time.strftime('%H:%M | %d-%m-%Y')}}</span>#}
-                            </div>
+                  {% else %}
+                        <div class="received_message">
+                        <span class="time_date"><b>{{message.username}}</b><span class="role"> ({{message.role}})</span></span>
+                              <p>{{message.message  | decodeb64 }}</p>
+                              <span class="time_date"> {{message.message_time.strftime('%H:%M | %d-%m-%Y')}}</span>
                         </div>
-                    </div>
-                    {#              {% endif %}#}
-                    {#              {% endfor %}#}
+                  {% endif %}
+                  {% endfor %}
                 </div>
                 <div class="input-group mb-3">
                     <input id="add_text" type="text" class="form-control" placeholder="Type a message.."
@@ -71,10 +63,16 @@
             $('#chat_text').on('click', function () {
                 msg = $('#add_text').val();
                 $.post("{{url_for('ajax.chat_message',project_id=project_data.key.id())}}",
-                    {"email": email, "username": username, "role": role, "message": msg}).done(function (data) {
-                    console.log(data);
-                    $('#add_text').val("");
-                });
+                    {"email": email, "username": username, "role": role, "message": msg});
+                var currentdate = new Date();
+                var datetime = ("0" + currentdate.getHours()).slice(-2) +
+                ":"+ ("0" + currentdate.getMinutes()).slice(-2) +
+                " | " + ("0" + currentdate.getDate()).slice(-2) +
+                "-" + ("0" + (currentdate.getMonth()+1)).slice(-2) +
+                "-" + currentdate.getFullYear();
+                new_msg = `<div class="sent_message"><span class="time_date"><b>${username}</b> <span class="role"> (${role})</span></span><p>${msg}</p><span class="time_date">${datetime}</span></div>`;
+                $('.chat_log').append(new_msg);
+                $('#add_text').val("");
             });
 
             var pusher = new Pusher('08d09cb027a29bc3cb55', {
@@ -84,12 +82,11 @@
 
             var channel = pusher.subscribe("{{project_data.key.id()}}-channel");
             channel.bind('new-message', function (data) {
-                if (data.email === email) {
-                    new_msg = `<div class="outgoing_msg"><div class="sent_msg"><span class="time_date"><b>${(data.username)}</b></span><p>${atob(data.message)}</p><span class="time_date">${data.message_time}</span></div></div>`
-                } else {
-                    new_msg = `<div class="incoming_msg"><div class="received_msg"><span class="time_date"><b>${(data.username)}</b></span><div class="received_withd_msg"><p>${atob(data.message)}</p><span class="time_date"> ${data.message_time}</span></div></div></div>`
+                if (data.email != email) {
+                    new_msg = `<div class="received_message"><span class="time_date"><b>${(data.username)}</b> <span class="role"> (${data.role})</span></span><p>${atob(data.message)}</p><span class="time_date"> ${data.message_time}</span></div>`;
+                    $('.chat_log').append(new_msg);
                 }
-                $('.msg_history').append(new_msg);
+
             });
         });
     </script>

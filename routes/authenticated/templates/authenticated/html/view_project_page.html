@@ -90,9 +90,7 @@
                 </div>
                 <div class="tab-content" id="RequestsContent">
                     <div class="tab-pane tab-cards fade show active" id="All" role="tabpanel" aria-labelledby="All-tab">
-                        fdasfdasfa
-                        fsadfdsafdsa
-                        fdasfads
+                                {{ tasks }}
                     </div>
                     <div class="tab-pane tab-cards fade" id="Open" role="tabpanel" aria-labelledby="Open-tab">
                         fdasfdasfa
@@ -110,11 +108,11 @@
                     {% set key = user_data.get_project_data().key %}
             {{user_data.get_open_task_number(key)}}/{{user_data.get_total_task_number(key)}} Tasks Open
         </div>
-        <div class="fa btn chat-button" style="display: table;">
-            <a style="display: table-cell; vertical-align: middle;" href="{{url_for('authenticated.project_chat',wks_id=wks_data.key.id(),project_id=project_data.key.id())}}">
+        <a class="fa btn chat-button" style="display: table;" href="{{url_for('authenticated.project_chat',wks_id=wks_data.key.id(),project_id=project_data.key.id())}}">
+            <span style="display: table-cell; vertical-align: middle;">
                 <i class="fas fa-comments"></i>
-            </a>
-        </div>
+            </span>
+        </a>
 
 
         </form>

@@ -1,5 +1,9 @@
 from flask import Blueprint, jsonify
 from routes.ajax.utils import *
+from datetime import datetime, timedelta
+import pytz
+
+
 
 ajax = Blueprint('ajax',__name__,url_prefix='/ajax',template_folder='templates')
 
@@ -14,12 +18,11 @@ def chat_message(project_id):
     # try:
         username = request.form.get('username')
         message = base64.b64encode(request.form.get('message').decode('utf-8'))
-        message_time = datetime.now()
-        print message_time
+        message_time = datetime.now() + timedelta(hours=1)
         email = request.form.get('email')
         role = request.form.get('role')
         log_message(project_id,username,message,message_time,email,role)
-        push_message(project_id,username,message,message_time,email,role)
+        push_chat_message(project_id,username,message,message_time,email,role)
         return jsonify({'result': 'success'})
     # except:
     #     return jsonify({'Request': 'Failed'})
