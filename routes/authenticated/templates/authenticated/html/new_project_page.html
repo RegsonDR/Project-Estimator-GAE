@@ -41,7 +41,7 @@
             </div>
 
             <!-- Tasks Appear Here -->
-            <div id="taskPanel" class="mb-3" style="overflow: auto; max-height: 50vh ">
+            <div id="taskPanel" class="mb-3" >
 
             </div>
 
@@ -204,7 +204,7 @@
                     minutes =  $("input[name='Task["+task_number+"][aMinutes]'][data-task-number="+task_number+"]").val();
 
                  return '               <div data-task-frame-number="'+task_number+'" class="col-lg-11 my-3" style="margin: auto;">\n' +
-                    '                    <div class="card my-card o-hidden h-100" style="border: 1px solid #ced4da;">\n' +
+                    '                    <div class="card my-card o-hidden h-100">\n' +
                     '                        <div class="card-header my-card-header d-flex justify-content-between">\n' +
                     '                            <h6 name="title" data-task-number="'+task_number+'" class="d-flex align-items-start bd-highlight" style="padding: .75rem 1.25rem .0rem 1.25rem;">'+escapeHtml(title)+'</h6>\n' +
                     '                        </div>\n' +
@@ -223,6 +223,10 @@
 
             function updateTotal(amount){
                 $("#totalTasks").text(parseInt($("#totalTasks").text()) + amount);
+                num = parseInt($("#totalTasks").text());
+                if (num == 0){
+                    $('#taskPanel').css({'border': 'none'});
+                }
             }
 
             // Delete
@@ -247,6 +251,7 @@
 
             // Add New Task
             $('#modelFrame').on('click','.addTask', function () {
+              $('#taskPanel').css({'border': '1px solid rgba(0,0,0,.125)'});
               current_task_number = parseInt($(this).attr('data-task-number'));
               next_task_number = current_task_number + 1;
               // Modify Current Modal

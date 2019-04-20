@@ -1,8 +1,9 @@
 .my-card{
     border-radius: 1rem;
-    background-color: #f8f9fa;
     min-height: 9rem;
     color: #495057;
+    border: 1px solid #ced4da;
+    background-color: rgba(0,0,0,.03);
 }
 .my-card-header {
     border-bottom: 0px;
@@ -70,4 +71,11 @@ padding: 8px 20px 8px 5px !important;
 
 .create-button:hover{
     color: grey;
+}
+
+#taskPanel{
+    background-color: #fff;
+    border-radius: 0rem 0rem 0.30rem 0.30rem;
+    overflow: auto;
+    max-height: 50vh;
 }
