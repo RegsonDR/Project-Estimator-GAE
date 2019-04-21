@@ -131,8 +131,7 @@
                 </div>
             </div>
                 <div style="margin: 5px 5px 0px 5px; text-align: right; color:#495057;">
-                    {% set key = user_data.get_project_data().key %}
-            {{user_data.get_open_task_number(key)}}/{{user_data.get_total_task_number(key)}} Tasks Open
+            {{user_data.get_open_task_number(project_data.key)}}/{{user_data.get_total_task_number(project_data.key)}} Tasks Open
         </div>
         <a class="fa btn chat-button" style="display: table;" href="{{url_for('authenticated.project_chat',wks_id=wks_data.key.id(),project_id=project_data.key.id())}}">
             <span style="display: table-cell; vertical-align: middle;">

@@ -73,9 +73,11 @@ def get_user_data_by_id(datastore_id):
 def get_wks_data_by_id(datastore_id):
     return WorkspaceDetails.get_by_id(datastore_id)
 
-def get_project_data_by(datastore_id):
-    return ProjectDetails.get_by_id(datastore_id)
+def get_project_data_by_id(project_id):
+    return ProjectDetails.get_by_id(project_id)
 
+def get_task_data_by_id(project_id):
+    return TaskDetails.get_by_id(project_id)
 
 def check_access(wks_key, user_email):
     return UserProfile.query(UserProfile.Wks == wks_key, UserProfile.invitation_accepted == True, UserProfile.disabled == False,
@@ -120,10 +122,6 @@ def get_open_task_number(project_key):
 
 def get_total_task_number(project_key):
     return TaskDetails.query(TaskDetails.Project == project_key).count()
-
-
-def get_project_data_by_id(project_id):
-    return ProjectDetails.get_by_id(project_id)
 
 
 def get_all_users(wks_key):
@@ -184,4 +182,3 @@ def get_chat_messages(project_id):
 
 def get_tasks(project_key):
     return TaskDetails.query(TaskDetails.Project == project_key).fetch()
-

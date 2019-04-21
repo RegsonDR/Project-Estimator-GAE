@@ -12,6 +12,7 @@ import json
 
 authenticated = Blueprint('authenticated', __name__, template_folder='templates')
 
+
 class DictMissKey(dict):
     # Create key if doesn't exist
     def __missing__(self, key):
@@ -20,7 +21,7 @@ class DictMissKey(dict):
 
 
 class LoggedUser:
-    def __init__(self, user_data, user_email, wks_data=None, projects_data=None, access_data=None):
+    def __init__(self, user_data, user_email, wks_data=None, projects_data=None, task_data=None, access_data=None):
         self.user_data = user_data
         self.user_key = user_data.key
         self.user_email = user_email
@@ -34,6 +35,9 @@ class LoggedUser:
         if projects_data:
             self.projects_data = projects_data
             self.projects_key = projects_data.key
+        if task_data:
+            self.task_data = task_data
+            self.task_key = task_data.key
 
     def get_user_data(self):
         return self.user_data
@@ -43,6 +47,9 @@ class LoggedUser:
 
     def get_project_data(self):
         return self.projects_data
+
+    def get_task_data(self):
+        return self.task_data
 
     def get_role(self):
         return self.access_data.role
@@ -84,6 +91,7 @@ def login_required(roles=None):
                 #
                 wks_data = None
                 projects_data = None
+                task_data = None
                 access_data = None
                 if 'wks_id' in kwargs.keys():
                     if kwargs['wks_id'] == 0:
@@ -97,13 +105,16 @@ def login_required(roles=None):
                         abort(403)
                     # Check Permission for project
                     if 'project_id' in kwargs.keys():
-                        projects_data = get_project_data_by(kwargs['project_id'])
+                        projects_data = get_project_data_by_id(kwargs['project_id'])
                         if not projects_data:
                             abort(403)
                         if not check_project_access(projects_data, session.get('Email'), access_data.role):
                             abort(403)
+                    if 'task_id' in kwargs.keys():
+                        task_data = get_task_data_by_id(kwargs['task_id'])
 
-                kwargs['user'] = LoggedUser(user_data, session.get('Email'), wks_data, projects_data, access_data)
+                kwargs['user'] = LoggedUser(user_data, session.get('Email'), wks_data, projects_data, task_data,
+                                            access_data)
             else:
                 flash('Please login to access the requested page.', 'danger')
                 abort(401)
@@ -112,6 +123,42 @@ def login_required(roles=None):
         return wrapper
 
     return decorator
+
+
+@authenticated.route('/Workspace/<int:wks_id>/Project/<int:project_id>/Task/<int:task_id>', methods=['GET', 'POST'])
+@login_required({'admin', 'manager'})
+def view_task_page(wks_id, project_id, task_id, **kwargs):
+    log_form = LogTask()
+
+    task_form = Task()
+    task_data = kwargs['user'].get_task_data()
+
+    if request.method == "POST" and task_form.validate_on_submit():
+        task_data.task_name = task_form.task_name.data
+        task_data.task_aminutes = task_form.task_aminutes.data
+        task_data.task_status = task_form.task_status.data
+        task_data.task_description = task_form.task_description.data
+        task_data.task_skills = map(int, task_form.task_skills.data)
+        task_data.task_developers = map(int,  task_form.task_developers.data)
+        if task_data.put():
+            flash('Task details updated!', 'success')
+            return redirect(url_for('authenticated.view_task_page', wks_id=wks_id, project_id=project_id,task_id=task_id))
+        flash('Error occurred, please try again!', 'danger')
+
+    task_form.task_name.data = task_data.task_name
+    task_form.task_aminutes.data = task_data.task_aminutes
+    task_form.task_status.data = task_data.task_status
+    task_form.task_description.data = task_data.task_description
+    task_form.task_skills.data = map(str, task_data.task_skills)
+    task_form.task_developers.data = map(str, task_data.task_developers)
+
+    return render_template('authenticated/html/view_task_page.html',
+                           user_data=kwargs['user'],
+                           form=task_form,
+                           task_data=task_data,
+                           log_form=log_form,
+                           wks_data=kwargs['user'].get_wks_data(),
+                           SIDEBAR=SIDEBAR)
 
 
 @authenticated.route('/Workspace/<int:wks_id>/Project/<int:project_id>', methods=['GET', 'POST'])
@@ -124,28 +171,23 @@ def view_project_page(wks_id, project_id, **kwargs):
                                                 projection=[UserProfile.UserEmail])]
 
     manager_data = [(user.UserEmail, user.get_name(), user.disabled) for user in
-                                            UserProfile.query(UserProfile.role != "developer",
-                                                              UserProfile.invitation_accepted == True).fetch(
-                                                projection=[UserProfile.UserEmail, UserProfile.disabled])]
+                    UserProfile.query(UserProfile.role != "developer",
+                                      UserProfile.invitation_accepted == True).fetch(
+                        projection=[UserProfile.UserEmail, UserProfile.disabled])]
 
     project_data = kwargs['user'].get_project_data()
     if request.method == "POST" and project_form.validate_on_submit():
-        if project_form.project_name.data:
-            project_data.project_name = project_form.project_name.data
-        if project_form.project_deadline.data:
-            project_data.project_deadline = project_form.project_deadline.data
-        if project_form.project_description.data:
-            project_data.project_description = project_form.project_description.data
-        if project_form.project_manager.data:
-            project_data.project_manager = project_form.project_manager.data
-        if project_form.project_status.data:
-            project_data.project_status = project_form.project_status.data
-        if project_form.project_stage.data:
-            project_data.project_stage = project_form.project_stage.data
+        project_data.project_name = project_form.project_name.data
+        project_data.project_deadline = project_form.project_deadline.data
+        project_data.project_description = project_form.project_description.data
+        project_data.project_manager = project_form.project_manager.data
+        project_data.project_status = project_form.project_status.data
+        project_data.project_stage = project_form.project_stage.data
         if project_data.put():
             flash('Project details updated!', 'success')
             return redirect(url_for('authenticated.view_project_page', wks_id=wks_id, project_id=project_id))
         flash('Error occurred, please try again!', 'danger')
+
 
     project_form.project_name.data = project_data.project_name
     project_form.project_deadline.data = project_data.project_deadline
@@ -155,7 +197,7 @@ def view_project_page(wks_id, project_id, **kwargs):
     project_form.project_stage.data = project_data.project_stage
 
     return render_template('authenticated/html/view_project_page.html',
-                           tasks =kwargs['user'].get_tasks(),
+                           tasks=kwargs['user'].get_tasks(),
                            user_data=kwargs['user'],
                            wks_data=kwargs['user'].get_wks_data(),
                            form=project_form,
@@ -163,20 +205,17 @@ def view_project_page(wks_id, project_id, **kwargs):
                            manager_data=manager_data,
                            SIDEBAR=SIDEBAR)
 
-@authenticated.route('/Workspace/<int:wks_id>/Project/<int:project_id>/Task/<int:task_id>', methods=['GET', 'POST'])
-@login_required({'admin', 'manager'})
-def view_task_page(wks_id, project_id, task_id,**kwargs):
-    return render_template('authenticated/html/includes/Blank.html')
 
 @authenticated.route('/Workspace/<int:wks_id>/Project/<int:project_id>/Chat/', methods=['GET', 'POST'])
 @login_required({'admin', 'manager'})
 def project_chat(wks_id, project_id, **kwargs):
     return render_template('authenticated/html/project_chat.html',
-                    user_data=kwargs['user'],
-                    wks_data=kwargs['user'].get_wks_data(),
-                    old_messages=get_chat_messages(project_id),
-                    project_data=kwargs['user'].get_project_data(),
-                    SIDEBAR=SIDEBAR)
+                           user_data=kwargs['user'],
+                           wks_data=kwargs['user'].get_wks_data(),
+                           old_messages=get_chat_messages(project_id),
+                           project_data=kwargs['user'].get_project_data(),
+                           SIDEBAR=SIDEBAR)
+
 
 @authenticated.route('/')
 @authenticated.route('/Workspaces', methods=['GET', 'POST'])
@@ -202,16 +241,14 @@ def my_profile_page(**kwargs):
 
     user_data = kwargs['user'].get_user_data()
     if request.method == "POST" and user_profile.validate_on_submit():
-        if user_profile.first_name.data and user_profile.first_name.data is not user_data.first_name:
+        if user_profile.first_name.data is not user_data.first_name:
             user_data.first_name = user_profile.first_name.data
-        if user_profile.last_name.data and user_profile.last_name.data is not user_data.last_name:
+        if user_profile.last_name.data is not user_data.last_name:
             user_data.last_name = user_profile.last_name.data
-        if user_profile.email.data and user_profile.email.data is not user_data.email:
+        if user_profile.email.data is not user_data.email:
             user_data.change_email(user_profile.email.data)
             session['Email'] = user_profile.email.data
-        if user_profile.password.data and user_profile.password.data is not user_data.password:
-            user_data.password = generate_password_hash(user_profile.password.data)
-        if user_profile.mobile_number.data and user_profile.mobile_number.data is not user_data.mobile_number:
+        if user_profile.mobile_number.data is not user_data.mobile_number:
             user_data.mobile_number = user_profile.mobile_number.data
         if user_data.put():
             flash('Profile updated!', 'success')

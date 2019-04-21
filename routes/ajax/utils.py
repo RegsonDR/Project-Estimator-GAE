@@ -1,4 +1,4 @@
-from models import AccountDetails, ProjectChat
+from models import AccountDetails, ProjectChat, TaskLog
 from flask import request, url_for, render_template
 from google.appengine.api import mail, urlfetch
 from app_statics import APP_NAME
@@ -103,3 +103,19 @@ def push_chat_message(project_id,username,message,message_time,email,role):
         "name": "new-message",
         "channel": str(project_id) + "-channel"})
     return pusher_request(parameters)
+
+
+def save_log(task_id,log_developer,log_minutes,log_comments):
+    log_data = TaskLog(
+        task_id=task_id,
+        log_developer=5629499534213120,
+        log_minutes=log_minutes,
+        log_comments=log_comments
+    )
+    if log_data.put():
+        return True
+    return False
+
+
+
+

@@ -70,7 +70,14 @@ class TaskDetails(ndb.Model):
     task_aminutes = ndb.IntegerProperty()
     task_skills = ndb.IntegerProperty(repeated=True)
     task_developers = ndb.IntegerProperty(repeated=True)
-    task_status = ndb.StringProperty()
+    task_status = ndb.StringProperty(choices={'Open', 'Closed'})
+
+class TaskLog(ndb.Model):
+    task_id = ndb.IntegerProperty()
+    log_developer = ndb.IntegerProperty()
+    log_minutes = ndb.IntegerProperty()
+    log_comments = ndb.StringProperty()
+    log_time = ndb.DateTimeProperty(auto_now_add=True)
 
 class ProjectChat(ndb.Model):
     project_id = ndb.IntegerProperty()

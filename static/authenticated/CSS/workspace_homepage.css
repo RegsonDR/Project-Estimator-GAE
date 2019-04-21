@@ -21,13 +21,6 @@
     background-color: #fbe5d6;
 }
 
-/*.card-body{*/
-    /*display:flex;*/
-    /*justify-content:center;*/
-    /*padding: 0.25rem 1.25rem;*/
-    /*min-height: 3rem;*/
-/*}*/
-
 .my-card-body {
     padding-top: 0;
     padding-bottom: 0;

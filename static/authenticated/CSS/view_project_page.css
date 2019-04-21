@@ -28,7 +28,7 @@
 #TasksContent{
     background-color: #fff;
     border: 1px solid rgba(0,0,0,.125);
-    border-radius: 0rem 0rem 0.30rem 0.30rem;
+    border-radius: 0.25rem;
 }
 
 .chat-button{
@@ -63,7 +63,6 @@ a { color: inherit; }
     border-radius: 50%;
     font-size: 24px;
     height: 56px;
-    margin: auto;
     min-width: 56px;
     width: 56px;
     cursor: pointer;
@@ -142,8 +141,5 @@ a { color: inherit; }
 }
 
 .alert{
-        margin-top: 1rem;
-        margin-bottom: 1rem;
-        margin-left: auto;
-        margin-right: auto;
+    margin: 1rem auto;
 }

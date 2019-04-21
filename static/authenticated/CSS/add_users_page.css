@@ -1,5 +1,30 @@
+#user-list{
+    background-color: #fff;
+    border: 1px solid rgba(0,0,0,.125);
+    border-radius: 0.25rem;
+    padding: 10px;
+}
+
+
 .new-user-button{
-     background-color: #e2f0d9;
-     border: 1px solid rgba(0,0,0,.5);;
-     margin-bottom: 8px;
+    z-index: 1;
+    bottom: 20px;
+    position: fixed;
+    right: 20px;
+    background-color: #4caf50;
+    color: rgba(255,255,255,.84);
+    border-radius: 50%;
+    font-size: 24px;
+    height: 56px;
+    min-width: 56px;
+    width: 56px;
+    cursor: pointer;
+    box-shadow: 0 1px 1.5px 0 rgba(0,0,0,.12), 0 1px 1px 0 rgba(0,0,0,.24);
+    display: table;
+}
+
+.new-user-button:hover{
+    background-color: rgba(153,153,153,.2);
+    text-decoration: none;
+    color: #4caf50;
 }

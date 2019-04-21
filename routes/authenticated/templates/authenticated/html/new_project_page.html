@@ -54,9 +54,7 @@
 
             <a href="#" data-toggle="modal" data-target="#NewTask1" data-task-number="1" id="create-task" class="btn btn-lg btn-block"  style="font-size: 1rem;"><i class="fas fa-plus"></i> Task</a>
                     </div>
-                <div class="col-2" style="min-width: 80px;">
-            {{ form.submit(class="btn btn-lg btn-block create-button", style="font-size: 1rem;") }}
-                </div>
+                    {{form.submit(class="fa btn save-button", value='')}}
             </div>
     </div>
 
@@ -145,7 +143,7 @@
             }
 
             function escapeHtml(unsafe) {
-                return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;").replace(/\//g, "&#x2F");
+                return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;").replace(/\//g, "&#x2f;");
              }
 
             function produceNewModel(task_number){
@@ -199,17 +197,17 @@
             }
 
             function produceNewTask(task_number){
-                    title = $("input[name='Task["+task_number+"][Title]'][data-task-number="+task_number+"]").val();
-                    description = $("textarea[name='Task["+task_number+"][Description]'][data-task-number="+task_number+"]").val();
-                    minutes =  $("input[name='Task["+task_number+"][aMinutes]'][data-task-number="+task_number+"]").val();
+                    title = escapeHtml($("input[name='Task["+task_number+"][Title]'][data-task-number="+task_number+"]").val());
+                    description = escapeHtml($("textarea[name='Task["+task_number+"][Description]'][data-task-number="+task_number+"]").val());
+                    minutes =  escapeHtml($("input[name='Task["+task_number+"][aMinutes]'][data-task-number="+task_number+"]").val());
 
                  return '               <div data-task-frame-number="'+task_number+'" class="col-lg-11 my-3" style="margin: auto;">\n' +
                     '                    <div class="card my-card o-hidden h-100">\n' +
                     '                        <div class="card-header my-card-header d-flex justify-content-between">\n' +
-                    '                            <h6 name="title" data-task-number="'+task_number+'" class="d-flex align-items-start bd-highlight" style="padding: .75rem 1.25rem .0rem 1.25rem;">'+escapeHtml(title)+'</h6>\n' +
+                    '                            <h6 name="title" data-task-number="'+task_number+'" class="d-flex align-items-start bd-highlight" style="padding: .75rem 1.25rem .0rem 1.25rem;">'+(title)+'</h6>\n' +
                     '                        </div>\n' +
                     '                        <div class="card-body my-card-body">\n' +
-                    '                            <span name="description" data-task-number="'+task_number+'" class="card-text" style="flex-grow: 1;">'+escapeHtml(description)+'</span>\n' +
+                    '                            <span name="description" data-task-number="'+task_number+'" class="card-text" style="flex-grow: 1;">'+(description)+'</span>\n' +
                     '                            <div class="d-flex justify-content-between">\n' +
                     '                            <span class="d-flex align-items-start"><i class="far fa-clock" name="allocatedTime" data-task-number="'+task_number+'" > '+timeConvert(minutes)+'</i></span>\n' +
                     '                            <span class="d-flex align-items-end">test</span>\n' +

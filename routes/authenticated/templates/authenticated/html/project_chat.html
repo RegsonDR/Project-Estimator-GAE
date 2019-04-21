@@ -60,6 +60,10 @@
                 }
             });
 
+            function escapeHtml(unsafe) {
+                return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;").replace(/\//g, "&#x2f;");
+             }
+
             $('#chat_text').on('click', function () {
                 msg = $('#add_text').val();
                 $.post("{{url_for('ajax.chat_message',project_id=project_data.key.id())}}",
@@ -70,10 +74,12 @@
                 " | " + ("0" + currentdate.getDate()).slice(-2) +
                 "-" + ("0" + (currentdate.getMonth()+1)).slice(-2) +
                 "-" + currentdate.getFullYear();
-                new_msg = `<div class="sent_message"><span class="time_date"><b>${username}</b> <span class="role"> (${role})</span></span><p>${msg}</p><span class="time_date">${datetime}</span></div>`;
+
+                new_msg = `<div class="sent_message"><span class="time_date"><b>${username}</b> <span class="role"> (${role})</span></span><p>${escapeHtml(msg)}</p><span class="time_date">${datetime}</span></div>`;
                 $('.chat_log').append(new_msg);
                 $('#add_text').val("");
             });
+
 
             var pusher = new Pusher('08d09cb027a29bc3cb55', {
                 cluster: 'eu',
@@ -83,7 +89,7 @@
             var channel = pusher.subscribe("{{project_data.key.id()}}-channel");
             channel.bind('new-message', function (data) {
                 if (data.email != email) {
-                    new_msg = `<div class="received_message"><span class="time_date"><b>${(data.username)}</b> <span class="role"> (${data.role})</span></span><p>${atob(data.message)}</p><span class="time_date"> ${data.message_time}</span></div>`;
+                    new_msg = `<div class="received_message"><span class="time_date"><b>${(data.username)}</b> <span class="role"> (${data.role})</span></span><p>${escapeHtml(atob(data.message))}</p><span class="time_date"> ${data.message_time}</span></div>`;
                     $('.chat_log').append(new_msg);
                 }
 

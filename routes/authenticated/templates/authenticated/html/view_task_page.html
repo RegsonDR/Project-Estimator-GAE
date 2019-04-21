@@ -1,0 +1,152 @@
+{% extends "authenticated/html/includes/Base_Template.html" %}
+
+{% block header_content %}
+        <link href="{{ url_for('static', filename='authenticated/CSS/view_task_page.css') }}" rel="stylesheet" xmlns="http://www.w3.org/1999/html">
+{% endblock header_content %}
+
+{% block page_header %}
+    <h1 style="margin-bottom: 0px;" > {{user_data.get_project_data().project_name}}</h1>
+{% endblock page_header %}
+
+{% block page_content %}
+    <div class="container">
+        <div class="my-page">
+            <form method="POST" autocomplete="off">
+                {{ form.hidden_tag() }}
+                <div class="form-row" style="justify-content:center">
+                    <div class="col-5 input-group mb-2">
+                        <div class="input-group-prepend">
+                            {{ form.task_name.label(class="input-group-text") }}
+                        </div>
+                        {{ form.task_name(class="form-control") }}
+                    </div>
+                    <div class="col-3 input-group mb-2">
+                        <div class="input-group-prepend">
+                            {{ form.task_aminutes.label(class="input-group-text") }}
+                        </div>
+                        {{ form.task_aminutes(class="form-control") }}
+                    </div>
+                    <div class="col-3 input-group mb-2">
+                        <div class="input-group-prepend">
+                            {{ form.task_status.label(class="input-group-text") }}
+                        </div>
+                        {{ form.task_status(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-row" style="justify-content:center">
+                    <div class="col-11 input-group mb-2">
+                        <div class="input-group-prepend">
+                            {{ form.task_description.label(class="input-group-text") }}
+                        </div>
+                        {{ form.task_description(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="form-row" style="justify-content:center">
+                    <div class="col-5 input-group mb-2">
+                        <div class="input-group-prepend">
+                            {{ form.task_skills.label(class="input-group-text") }}
+                        </div>
+                        {{ form.task_skills(class="chosen-select") }}
+                    </div>
+                    <div class="col-6 input-group mb-2">
+                        <div class="input-group-prepend">
+                            {{ form.task_developers.label(class="input-group-text") }}
+                        </div>
+                        {{ form.task_developers(class="chosen-select") }}
+                    </div>
+                </div>
+                {{ form.submit(class="fa btn save-button", value='') }}
+            </form>
+            <div id="time-log">
+                <div class="col-11 my-3" style="margin: auto;">
+                    <table class="table table-hover table-responsive-sm my-table">
+                        <thead class="thead-light">
+                        <tr>
+                            <th width="25%">Developer</th>
+                            <th width="15%">Time Logged</th>
+                            <th width="60%" scope="col">Comments</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr title="Timestamp">
+                            <td>Mark</td>
+                            <td>Otto</td>
+                            <td>@mdo</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<a class="fa btn log-task" style="display: table;"  data-toggle="modal" data-target="#LogTask" href="javascript:void(0)">
+    <span style="display: table-cell; vertical-align: middle;">
+        <i class="fas fa-calendar-plus"></i>
+    </span>
+</a>
+
+<div class="modal" id="LogTask" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalCenterTitle">Please Enter Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+             <div class="form-row" style="justify-content:center">
+                    <div class="input-group mb-2">
+                        <div class="input-group-prepend">
+                            {{ log_form.log_minutes.label(class="input-group-text") }}
+                        </div>
+                        {{ log_form.log_minutes(class="form-control") }}
+                    </div>
+                </div>
+             <div class="form-row" style="justify-content:center">
+                    <div class="input-group mb-2">
+                        <div class="input-group-prepend">
+                            {{ log_form.log_comments.label(class="input-group-text") }}
+                        </div>
+                        {{ log_form.log_comments(class="form-control") }}
+                    </div>
+            </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" id="logTask" data-dismiss="modal">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock page_content %}
+
+{# Scripts #}
+{% block script %}
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.css">
+    <script>
+    $(document).ready(function () {
+        $(".chosen-select").chosen({width: "67.5%"});
+
+        function escapeHtml(unsafe) {
+            return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;").replace(/\//g, "&#x2f;");
+         }
+
+        $('#logTask').on('click', function () {
+
+            var minutes = $('#log_minutes').val();
+            var comments = $('#log_comments').val();
+            $.post("{{url_for('ajax.save_task',task_id=task_data.key.id())}}",
+                    {"minutes": minutes, "comments": comments });
+        });
+
+
+    });
+
+    </script>
+{% endblock script %}

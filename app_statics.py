@@ -8,14 +8,13 @@ SIDEBAR = {
             "icon": "tachometer-alt",
         },
         {
+            "label": "New Project",
+            "view": "authenticated.new_project_page",
+            "icon": "folder-plus",
+        },{
             "label": "Add Users",
             "view": "authenticated.add_users_page",
             "icon": "user-plus",
-        },
-        {
-            "label": "New Project",
-            "view": "authenticated.new_project_page",
-            "icon": "plus",
         }
     ],
     'manager': [
