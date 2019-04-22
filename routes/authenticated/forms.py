@@ -20,7 +20,7 @@ class NewProject(FlaskForm):
 
 class NewUser(FlaskForm):
     user_email = EmailField("User's Email", validators=[DataRequired()])
-    role = SelectField("Role", choices=[("developer", "Developer"), ("manager", "Manager")], validators=[DataRequired()])
+    role = SelectField("Role", choices=[("developer", "Developer"), ("manager", "Manager"), ("admin","Admin")], validators=[DataRequired()])
     submit = SubmitField('Add')
 
 

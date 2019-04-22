@@ -27,14 +27,21 @@
                 <tbody>
                  {% for user in user_data.get_all_users()|sort(attribute='role') %}
                     <tr {% if user.disabled==True %}class="table-danger"{% endif %}>
-                        <td>{{ user.get_name() | capitalize}}</td>
+                        <td>
+                            {% if user.get_name() %}
+                                {{ user.get_name() | capitalize}}
+                            {% else %}
+                                <span>N/A</span>
+                            {% endif %}
+
+                        </td>
                         <td>{{ user.UserEmail}}</td>
                         <td>{{ user.invitation_accepted }}</td>
                         <td>{{ user.role | capitalize }}</td>
                         <td>
                             <a href="{{ url_for('authenticated.my_skills_page',wks_id=wks_data.key.id(), user_id=user.key.id()) }}" class="badge badge-warning">Edit Skills</a>
-                        {% if user.role != "admin" %}
-                            <a data-email="{{ user.UserEmail}}" href="#" class="badge badge-primary">Change Role</a>
+                        {% if user.UserEmail != session.get("Email") %}
+                            <a data-email="{{ user.UserEmail}}" data-current-role="{{user.role}}" data-toggle="modal" data-target="#UpdateUser" href="javascript:void(0)"  class="badge badge-primary">Change Role</a>
                          <a data-email="{{ user.UserEmail}}" data-toggle="modal" data-target="#DisEnUser" href="javascript:void(0)" class="badge DisEnUser
                             {% if user.disabled==True %}
                                  badge-success">Enable
@@ -53,7 +60,7 @@
         </div>
     </div>
 
-    <div class="modal" id="NewUser" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal" id="NewUser" tabindex="-1" role="dialog" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -77,7 +84,7 @@
   </div>
 </div>
 
-    <div class="modal" id="DisEnUser" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal" id="DisEnUser" tabindex="-1" role="dialog" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -100,11 +107,38 @@
   </div>
 </div>
 
-    <a class="fa btn new-user-button" data-toggle="modal" data-target="#NewUser" href="javascript:void(0)" >
-                <span style="display: table-cell; vertical-align: middle;">
-                <i class="fas fa-plus"></i>
-            </span>
-            </a>
+<div class="modal" id="UpdateUser" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalCenterTitle">Select new role</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+        <form style="font-size:15px;" method="POST" >
+            <div class="modal-body">
+        <select id="new-role" class="form-control" placeholder="Role" required="">
+                <option value="admin">Admin</option>
+                <option value="developer">Developer</option>
+                <option value="manager">Manager</option>
+            </select>
+            <input id="UPAccountInQuestion" type="hidden">
+      </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button id="UPConfirm" type="button" class="btn btn-primary" data-dismiss="modal">Confirm</button>
+      </div>
+        </form>
+    </div>
+  </div>
+</div>
+
+<a class="fa btn new-user-button" data-toggle="modal" data-target="#NewUser" href="javascript:void(0)" >
+    <span style="display: table-cell; vertical-align: middle;">
+    <i class="fas fa-plus"></i>
+    </span>
+</a>
 
 {% endblock page_content %}
 
@@ -116,6 +150,19 @@
         $(document).ready( function () {
             $('#myTable').DataTable();
 
+            $('.badge-primary').on('click',function(){
+                $('#UPAccountInQuestion').val($(this).attr('data-email'));
+                $('#new-role').val($(this).attr('data-current-role'));
+            });
+
+            $('#UPConfirm').on('click',function(){
+                 $.post("{{url_for('ajax.change_role',wks_id=wks_data.key.id())}}",{"email": $('#UPAccountInQuestion').val(),"role":$('#new-role').val()});
+                 setTimeout(function(){
+                      location.reload()
+                  }, 1000);
+             });
+
+
             $('.DisEnUser').on('click',function(){
                 $('#DEAccountInQuestion').val($(this).attr('data-email'));
             });
@@ -126,6 +173,8 @@
                       location.reload()
                   }, 1000);
              });
+
+
         } );
     </script>
 {% endblock script %}

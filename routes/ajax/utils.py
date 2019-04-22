@@ -116,3 +116,10 @@ def account_switch(wks_key, email):
     if profile.put():
         return True
     return False
+
+def change_user_role(wks_key, email, role):
+    profile = UserProfile.query(UserProfile.Wks == wks_key, UserProfile.UserEmail == email).get()
+    profile.role = role
+    if profile.put():
+        return True
+    return False

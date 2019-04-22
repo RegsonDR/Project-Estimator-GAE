@@ -4,7 +4,6 @@ from google.appengine.api import mail
 from app_statics import APP_NAME
 import uuid
 
-
 def create_wks(workspace_name, user_email):
     workspace_data = WorkspaceDetails(
         workspace_name=workspace_name
@@ -146,7 +145,6 @@ def add_user(wks_key, workspace_name, UserEmail, role):
     if not user_data.put():
         flash('Error occurred, User: ' + UserEmail + ' not created.', 'danger')
         return False
-
     send_invitation_email(token, UserEmail)
     flash('User: ' + UserEmail + ' invited!', 'success')
     return True

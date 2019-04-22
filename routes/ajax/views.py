@@ -42,12 +42,24 @@ def save_task(task_id, **kwargs):
         return jsonify({'Request': False})
 
 
-@ajax.route('/Workspace/<int:wks_id>/User/Switch', methods=['POST'])
+@ajax.route('/Workspace/<int:wks_id>/User/Status', methods=['POST'])
 @login_required('admin')
 def switch_account_status(wks_id, **kwargs):
     try:
         email = request.form.get('email')
         account_switch(kwargs['user'].wks_data.key, email)
+        return jsonify({'Request': True})
+    except:
+        return jsonify({'Request': False})
+
+
+@ajax.route('/Workspace/<int:wks_id>/User/Role', methods=['POST'])
+@login_required('admin')
+def change_role(wks_id, **kwargs):
+    try:
+        email = request.form.get('email')
+        new_role = request.form.get('role')
+        change_user_role(kwargs['user'].wks_data.key, email, new_role)
         return jsonify({'Request': True})
     except:
         return jsonify({'Request': False})
