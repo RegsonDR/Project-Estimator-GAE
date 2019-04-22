@@ -74,3 +74,9 @@ padding: 8px 20px 8px 5px !important;
     text-decoration: none;
     color: #3b8eaf !important;
 }
+
+.timestamp {
+    position: absolute ;
+    bottom: 20%;
+    right: 1%;
+}

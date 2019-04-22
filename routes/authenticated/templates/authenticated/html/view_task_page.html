@@ -54,7 +54,12 @@
                         <div class="input-group-prepend">
                             {{ form.task_developers.label(class="input-group-text") }}
                         </div>
-                        {{ form.task_developers(class="chosen-select") }}
+                    <select class="chosen-select" id="{{ form.task_developers.name }}" name="{{ form.task_developers.name }}" multiple required>
+                        {% for option in developer_choices %}
+                            <option{% if option[2] == True %} disabled{% endif %}
+                                    {% if option[0] in form.task_developers.data %} selected{% endif %} value="{{ option[0] }}">{{ option[1] }}</option>
+                        {% endfor %}
+                    </select>
                     </div>
                 </div>
                 {{ form.submit(class="fa btn save-button", value='') }}
@@ -69,12 +74,14 @@
                             <th width="60%" scope="col">Comments</th>
                         </tr>
                         </thead>
-                        <tbody>
-                        <tr title="Timestamp">
-                            <td>Mark</td>
-                            <td>Otto</td>
-                            <td>@mdo</td>
+                        <tbody id="body-logs">
+                        {% for log in task_data.get_logs() %}
+                        <tr>
+                            <td>{{ log.get_username() }}</td>
+                            <td>{{ log.log_minutes | int_to_minhour }}</td>
+                            <td style="position: relative;">{{ log.log_comments }} <sub class="timestamp"> {{ log.log_time.strftime('%H:%M | %d-%m-%Y') }} </sub> </td>
                         </tr>
+                        {%  endfor %}
                         </tbody>
                     </table>
                 </div>
@@ -131,7 +138,21 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.css">
     <script>
     $(document).ready(function () {
+        var username = "{{user_data.get_user_data().first_name}} {{user_data.get_user_data().last_name}}";
+
         $(".chosen-select").chosen({width: "67.5%"});
+
+        function timeConvert(n) {
+                var hours = (n / 60);
+                var rhours = Math.floor(hours);
+                var minutes = (hours - rhours) * 60;
+                var rminutes = Math.round(minutes);
+                var numberStr = rminutes.toString();
+                if(numberStr.length < 2){
+                  numberStr = '0' + numberStr;
+                }
+                return rhours + ":" + numberStr;
+            }
 
         function escapeHtml(unsafe) {
             return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;").replace(/\//g, "&#x2f;");
@@ -143,6 +164,18 @@
             var comments = $('#log_comments').val();
             $.post("{{url_for('ajax.save_task',task_id=task_data.key.id())}}",
                     {"minutes": minutes, "comments": comments });
+            var currentdate = new Date();
+            var datetime = ("0" + currentdate.getHours()).slice(-2) +
+            ":"+ ("0" + currentdate.getMinutes()).slice(-2) +
+            " | " + ("0" + currentdate.getDate()).slice(-2) +
+            "-" + ("0" + (currentdate.getMonth()+1)).slice(-2) +
+            "-" + currentdate.getFullYear();
+
+            table_row = `<tr><td>`+username+`</td><td>`+timeConvert(minutes)+`</td><td style="position: relative;">`+escapeHtml(comments)+`<sub class="timestamp">`+datetime+`</sub></td></tr>`;
+            $('#body-logs').append(table_row);
+            $('#log_minutes').val("");
+            $('#log_comments').val("");
+
         });
 
 

@@ -62,3 +62,19 @@
     padding: 5px 10px 5px 12px;
     width: 100%;
 }
+
+
+.badge-admin {
+    color: #212529;
+    background-color: #ffc107;
+}
+
+.badge-manager {
+    color: #fff;
+    background-color: #28a745;
+}
+
+.badge-developer {
+    color: #fff;
+    background-color: #6c757d;
+}

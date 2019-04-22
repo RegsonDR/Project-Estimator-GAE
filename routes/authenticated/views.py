@@ -112,6 +112,8 @@ def login_required(roles=None):
                             abort(403)
                     if 'task_id' in kwargs.keys():
                         task_data = get_task_data_by_id(kwargs['task_id'])
+                        if not task_data:
+                            abort(404)
 
                 kwargs['user'] = LoggedUser(user_data, session.get('Email'), wks_data, projects_data, task_data,
                                             access_data)
@@ -129,8 +131,18 @@ def login_required(roles=None):
 @login_required({'admin', 'manager'})
 def view_task_page(wks_id, project_id, task_id, **kwargs):
     log_form = LogTask()
-
     task_form = Task()
+    task_form.task_developers.choices = [(str(user.get_id()), user.get_name()) for user in
+                                            UserProfile.query(UserProfile.Wks==kwargs['user'].wks_key,
+                                                              UserProfile.invitation_accepted == True).fetch(
+                                                projection=[UserProfile.UserEmail])]
+    print task_form.task_developers.choices
+    print task_form.task_developers.data
+    developer_choices = [(str(user.get_id()), user.get_name(), user.disabled) for user in
+                    UserProfile.query( UserProfile.Wks==kwargs['user'].wks_key,
+                                      UserProfile.invitation_accepted == True).fetch(
+                        projection=[UserProfile.UserEmail, UserProfile.disabled])]
+
     task_data = kwargs['user'].get_task_data()
 
     if request.method == "POST" and task_form.validate_on_submit():
@@ -152,11 +164,32 @@ def view_task_page(wks_id, project_id, task_id, **kwargs):
     task_form.task_skills.data = map(str, task_data.task_skills)
     task_form.task_developers.data = map(str, task_data.task_developers)
 
+
     return render_template('authenticated/html/view_task_page.html',
                            user_data=kwargs['user'],
                            form=task_form,
                            task_data=task_data,
+                           developer_choices=developer_choices,
                            log_form=log_form,
+                           wks_data=kwargs['user'].get_wks_data(),
+                           SIDEBAR=SIDEBAR)
+
+@authenticated.route('/Workspace/<int:wks_id>/ViewSkills/<int:user_id>', methods=['GET', 'POST'])
+@authenticated.route('/Workspace/<int:wks_id>/MySkills', methods=['GET', 'POST'])
+@login_required({'admin', 'manager'})
+def my_skills_page(wks_id, user_id=None,**kwargs):
+
+
+    return render_template('authenticated/html/my_skills_page.html',
+                           user_data=kwargs['user'],
+                           wks_data=kwargs['user'].get_wks_data(),
+                           SIDEBAR=SIDEBAR)
+
+@authenticated.route('/Workspace/<int:wks_id>/SkillsMatrix', methods=['GET', 'POST'])
+@login_required({'admin', 'manager'})
+def skills_matrix_page(wks_id, **kwargs):
+    return render_template('authenticated/html/skills_matrix_page.html',
+                           user_data=kwargs['user'],
                            wks_data=kwargs['user'].get_wks_data(),
                            SIDEBAR=SIDEBAR)
 
@@ -166,12 +199,12 @@ def view_task_page(wks_id, project_id, task_id, **kwargs):
 def view_project_page(wks_id, project_id, **kwargs):
     project_form = Project()
     project_form.project_manager.choices = [(user.UserEmail, user.get_name()) for user in
-                                            UserProfile.query(UserProfile.role != "developer",
+                                            UserProfile.query(UserProfile.role != "developer", UserProfile.Wks==kwargs['user'].wks_key,
                                                               UserProfile.invitation_accepted == True).fetch(
                                                 projection=[UserProfile.UserEmail])]
 
     manager_data = [(user.UserEmail, user.get_name(), user.disabled) for user in
-                    UserProfile.query(UserProfile.role != "developer",
+                    UserProfile.query(UserProfile.role != "developer", UserProfile.Wks==kwargs['user'].wks_key,
                                       UserProfile.invitation_accepted == True).fetch(
                         projection=[UserProfile.UserEmail, UserProfile.disabled])]
 
@@ -266,7 +299,6 @@ def my_profile_page(**kwargs):
 
 
 @authenticated.route('/Workspace/<int:wks_id>/Projects', methods=['GET', 'POST'])
-@authenticated.route('/Workspace/<int:wks_id>', methods=['GET', 'POST'])
 @login_required({'admin', 'manager'})
 def workspace_homepage(wks_id, **kwargs):
     return render_template('authenticated/html/workspace_homepage.html',
@@ -314,16 +346,16 @@ def new_project_page(wks_id, **kwargs):
                            SIDEBAR=SIDEBAR)
 
 
-@authenticated.route('/Workspace/<int:wks_id>/AddUsers', methods=['GET', 'POST'])
+@authenticated.route('/Workspace/<int:wks_id>/Users', methods=['GET', 'POST'])
 @login_required('admin')
-def add_users_page(wks_id, **kwargs):
+def users_page(wks_id, **kwargs):
     new_user = NewUser()
     if request.method == "POST" and new_user.validate_on_submit():
         if add_user(kwargs['user'].wks_key, kwargs['user'].get_wks_data().workspace_name, new_user.user_email.data,
                     new_user.role.data):
-            return redirect(url_for('authenticated.add_users_page', wks_id=wks_id))
+            return redirect(url_for('authenticated.users_page', wks_id=wks_id))
 
-    return render_template('authenticated/html/add_users_page.html',
+    return render_template('authenticated/html/users_page.html',
                            form=new_user,
                            user_data=kwargs['user'],
                            wks_data=kwargs['user'].get_wks_data(),
@@ -366,4 +398,4 @@ def logout(**kwargs):
 @authenticated.route('/debug', methods=['GET', 'POST'])
 @login_required()
 def debug(**kwargs):
-    return render_template('authenticated/html/Blank.html')
+    return render_template('authenticated/html/includes/Blank.html')

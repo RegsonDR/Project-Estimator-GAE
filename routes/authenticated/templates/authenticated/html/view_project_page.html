@@ -8,57 +8,64 @@
     <h1 style="margin-bottom: 0px;">{{ project_data.project_name }}</h1>
 {% endblock page_header %}
 {% block page_content %}
-{% macro ProduceTaskCards(TasksObject, Status) -%}
-      {% for task in TasksObject if task.task_status == Status or Status == "All" %}
-          <div class="col-lg-11 my-3" style="margin: auto;">
-              <div class="card my-card o-hidden h-100">
-                  <div class="main-card">
-                      <div class="card-header my-card-header">
-                          <h6>{{ task.task_name }}</h6>
-                      </div>
-                      <div class="card-body my-card-body">
-                          <span class="card-text" style="flex-grow: 1;">{{ task.task_description }}</span>
-                      </div>
-                      <div class="my-card-footer">
-                          <i class="fa fa-users">{{ task.task_developers }} </i>
-                      </div>
-                  </div>
-                  <div class="side-card">
-                          <div>Allocated: {{ task.task_aminutes | int_to_minhour }}</div>
-                          <div>Logged:</div>
-                  </div>
-                  <a class="cover-card"
-                     href="{{ url_for('authenticated.view_task_page',wks_id=wks_data.key.id(),project_id=project_data.key.id(),task_id=task.key.id()) }}"></a>
-              </div>
-          </div>
+    {% macro ProduceTaskCards(TasksObject, Status) -%}
+        {% for task in TasksObject if task.task_status == Status or Status == "All" %}
+            <div class="col-lg-11 my-3" style="margin: auto;">
+                <div class="card my-card o-hidden h-100">
+                    <div class="main-card">
+                        <div class="card-header my-card-header">
+                            <h6>{{ task.task_name }}</h6>
+                        </div>
+                        <div class="card-body my-card-body">
+                            <span class="card-text" style="flex-grow: 1;">{{ task.task_description }}</span>
+                        </div>
+                        <div class="my-card-footer">
+                            <i class="fa fa-users">
+                            </i>
+                            {% for dev in task.task_developers %}
+                                    <span class="badge badge-secondary">
+                                  {{ task.get_username(dev) | create_initials }}
+                                  </span>
+                                {% endfor %}
+                        </div>
+                    </div>
+                    <div class="side-card" {% if task.task_logged_minutes > task.task_aminutes %}
+                         style="color:red" {% endif %} >
+                        <div>Allocated: {{ task.task_aminutes | int_to_minhour }}</div>
+                        <div>Logged: {{ task.task_logged_minutes | int_to_minhour }}</div>
+                    </div>
+                    <a class="cover-card"
+                       href="{{ url_for('authenticated.view_task_page',wks_id=wks_data.key.id(),project_id=project_data.key.id(),task_id=task.key.id()) }}"></a>
+                </div>
+            </div>
         {% else %}
-        <div class="alert alert-info col-lg-11">
-            There are no tasks in this category.
-        </div>
-    {% endfor %}
-{%- endmacro %}
+            <div class="alert alert-info col-lg-11">
+                There are no tasks in this category.
+            </div>
+        {% endfor %}
+    {%- endmacro %}
 
 
     <div class="container">
         <form method="POST" autocomplete="off" class="my-page">
             {{ form.hidden_tag() }}
-             <div class="form-row" style="justify-content:center">
-            <div class="col-8 input-group mb-2">
-                <div class="input-group-prepend">
-                    {{ form.project_name.label(class="input-group-text") }}
+            <div class="form-row" style="justify-content:center">
+                <div class="col-8 input-group mb-2">
+                    <div class="input-group-prepend">
+                        {{ form.project_name.label(class="input-group-text") }}
+                    </div>
+                    {{ form.project_name(class="form-control") }}
                 </div>
-                {{ form.project_name(class="form-control") }}
+
+                <div class="col-3 input-group mb-2">
+                    <div class="input-group-prepend">
+                        {{ form.project_deadline.label(class="input-group-text") }}
+                    </div>
+                    {{ form.project_deadline(class="form-control") }}
+                </div>
             </div>
 
-            <div class="col-3 input-group mb-2">
-                <div class="input-group-prepend">
-                    {{ form.project_deadline.label(class="input-group-text") }}
-                </div>
-                {{ form.project_deadline(class="form-control") }}
-            </div>
-             </div>
-
-            <div class="form-row"  style="justify-content:center">
+            <div class="form-row" style="justify-content:center">
                 <div class="col-11 input-group mb-2">
                     <div class="input-group-prepend">
                         {{ form.project_description.label(class="input-group-text") }}
@@ -67,23 +74,24 @@
                 </div>
             </div>
 
-            <div class="form-row"  style="justify-content:center">
+            <div class="form-row" style="justify-content:center">
                 <div class="col-4 input-group mb-2">
                     <div class="input-group-prepend">
                         {{ form.project_manager.label(class="input-group-text") }}
                     </div>
-                    <select class="custom-select" id="{{ form.project_manager.name }}"  name="{{ form.project_manager.name }}" required>
-                    {% for option in manager_data %}
-                    <option
-                        {% if option[2] == True %}
-                        disabled
-                        {% endif %}
-                        {% if option[0] == form.project_manager.data %}
-                        selected
-                        {% endif %}
-                            value="{{option[0]}}">{{option[1]}}</option>
+                    <select class="custom-select" id="{{ form.project_manager.name }}"
+                            name="{{ form.project_manager.name }}" required>
+                        {% for option in manager_data %}
+                            <option
+                                    {% if option[2] == True %}
+                                        disabled
+                                    {% endif %}
+                                    {% if option[0] == form.project_manager.data %}
+                                        selected
+                                    {% endif %}
+                                        value="{{ option[0] }}">{{ option[1] }}</option>
                         {% endfor %}
-                      </select>
+                    </select>
                 </div>
                 <div class="col-3 input-group mb-2">
                     <div class="input-group-prepend">
@@ -99,7 +107,7 @@
                 </div>
             </div>
 
-            {{form.submit(class="fa btn save-button", value='')}}
+            {{ form.submit(class="fa btn save-button", value='') }}
 
             <div class="card text-center remove-border">
                 <div class="card-header remove-border">
@@ -120,24 +128,26 @@
                 </div>
                 <div class="tab-content" id="TasksContent">
                     <div class="tab-pane tab-cards fade show active" id="All" role="tabpanel" aria-labelledby="All-tab">
-                        {{ ProduceTaskCards(tasks, "All")}}
+                        {{ ProduceTaskCards(tasks, "All") }}
                     </div>
                     <div class="tab-pane tab-cards fade" id="Open" role="tabpanel" aria-labelledby="Open-tab">
-                        {{ ProduceTaskCards(tasks, "Open")}}
+                        {{ ProduceTaskCards(tasks, "Open") }}
                     </div>
                     <div class="tab-pane tab-cards fade" id="Closed" role="tabpanel" aria-labelledby="Closed-tab">
-                        {{ ProduceTaskCards(tasks, "Closed")}}
+                        {{ ProduceTaskCards(tasks, "Closed") }}
                     </div>
                 </div>
             </div>
-                <div style="margin: 5px 5px 0px 5px; text-align: right; color:#495057;">
-            {{user_data.get_open_task_number(project_data.key)}}/{{user_data.get_total_task_number(project_data.key)}} Tasks Open
-        </div>
-        <a class="fa btn chat-button" style="display: table;" href="{{url_for('authenticated.project_chat',wks_id=wks_data.key.id(),project_id=project_data.key.id())}}">
+            <div style="margin: 5px 5px 0px 5px; text-align: right; color:#495057;">
+                {{ user_data.get_open_task_number(project_data.key) }}/{{ user_data.get_total_task_number(project_data.key) }}
+                Tasks Open
+            </div>
+            <a class="fa btn chat-button" style="display: table;"
+               href="{{ url_for('authenticated.project_chat',wks_id=wks_data.key.id(),project_id=project_data.key.id()) }}">
             <span style="display: table-cell; vertical-align: middle;">
                 <i class="fas fa-comments"></i>
             </span>
-        </a>
+            </a>
 
 
         </form>
@@ -146,16 +156,18 @@
 
 {# Scripts #}
 {% block script %}
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css">
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css">
 
     <script>
-           $(document).ready(function () {
+        $(document).ready(function () {
             $('#project_deadline').datepicker({
                 format: 'dd/mm/yyyy',
                 startDate: '0d',
-                todayHighlight:'true',
-                todayBtn:'true'
+                todayHighlight: 'true',
+                todayBtn: 'true'
             });
         });
     </script>

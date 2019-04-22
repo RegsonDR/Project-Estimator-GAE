@@ -92,11 +92,8 @@
 
                                                     <div class="form-row"  style="justify-content:center">
                                                      <select data-task-number="1" data-placeholder="Select Developer(s)" name="Task[1][Developers]" class="col-10 chosen-select form-control" multiple>
-                                                        <option value="3">Regson</option>
-                                                        <option value="4">Marcel</option>
-                                                        <option value="4">Marcel</option>
-                                                        <option value="4">Marcel</option>
-
+                                                        <option value="5629499534213120">Regson</option>
+                                                        <option value="5610258080727040">Marcel</option>
                                                     </select>
                                                     </div>
                                                 </div>
@@ -130,8 +127,7 @@
              $(".chosen-select").chosen({width: "80%"});
 
             function timeConvert(n) {
-                var num = n;
-                var hours = (num / 60);
+                var hours = (n / 60);
                 var rhours = Math.floor(hours);
                 var minutes = (hours - rhours) * 60;
                 var rminutes = Math.round(minutes);
@@ -179,10 +175,8 @@
                     '\n' +
                     '                                <div class="form-row"  style="justify-content:center">\n' +
                     '                                 <select data-task-number="'+task_number+'" data-placeholder="Select Developer(s)" name="Task['+task_number+'][Developers]" class="col-10 chosen-select form-control" multiple>\n' +
-                    '                                    <option value="3">Regson</option>\n' +
-                    '                                    <option value="4">Marcel</option>\n' +
-                    '                                    <option value="4">Marcel</option>\n' +
-                    '                                    <option value="4">Marcel</option>\n' +
+                    '                                    <option value="5629499534213120">Regson</option>\n' +
+                    '                                    <option value="5610258080727040">Test Manager</option>\n' +
                     '\n' +
                     '                                </select>\n' +
                     '                                </div>\n' +

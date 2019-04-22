@@ -16,20 +16,20 @@
             <div class="messages">
                 <div class="chat_log">
                     {% for message in old_messages %}
-                    {% if message.email == session.get('Email') %}
-                        <div class="sent_message">
-                            <span class="time_date"><b>{{message.username}}</b><span class="role"> ({{message.role}})</span></span>
-                           <p>{{message.message | decodeb64 }}</p>
-                           <span class="time_date">{{message.message_time.strftime('%H:%M | %d-%m-%Y')}}</span>
-                        </div>
-                  {% else %}
-                        <div class="received_message">
-                        <span class="time_date"><b>{{message.username}}</b><span class="role"> ({{message.role}})</span></span>
-                              <p>{{message.message  | decodeb64 }}</p>
-                              <span class="time_date"> {{message.message_time.strftime('%H:%M | %d-%m-%Y')}}</span>
-                        </div>
-                  {% endif %}
-                  {% endfor %}
+                        {% if message.email == session.get('Email') %}
+                            <div class="sent_message">
+                            <span class="time_date"><b>{{ message.username }}</b> <span class="badge badge-{{message.role}} role">{{ message.role }}</span></span>
+                                <p>{{ message.message | decodeb64 }}</p>
+                                <span class="time_date">{{ message.message_time.strftime('%H:%M | %d-%m-%Y') }}</span>
+                            </div>
+                        {% else %}
+                            <div class="received_message">
+                        <span class="time_date"><b>{{ message.username }}</b> <span class="badge badge-{{message.role}} role">{{ message.role }}</span></span>
+                                <p>{{ message.message  | decodeb64 }}</p>
+                                <span class="time_date"> {{ message.message_time.strftime('%H:%M | %d-%m-%Y') }}</span>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
                 </div>
                 <div class="input-group mb-3">
                     <input id="add_text" type="text" class="form-control" placeholder="Type a message.."
@@ -62,7 +62,7 @@
 
             function escapeHtml(unsafe) {
                 return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;").replace(/\//g, "&#x2f;");
-             }
+            }
 
             $('#chat_text').on('click', function () {
                 msg = $('#add_text').val();
@@ -70,12 +70,12 @@
                     {"email": email, "username": username, "role": role, "message": msg});
                 var currentdate = new Date();
                 var datetime = ("0" + currentdate.getHours()).slice(-2) +
-                ":"+ ("0" + currentdate.getMinutes()).slice(-2) +
-                " | " + ("0" + currentdate.getDate()).slice(-2) +
-                "-" + ("0" + (currentdate.getMonth()+1)).slice(-2) +
-                "-" + currentdate.getFullYear();
+                    ":" + ("0" + currentdate.getMinutes()).slice(-2) +
+                    " | " + ("0" + currentdate.getDate()).slice(-2) +
+                    "-" + ("0" + (currentdate.getMonth() + 1)).slice(-2) +
+                    "-" + currentdate.getFullYear();
 
-                new_msg = `<div class="sent_message"><span class="time_date"><b>${username}</b> <span class="role"> (${role})</span></span><p>${escapeHtml(msg)}</p><span class="time_date">${datetime}</span></div>`;
+                new_msg = `<div class="sent_message"><span class="time_date"><b>${username}</b> <span class="badge badge-${role} role">${role}</span></span><p>${escapeHtml(msg)}</p><span class="time_date">${datetime}</span></div>`;
                 $('.chat_log').append(new_msg);
                 $('#add_text').val("");
             });
@@ -89,7 +89,7 @@
             var channel = pusher.subscribe("{{project_data.key.id()}}-channel");
             channel.bind('new-message', function (data) {
                 if (data.email != email) {
-                    new_msg = `<div class="received_message"><span class="time_date"><b>${(data.username)}</b> <span class="role"> (${data.role})</span></span><p>${escapeHtml(atob(data.message))}</p><span class="time_date"> ${data.message_time}</span></div>`;
+                    new_msg = `<div class="received_message"><span class="time_date"><b>${(data.username)}</b> <span class="badge badge-${data.role} role">${data.role}</span></span><p>${escapeHtml(atob(data.message))}</p><span class="time_date"> ${data.message_time}</span></div>`;
                     $('.chat_log').append(new_msg);
                 }
 

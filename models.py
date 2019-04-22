@@ -43,9 +43,12 @@ class UserProfile(ndb.Model):
             return account_data.first_name + " " + account_data.last_name
         return False
 
-    # Super admin owns all
-    # Super dev can log time anywhere
-    # Deve can only log time
+    def get_id(self):
+        account_data = AccountDetails.query(AccountDetails.email == self.UserEmail).get()
+        if account_data:
+            return account_data.key.id()
+        return False
+
 
 
 class TaskProfile(ndb.Model):
@@ -71,13 +74,36 @@ class TaskDetails(ndb.Model):
     task_skills = ndb.IntegerProperty(repeated=True)
     task_developers = ndb.IntegerProperty(repeated=True)
     task_status = ndb.StringProperty(choices={'Open', 'Closed'})
+    task_logged_minutes = ndb.IntegerProperty()
+
+    def get_username(self, log_developer):
+        account_data = AccountDetails.get_by_id(log_developer)
+        return account_data.first_name + " " + account_data.last_name
+
+    def get_logs(self):
+        return TaskLog.query(TaskLog.task_id == self.key.id()).order(TaskLog.log_time).fetch()
 
 class TaskLog(ndb.Model):
     task_id = ndb.IntegerProperty()
     log_developer = ndb.IntegerProperty()
     log_minutes = ndb.IntegerProperty()
     log_comments = ndb.StringProperty()
-    log_time = ndb.DateTimeProperty(auto_now_add=True)
+    log_time = ndb.DateTimeProperty()
+
+    def get_username(self):
+        account_data = AccountDetails.get_by_id(self.log_developer)
+        return account_data.first_name + " " + account_data.last_name
+
+    def update_total(self):
+        task_data = TaskDetails.get_by_id(self.task_id)
+        logged_tasks = TaskLog.query(TaskLog.task_id == self.task_id)
+        total_minutes = self.log_minutes
+        for log in logged_tasks.fetch():
+            total_minutes = total_minutes + log.log_minutes
+        task_data.task_logged_minutes = total_minutes
+        if task_data.put():
+            return True
+        return False
 
 class ProjectChat(ndb.Model):
     project_id = ndb.IntegerProperty()
@@ -86,4 +112,3 @@ class ProjectChat(ndb.Model):
     message_time = ndb.DateTimeProperty()
     email = ndb.StringProperty()
     role = ndb.StringProperty()
-

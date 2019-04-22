@@ -23,8 +23,17 @@ def int_to_minhour(minutes):
     if isinstance(minutes, int):
         return '{:02d}:{:02d}'.format(*divmod(minutes, 60))
 
+
+def create_initials(full_name):
+    if isinstance(full_name, str):
+        print full_name
+    names = full_name.split(" ")
+    return names[0][0].upper()+names[1][0].upper()
+
+
 app.jinja_env.filters['decodeb64'] = decode_base64
 app.jinja_env.filters['int_to_minhour'] = int_to_minhour
+app.jinja_env.filters['create_initials'] = create_initials
 
 
 if __name__ == '__main__':

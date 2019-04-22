@@ -1,7 +1,7 @@
 {% extends "authenticated/html/includes/Base_Template.html" %}
 
 {% block header_content %}
-        <link href="{{ url_for('static', filename='authenticated/CSS/add_users_page.css') }}" rel="stylesheet" xmlns="http://www.w3.org/1999/html">
+        <link href="{{ url_for('static', filename='authenticated/CSS/users_page.css') }}" rel="stylesheet" xmlns="http://www.w3.org/1999/html">
         <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css">
 {% endblock header_content %}
 
@@ -16,6 +16,7 @@
             <table id="myTable" class="table table-hover col-11 my-3">
                 <thead class="thead-light">
                     <tr>
+                        <th>Name</th>
                         <th>Email</th>
                         <th>Invite Accepted</th>
                         <th>Role</th>
@@ -25,11 +26,20 @@
 
                 <tbody>
                  {% for user in user_data.get_all_users()|sort(attribute='role') %}
-                    <tr>
+                    <tr {% if user.disabled==True %}class="table-danger"{% endif %}>
+                        <td>{{ user.get_name()}}</td>
                         <td>{{ user.UserEmail}}</td>
                         <td>{{ user.invitation_accepted }}</td>
                         <td>{{ user.role }}</td>
-                        <td>Change Role / Remove Access</td>
+                        <td>
+                            <a href="#" class="badge badge-primary">Change Role</a>
+                            {% if user.disabled==True %}
+                                 <a href="#" class="badge badge-success">Enable Account</a>
+                                {% else %}
+                                <a href="#" class="badge badge-danger">Disable Account</a>
+                            {% endif %}
+                            <a href="{{ url_for('authenticated.my_skills_page',wks_id=wks_data.key.id(), user_id=user.key.id()) }}" class="badge badge-warning">Edit Skills</a>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>

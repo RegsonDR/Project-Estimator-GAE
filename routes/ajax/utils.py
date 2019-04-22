@@ -2,28 +2,13 @@ from models import AccountDetails, ProjectChat, TaskLog
 from flask import request, url_for, render_template
 from google.appengine.api import mail, urlfetch
 from app_statics import APP_NAME
-from datetime import datetime
+from datetime import datetime, timedelta
 import uuid
 import base64
 import hmac
 import hashlib
 import json
 import time
-
-def send_verification_email(user_id):
-    user = get_user_data_by_id(user_id)
-    VERIFICATION_URL = (request.url_root + url_for('unauthenticated.verify_page').replace("/", "") + "?email=" +
-                        user.email + "&code=" + user.verification_code)
-    mail.send_mail(
-        sender="support@project-application-231720.appspotmail.com",
-        to=user.email,
-        subject=APP_NAME + " Verification Link",
-        body="",
-        html=render_template('unauthenticated/email/email_verification.html', EMAIL_HEADER="Thanks for signing up!",
-                             VERIFICATION_URL=VERIFICATION_URL)
-    )
-    return True
-
 
 def get_user_data_by_email(email):
     return AccountDetails.query(AccountDetails.email == email.lower()).get()
@@ -108,10 +93,12 @@ def push_chat_message(project_id,username,message,message_time,email,role):
 def save_log(task_id,log_developer,log_minutes,log_comments):
     log_data = TaskLog(
         task_id=task_id,
-        log_developer=5629499534213120,
+        log_developer=get_user_data_by_email(log_developer).key.id(),
         log_minutes=log_minutes,
-        log_comments=log_comments
+        log_comments=log_comments,
+        log_time=datetime.now() + timedelta(hours=1)
     )
+    log_data.update_total()
     if log_data.put():
         return True
     return False

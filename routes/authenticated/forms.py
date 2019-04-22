@@ -49,7 +49,7 @@ class Task(FlaskForm):
     task_description = StringField('Task Description', widget=TextArea(), validators=[DataRequired()])
     task_aminutes = IntegerField('Allocated Minutes', validators=[DataRequired()])
     task_skills = SelectMultipleField('Skills Required', choices=[("2", "Python"), ("1", "Java")], validators=[DataRequired()])
-    task_developers = SelectMultipleField('Allocated Developers',choices=[("3", "Regson"), ("4", "Marcel")], validators=[DataRequired()])
+    task_developers = SelectMultipleField('Allocated Developers', validators=[DataRequired()])
     task_status = SelectField('Task Status', choices=[("Open", "Open"), ("Closed", "Closed")], validators=[DataRequired()])
     submit = SubmitField('Save')
 
