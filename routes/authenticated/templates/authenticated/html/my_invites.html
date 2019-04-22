@@ -1,0 +1,49 @@
+{% extends "authenticated/html/includes/Base_Template.html" %}
+
+{% block header_content %}
+            <link href="{{ url_for('static', filename='authenticated/CSS/my_invites.css') }}" rel="stylesheet" xmlns="http://www.w3.org/1999/html">
+            <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css">
+{% endblock header_content %}
+
+{% block page_header %}
+    <h1 style="margin-bottom: 0px;" >My Invites</h1>
+{% endblock page_header %}
+
+{% block page_content %}
+    <div class="container">
+    <div class="my-page">
+    <div id="invites-list">
+         <table id="myTable" class="table table-hover col-11 my-3">
+             <thead class="thead-light">
+                    <tr>
+                        <th>Workspace Name</th>
+                        <th>Role</th>
+                        <th>View</th>
+                    </tr>
+                </thead>
+              <tbody>
+               {% for invite in user_data.get_invites()|sort(attribute='workspace_name') %}
+                   <tr>
+                        <td>{{ invite.workspace_name|capitalize}}</td>
+                        <td>{{ invite.role|capitalize}}</td>
+                        <td> <a href="{{ url_for('authenticated.open_invitation',email=session.get("Email"), code=invite.invitation_token) }}" class="badge badge-info">View</a> </td>
+                   </tr>
+               {% endfor %}
+              </tbody>
+         </table>
+        </div>
+        </div>
+    </div>
+    
+{% endblock page_content %}
+
+{# Scripts #}
+{% block script %}
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
+
+    <script>
+        $(document).ready( function () {
+            $('#myTable').DataTable();
+        } );
+    </script>
+{% endblock script %}

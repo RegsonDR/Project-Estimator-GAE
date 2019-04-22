@@ -5,6 +5,7 @@ from wtforms.widgets import TextArea, html_params, HTMLString
 from wtforms.validators import DataRequired, Email, EqualTo
 from cgi import escape
 
+
 class NewWorkspace(FlaskForm):
     workspace_name = StringField('Name', validators=[DataRequired()])
     submit = SubmitField('Create')

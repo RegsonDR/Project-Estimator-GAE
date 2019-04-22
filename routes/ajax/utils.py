@@ -1,4 +1,4 @@
-from models import AccountDetails, ProjectChat, TaskLog
+from models import AccountDetails, ProjectChat, TaskLog, UserProfile
 from flask import request, url_for, render_template
 from google.appengine.api import mail, urlfetch
 from app_statics import APP_NAME
@@ -10,8 +10,10 @@ import hashlib
 import json
 import time
 
+
 def get_user_data_by_email(email):
     return AccountDetails.query(AccountDetails.email == email.lower()).get()
+
 
 def send_reset_email(email):
     account = get_user_data_by_email(email)
@@ -38,7 +40,8 @@ def send_reset_email(email):
         return True
     return False
 
-def log_message(project_id,username,message,message_time,email,role):
+
+def log_message(project_id, username, message, message_time, email, role):
     data = ProjectChat(
         project_id=project_id,
         username=username,
@@ -51,12 +54,14 @@ def log_message(project_id,username,message,message_time,email,role):
         return True
     return False
 
+
 def create_pusher_auth_signature(timestamp, md5):
     app_id = "766185"
     key = "08d09cb027a29bc3cb55"
     secret = "25554a6393a0cbbb0814"
     string = "POST\n/apps/" + app_id + "/events\nauth_key=" + key + "&auth_timestamp=" + timestamp + "&auth_version=1.0&body_md5=" + md5
     return hmac.new(secret, string, hashlib.sha256).hexdigest()
+
 
 def pusher_request(parameters):
     body_md5 = hashlib.md5(parameters).hexdigest()
@@ -77,20 +82,21 @@ def pusher_request(parameters):
     return resp.content
 
 
-def push_chat_message(project_id,username,message,message_time,email,role):
+def push_chat_message(project_id, username, message, message_time, email, role):
     parameters = json.dumps({
         "data":
             "{\"email\":\"" + email + "\","
-            "\"message\":\"" + message + "\","
-            "\"role\":\"" + role + "\","
-            "\"username\":\"" + username + "\","
-            "\"message_time\":\"" + (message_time).strftime('%H:%M | %d-%m-%Y') + "\"}",
+                                      "\"message\":\"" + message + "\","
+                                                                   "\"role\":\"" + role + "\","
+                                                                                          "\"username\":\"" + username + "\","
+                                                                                                                         "\"message_time\":\"" + (
+                message_time).strftime('%H:%M | %d-%m-%Y') + "\"}",
         "name": "new-message",
         "channel": str(project_id) + "-channel"})
     return pusher_request(parameters)
 
 
-def save_log(task_id,log_developer,log_minutes,log_comments):
+def save_log(task_id, log_developer, log_minutes, log_comments):
     log_data = TaskLog(
         task_id=task_id,
         log_developer=get_user_data_by_email(log_developer).key.id(),
@@ -104,5 +110,9 @@ def save_log(task_id,log_developer,log_minutes,log_comments):
     return False
 
 
-
-
+def account_switch(wks_key, email):
+    profile = UserProfile.query(UserProfile.Wks == wks_key, UserProfile.UserEmail == email).get()
+    profile.disabled = not profile.disabled
+    if profile.put():
+        return True
+    return False

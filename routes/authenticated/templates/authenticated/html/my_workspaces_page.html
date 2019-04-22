@@ -23,6 +23,12 @@
 
 {% block page_header %}
     <h1 style="margin-bottom: 0px;" >Dashboard</h1>
+    {% if user_data.get_invites_number() %}
+    <div>
+    <a href="{{ url_for('authenticated.my_invites') }}" class="badge badge-info">{{user_data.get_invites_number()}} Pending Invite</a>
+    </div>
+    {% endif %}
+
 {% endblock page_header %}
 
 {% block page_content %}

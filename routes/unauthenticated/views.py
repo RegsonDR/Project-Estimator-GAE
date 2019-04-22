@@ -25,6 +25,7 @@ def login_page():
 @unauthenticated.route('/Register', methods=['GET', 'POST'])
 def register_page():
     register_form = RegisterForm()
+    print request.form.get('full_phone')
     #
     # Check if register request is valid
     if request.method == 'POST':

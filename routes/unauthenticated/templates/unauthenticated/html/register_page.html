@@ -11,7 +11,11 @@
         {{form.last_name(class="form-control", placeholder="Last Name")}}
     </div>
     <div class="input-group mb-1">
+        {% if request.args.get('email')  %}
+        {{form.email(class="form-control", placeholder="Email", value=request.args.get('email'))}}
+        {% else %}
         {{form.email(class="form-control", placeholder="Email")}}
+        {% endif %}
         {{form.mobile_number(class="form-control", placeholder="Mobile Number")}}
     </div>
     <div class="input-group mb-1">

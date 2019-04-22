@@ -60,6 +60,9 @@ class LoggedUser:
     def get_tasks(self):
         return get_tasks(self.projects_key)
 
+    def get_invites(self):
+        return get_invites(self.user_email)
+
     def get_projects(self, project_status):
         return get_projects(self.wks_key, self.get_role(), self.user_email, project_status)
 
@@ -69,6 +72,9 @@ class LoggedUser:
 
     def get_total_task_number(self, project_key):
         return get_total_task_number(project_key)
+
+    def get_invites_number(self):
+        return get_invites_number(self.user_email)
 
     def get_all_users(self):
         return get_all_users(self.wks_key)
@@ -117,6 +123,10 @@ def login_required(roles=None):
 
                 kwargs['user'] = LoggedUser(user_data, session.get('Email'), wks_data, projects_data, task_data,
                                             access_data)
+
+            elif request.args.get("email") is not None:
+                flash('Please login or sign up to access the requested page.', 'danger')
+                return redirect(url_for('unauthenticated.register_page',email=request.args.get("email")))
             else:
                 flash('Please login to access the requested page.', 'danger')
                 abort(401)
@@ -136,8 +146,6 @@ def view_task_page(wks_id, project_id, task_id, **kwargs):
                                             UserProfile.query(UserProfile.Wks==kwargs['user'].wks_key,
                                                               UserProfile.invitation_accepted == True).fetch(
                                                 projection=[UserProfile.UserEmail])]
-    print task_form.task_developers.choices
-    print task_form.task_developers.data
     developer_choices = [(str(user.get_id()), user.get_name(), user.disabled) for user in
                     UserProfile.query( UserProfile.Wks==kwargs['user'].wks_key,
                                       UserProfile.invitation_accepted == True).fetch(
@@ -178,12 +186,13 @@ def view_task_page(wks_id, project_id, task_id, **kwargs):
 @authenticated.route('/Workspace/<int:wks_id>/MySkills', methods=['GET', 'POST'])
 @login_required({'admin', 'manager'})
 def my_skills_page(wks_id, user_id=None,**kwargs):
-
-
     return render_template('authenticated/html/my_skills_page.html',
                            user_data=kwargs['user'],
                            wks_data=kwargs['user'].get_wks_data(),
                            SIDEBAR=SIDEBAR)
+
+
+
 
 @authenticated.route('/Workspace/<int:wks_id>/SkillsMatrix', methods=['GET', 'POST'])
 @login_required({'admin', 'manager'})
@@ -249,6 +258,14 @@ def project_chat(wks_id, project_id, **kwargs):
                            project_data=kwargs['user'].get_project_data(),
                            SIDEBAR=SIDEBAR)
 
+@authenticated.route('/MyInvites', methods=['GET', 'POST'])
+@login_required()
+def my_invites(**kwargs):
+    if not kwargs['user'].get_invites_number():
+        flash("You have no pending invites!","danger")
+        return redirect(url_for('authenticated.my_workspaces_page'))
+    return render_template('authenticated/html/my_invites.html',
+                           user_data=kwargs['user'])
 
 @authenticated.route('/')
 @authenticated.route('/Workspaces', methods=['GET', 'POST'])
@@ -337,7 +354,7 @@ def new_project_page(wks_id, **kwargs):
                         project_data['Task'][dic_position][element] = request.form[
                             'Task[' + task_id + '][' + element + ']']
             project_id = create_project(kwargs['user'].wks_key, kwargs['user'].user_email, project_data)
-            return redirect(url_for('authenticated.workspace_homepage', wks_id=wks_id))
+            return redirect(url_for('authenticated.view_project_page', wks_id=wks_id, project_id=project_id))
 
     return render_template('authenticated/html/new_project_page.html',
                            form=new_project,

@@ -21,7 +21,7 @@
     <script>
    $(document).ready(function(){
        $('#passwordReset').on('click', function() {
-           if ($('#email').val() != null){
+           if ($('#email').val() != ""){
                console.log("fds");
                $.post("{{url_for('ajax.reset_password_email')}}",
                {

@@ -102,3 +102,17 @@ meter[value="4"]
 {
     background: green;
 }
+
+.iti-flag {background-image: url("https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/15.0.2/img/flags.png");}
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .iti-flag {background-image: url("https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/15.0.2/img/flags@2x.png");}
+}
+
+.intl-tel-input input{
+    position: unset!important;
+}
+
+.intl-tel-input {
+    width: 100%;
+}

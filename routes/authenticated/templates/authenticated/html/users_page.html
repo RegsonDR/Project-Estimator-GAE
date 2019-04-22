@@ -27,18 +27,22 @@
                 <tbody>
                  {% for user in user_data.get_all_users()|sort(attribute='role') %}
                     <tr {% if user.disabled==True %}class="table-danger"{% endif %}>
-                        <td>{{ user.get_name()}}</td>
+                        <td>{{ user.get_name() | capitalize}}</td>
                         <td>{{ user.UserEmail}}</td>
                         <td>{{ user.invitation_accepted }}</td>
-                        <td>{{ user.role }}</td>
+                        <td>{{ user.role | capitalize }}</td>
                         <td>
-                            <a href="#" class="badge badge-primary">Change Role</a>
-                            {% if user.disabled==True %}
-                                 <a href="#" class="badge badge-success">Enable Account</a>
-                                {% else %}
-                                <a href="#" class="badge badge-danger">Disable Account</a>
-                            {% endif %}
                             <a href="{{ url_for('authenticated.my_skills_page',wks_id=wks_data.key.id(), user_id=user.key.id()) }}" class="badge badge-warning">Edit Skills</a>
+                        {% if user.role != "admin" %}
+                            <a data-email="{{ user.UserEmail}}" href="#" class="badge badge-primary">Change Role</a>
+                         <a data-email="{{ user.UserEmail}}" data-toggle="modal" data-target="#DisEnUser" href="javascript:void(0)" class="badge DisEnUser
+                            {% if user.disabled==True %}
+                                 badge-success">Enable
+                            {% else %}
+                                 badge-danger">Disable
+                            {% endif %}
+                            Account</a>
+                        {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
@@ -72,7 +76,31 @@
     </div>
   </div>
 </div>
-    <a class="fa btn new-user-button"  data-toggle="modal" data-target="#NewUser" href="javascript:void(0)" >
+
+    <div class="modal" id="DisEnUser" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalCenterTitle">Confirmation</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+        <form style="font-size:15px;" method="POST" >
+            <div class="modal-body">
+                Are you sure you would like to change this account's status?
+                <input id="DEAccountInQuestion" type="hidden">
+      </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button id="DEConfirm" type="button" class="btn btn-primary" data-dismiss="modal">Confirm</button>
+      </div>
+        </form>
+    </div>
+  </div>
+</div>
+
+    <a class="fa btn new-user-button" data-toggle="modal" data-target="#NewUser" href="javascript:void(0)" >
                 <span style="display: table-cell; vertical-align: middle;">
                 <i class="fas fa-plus"></i>
             </span>
@@ -87,6 +115,17 @@
     <script>
         $(document).ready( function () {
             $('#myTable').DataTable();
+
+            $('.DisEnUser').on('click',function(){
+                $('#DEAccountInQuestion').val($(this).attr('data-email'));
+            });
+
+             $('#DEConfirm').on('click',function(){
+                 $.post("{{url_for('ajax.switch_account_status',wks_id=wks_data.key.id())}}",{"email": $('#DEAccountInQuestion').val()});
+                 setTimeout(function(){
+                      location.reload()
+                  }, 1000);
+             });
         } );
     </script>
 {% endblock script %}

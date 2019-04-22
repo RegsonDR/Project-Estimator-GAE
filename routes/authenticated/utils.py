@@ -182,3 +182,10 @@ def get_chat_messages(project_id):
 
 def get_tasks(project_key):
     return TaskDetails.query(TaskDetails.Project == project_key).fetch()
+
+
+def get_invites_number(email):
+    return UserProfile.query(UserProfile.UserEmail == email, UserProfile.invitation_accepted == False, UserProfile.disabled==False).count()
+
+def get_invites(email):
+    return UserProfile.query(UserProfile.UserEmail == email, UserProfile.invitation_accepted == False, UserProfile.disabled==False).fetch()
