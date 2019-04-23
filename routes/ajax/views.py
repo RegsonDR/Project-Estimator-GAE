@@ -63,3 +63,14 @@ def change_role(wks_id, **kwargs):
         return jsonify({'Request': True})
     except:
         return jsonify({'Request': False})
+
+@ajax.route('/Workspace/<int:wks_id>/Skill', methods=['POST'])
+@login_required({'admin','manager','developer'})
+def alter_skill(wks_id, **kwargs):
+    try:
+        skill_id = int(request.form.get('skill_id'))
+        rating = request.form.get('rating')
+        update_user_skill(skill_id,rating)
+        return jsonify({'Request': True})
+    except:
+        return jsonify({'Request': False})

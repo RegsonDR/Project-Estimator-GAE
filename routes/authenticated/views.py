@@ -2,9 +2,11 @@
 import gc
 import time
 from functools import wraps
+
 from app_statics import SIDEBAR
 from flask import Blueprint, session, abort, redirect
 from forms import *
+from models import *
 from routes.authenticated.utils import *
 
 authenticated = Blueprint('authenticated', __name__, template_folder='templates')
@@ -138,9 +140,28 @@ def login_required(roles=None):
 @authenticated.route('/Workspace/<int:wks_id>/MySkills', methods=['GET', 'POST'])
 @login_required({'admin', 'manager'})
 def my_skills_page(wks_id, user_id=None, **kwargs):
+    if user_id and kwargs['user'].get_role() == "admin":
+        look_up_key = AccountDetails.get_by_id(user_id).key
+    else:
+        look_up_key = kwargs['user'].user_key
+
+    new_skill = AddSkill()
+    new_skill.skill_name.choices = [(skill.key.id(), skill.skill_name) for skill in
+                                    SkillData.query(SkillData.Wks == kwargs['user'].wks_key
+                                                    ).fetch()]
+
+    if request.method == "POST":
+        create_skill(new_skill.skill_name.data,kwargs['user'].wks_key,look_up_key)
+        time.sleep(1)
+        return redirect(url_for('authenticated.my_skills_page',wks_id=wks_id))
+
+    current_skills = UserSkill.query(UserSkill.Wks == kwargs['user'].wks_key, UserSkill.User == look_up_key).fetch()
+
     return render_template('authenticated/html/my_skills_page.html',
                            user_data=kwargs['user'],
                            wks_data=kwargs['user'].get_wks_data(),
+                           current_skills=current_skills,
+                           form=new_skill,
                            SIDEBAR=SIDEBAR)
 
 

@@ -112,3 +112,17 @@ class ProjectChat(ndb.Model):
     message_time = ndb.DateTimeProperty()
     email = ndb.StringProperty()
     role = ndb.StringProperty()
+
+class SkillData(ndb.Model):
+    Wks = ndb.KeyProperty(kind='WorkspaceDetails')
+    skill_name = ndb.StringProperty()
+
+
+class UserSkill(ndb.Model):
+    Wks = ndb.KeyProperty(kind='WorkspaceDetails')
+    User = ndb.KeyProperty(kind='AccountDetails')
+    skill_id = ndb.IntegerProperty()
+    skill_rating = ndb.IntegerProperty()
+
+    def skill_name(self):
+        return SkillData.get_by_id(self.skill_id).skill_name

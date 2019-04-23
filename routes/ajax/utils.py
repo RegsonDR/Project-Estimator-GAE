@@ -1,4 +1,4 @@
-from models import AccountDetails, ProjectChat, TaskLog, UserProfile
+from models import AccountDetails, ProjectChat, TaskLog, UserProfile, UserSkill
 from flask import request, url_for, render_template
 from google.appengine.api import mail, urlfetch
 from app_statics import APP_NAME
@@ -121,5 +121,18 @@ def change_user_role(wks_key, email, role):
     profile = UserProfile.query(UserProfile.Wks == wks_key, UserProfile.UserEmail == email).get()
     profile.role = role
     if profile.put():
+        return True
+    return False
+
+
+def update_user_skill(user_skill_id,rating):
+    data = UserSkill.get_by_id(user_skill_id)
+    if rating:
+        data.skill_rating = int(rating)
+        if not data.put():
+            return False
+        return True
+    if not rating:
+        data.key.delete()
         return True
     return False

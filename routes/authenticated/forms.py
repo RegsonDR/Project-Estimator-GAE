@@ -58,3 +58,7 @@ class LogTask(FlaskForm):
     log_minutes = IntegerField('Time Spent (Minutes)', validators=[DataRequired()])
     log_comments = StringField('Comments', widget=TextArea(), validators=[DataRequired()])
     submit = SubmitField('Save')
+
+class AddSkill(FlaskForm):
+    skill_name = SelectField('Skill Name', validators=[DataRequired()])
+    submit = SubmitField('Add')

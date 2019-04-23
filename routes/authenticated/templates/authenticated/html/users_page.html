@@ -39,7 +39,7 @@
                         <td>{{ user.invitation_accepted }}</td>
                         <td>{{ user.role | capitalize }}</td>
                         <td>
-                            <a href="{{ url_for('authenticated.my_skills_page',wks_id=wks_data.key.id(), user_id=user.key.id()) }}" class="badge badge-warning">Edit Skills</a>
+                            <a href="{{ url_for('authenticated.my_skills_page',wks_id=wks_data.key.id(), user_id=user.get_id()) }}" class="badge badge-warning">Edit Skills</a>
                         {% if user.UserEmail != session.get("Email") %}
                             <a data-email="{{ user.UserEmail}}" data-current-role="{{user.role}}" data-toggle="modal" data-target="#UpdateUser" href="javascript:void(0)"  class="badge badge-primary">Change Role</a>
                          <a data-email="{{ user.UserEmail}}" data-toggle="modal" data-target="#DisEnUser" href="javascript:void(0)" class="badge DisEnUser
@@ -136,7 +136,7 @@
 
 <a class="fa btn new-user-button" data-toggle="modal" data-target="#NewUser" href="javascript:void(0)" >
     <span style="display: table-cell; vertical-align: middle;">
-    <i class="fas fa-plus"></i>
+    <i class="fas fa-user-plus"></i>
     </span>
 </a>
 

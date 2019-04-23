@@ -1,4 +1,4 @@
-from models import WorkspaceDetails, AccountDetails, UserProfile, ProjectDetails, TaskDetails, ProjectChat
+from models import WorkspaceDetails, AccountDetails, UserProfile, ProjectDetails, TaskDetails, ProjectChat, SkillData, UserSkill
 from flask import flash, request, url_for, render_template
 from google.appengine.api import mail
 from app_statics import APP_NAME
@@ -187,3 +187,23 @@ def get_invites_number(email):
 
 def get_invites(email):
     return UserProfile.query(UserProfile.UserEmail == email, UserProfile.invitation_accepted == False, UserProfile.disabled==False).fetch()
+
+
+def create_skill(skill_id,wk_key,user_key):
+    try:
+        int(skill_id)
+    except ValueError:
+        # it's not an id, it's a name.
+        skill_data = SkillData(
+            Wks=wk_key,
+            skill_name=skill_id
+        ).put()
+        skill_id = skill_data.id()
+
+    UserSkill(
+        Wks=wk_key,
+        User=user_key,
+        skill_id=int(skill_id),
+        skill_rating=0
+    ).put()
+    return True

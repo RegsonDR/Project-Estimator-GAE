@@ -1,25 +1,120 @@
 {% extends "authenticated/html/includes/Base_Template.html" %}
 
 {% block header_content %}
+    <link href="{{ url_for('static', filename='authenticated/CSS/my_skills_page.css') }}" rel="stylesheet"
+          xmlns="http://www.w3.org/1999/html">
 {% endblock header_content %}
 
 {% block page_header %}
-    <h1 style="margin-bottom: 0px;" >My Skills</h1>
+    <h1 style="margin-bottom: 0px;">My Skills</h1>
 {% endblock page_header %}
 
 {% block page_content %}
     <div class="container">
         <div class="my-page">
+            <div class="skills">
+                <div class="col-11 my-3" style="margin: auto;">
 
+                    <table class="table table-sm table-hover table-responsive-sm my-table">
+                        <thead class="thead-light">
+                        <tr>
+                            <th width="40%" colspan="2">Skill</th>
+                            <th width="60%">Expertise Scale</th>
+                        </tr>
+                        </thead>
+                        <tbody id="body-logs">
+                        {% set ranks = ["Novice", "Advanced Beginner", "Competent","Proficient","Expert"] %}
+                        {% for skill in current_skills|sort(attribute='skill_id')%}
+                        <tr>
+                            <td style="vertical-align: middle;text-align: right">{{ skill.skill_name() }}</td>
+                            <td style="vertical-align: middle;text-align: left">
+                                <a data-skill-id="{{skill.key.id()}}" href="#" class="delete-skill badge badge-danger">Delete</a>
+                            </td>
+                            <td style="    padding-left: 1rem;    padding-right: 1rem;">
+                                <span class="slidecontainer">
+                                <div class="skill-name">
+                                    {{ ranks[skill.skill_rating] }}
+                                </div>
+                                    <input data-skill-id="{{skill.key.id()}}" type="range" min="0" max="4" value="{{ skill.skill_rating }}" class="slider">
+                                </span>
+                            </td>
+                        </tr>
+                                    {%  endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
         </div>
+        <div class="modal" id="NewSkill" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <form method="post">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalCenterTitle">Please select or create new skill</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            {{ form.hidden_tag() }}
+                            <div class="form-row" style="justify-content:center">
+                                <div class="input-group mb-2">
+                                    <div class="input-group-prepend">
+                                        {{ form.skill_name.label(class="input-group-text") }}
+                                    </div>
+                                    {{ form.skill_name(class="form-control") }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <a class="fa btn new-skill-button" data-toggle="modal" data-target="#NewSkill" href="javascript:void(0)">
+    <span style="display: table-cell; vertical-align: middle;">
+    <i class="fas fa-plus"></i>
+    </span>
+        </a>
+
     </div>
-    
+
 {% endblock page_content %}
 
 {# Scripts #}
 {% block script %}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
     <script>
+        $(document).ready(function () {
+            $("select").select2({
+                tags: true,
+                width: '70%'
+            });
 
+            $(".slider").on('change', function () {
+                ranks = ["Novice", "Advanced Beginner", "Competent","Proficient","Expert"];
+                $(this).parent().children("div").text(ranks[$(this).val()]);
+
+                $.post("{{url_for('ajax.alter_skill',wks_id=wks_data.key.id())}}",
+                    {"skill_id":$(this).attr("data-skill-id"), "rating":$(this).val()});
+
+            });
+
+
+            $(".delete-skill").on('click', function () {
+                $.post("{{url_for('ajax.alter_skill',wks_id=wks_data.key.id())}}",
+                    {"skill_id":$(this).attr("data-skill-id")});
+                 $(this).closest("tr").remove();
+            });
+
+
+
+
+        });
     </script>
 {% endblock script %}
