@@ -1,14 +1,51 @@
 {% extends "authenticated/html/includes/Base_Template.html" %}
 
 {% block header_content %}
+    <link href="{{ url_for('static', filename='authenticated/CSS/skills_matrix_page.css') }}" rel="stylesheet"
+          xmlns="http://www.w3.org/1999/html">
 {% endblock header_content %}
 
 {% block page_header %}
-    <h1 style="margin-bottom: 0px;" ></h1>
+    <h1 style="margin-bottom: 0px;">Skill Matrix</h1>
 {% endblock page_header %}
 
 {% block page_content %}
-    
+    <div class="container">
+        <div class="my-page">
+            <div id="skills">
+                <div class="scrollable-table">
+                    <table class="table-header-rotated" style="margin: auto;">
+                        <thead>
+                        <tr>
+                            <!-- First column header is not rotated -->
+                            <th></th>
+                            <!-- Following headers are rotated -->
+                            {% for skill in skill_data %}
+                                <th class="rotate-45">
+                                    <div><span>{{ skill[0] }}</span></div>
+                                </th>
+                            {% endfor %}
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for user, skill_item in user_skill.iteritems()|sort(attribute=0) %}
+                            <tr>
+                                <td class="row-header">
+                                    <div>{{ user }}</div>
+                                </td>
+                                {% for skill in skill_data %}
+                                    <td class="level-{{skill_item[skill[0]]}}" >{{ skill_item[skill[0]] }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock page_content %}
 
 {# Scripts #}

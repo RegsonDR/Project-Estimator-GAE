@@ -49,6 +49,12 @@ class UserProfile(ndb.Model):
             return account_data.key.id()
         return False
 
+    def get_user_key(self):
+        account_data = AccountDetails.query(AccountDetails.email == self.UserEmail).get()
+        if account_data:
+            return account_data.key
+        return False
+
 
 
 class TaskProfile(ndb.Model):
@@ -116,6 +122,10 @@ class ProjectChat(ndb.Model):
 class SkillData(ndb.Model):
     Wks = ndb.KeyProperty(kind='WorkspaceDetails')
     skill_name = ndb.StringProperty()
+
+    def usage(self):
+        return UserSkill.query(UserSkill.skill_id==self.key.id()).count()
+
 
 
 class UserSkill(ndb.Model):

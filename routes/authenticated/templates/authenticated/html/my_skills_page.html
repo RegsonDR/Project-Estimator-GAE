@@ -33,9 +33,9 @@
                             <td style="    padding-left: 1rem;    padding-right: 1rem;">
                                 <span class="slidecontainer">
                                 <div class="skill-name">
-                                    {{ ranks[skill.skill_rating] }}
+                                    {{ ranks[skill.skill_rating-1] }}
                                 </div>
-                                    <input data-skill-id="{{skill.key.id()}}" type="range" min="0" max="4" value="{{ skill.skill_rating }}" class="slider">
+                                    <input data-skill-id="{{skill.key.id()}}" type="range" min="1" max="5" value="{{ skill.skill_rating }}" class="slider">
                                 </span>
                             </td>
                         </tr>
@@ -98,7 +98,7 @@
 
             $(".slider").on('change', function () {
                 ranks = ["Novice", "Advanced Beginner", "Competent","Proficient","Expert"];
-                $(this).parent().children("div").text(ranks[$(this).val()]);
+                $(this).parent().children("div").text(ranks[$(this).val()-1]);
 
                 $.post("{{url_for('ajax.alter_skill',wks_id=wks_data.key.id())}}",
                     {"skill_id":$(this).attr("data-skill-id"), "rating":$(this).val()});

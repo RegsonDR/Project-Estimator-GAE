@@ -136,6 +136,83 @@ def login_required(roles=None):
     return decorator
 
 
+@authenticated.route('/Workspace/<int:wks_id>/SkillsMatrix', methods=['GET', 'POST'])
+@login_required({'admin', 'manager'})
+def skills_matrix_page(wks_id, **kwargs):
+    skill_data = [(skill.skill_name, skill.key.id()) for skill in
+                  SkillData.query(SkillData.Wks == kwargs['user'].wks_key).fetch(
+                      projection=[SkillData.skill_name]) if skill.usage() > 0]
+
+    users_data = [(user.get_name(), user.get_user_key()) for user in
+                  UserProfile.query(
+                      UserProfile.Wks == kwargs['user'].wks_key,
+                      UserProfile.invitation_accepted == True,
+                      UserProfile.disabled == False).fetch()
+                  ]
+
+    user_skill = DictMissKey()
+    for user in users_data:
+        for skill in skill_data:
+            test = UserSkill.query(UserSkill.Wks == kwargs['user'].wks_key,
+                                   UserSkill.User == user[1],
+                                   UserSkill.skill_id == skill[1]
+                                   ).get()
+            if test:
+                user_skill[user[0]][skill[0]] = test.skill_rating
+            else:
+                user_skill[user[0]][skill[0]] = 0
+
+    for user, skill in user_skill.iteritems():
+        print user, '-->', skill
+
+    return render_template('authenticated/html/skills_matrix_page.html',
+                           skill_data=skill_data,
+                           user_skill=user_skill,
+                           user_data=kwargs['user'],
+                           wks_data=kwargs['user'].get_wks_data(),
+                           SIDEBAR=SIDEBAR)
+
+@authenticated.route('/Workspace/<int:wks_id>/NewProject', methods=['GET', 'POST'])
+@login_required({'admin', 'manager'})
+def new_project_page(wks_id, **kwargs):
+    new_project = NewProject()
+
+    if request.method == 'POST':
+        if new_project.validate_on_submit():
+            project_data = DictMissKey()
+            taskid_list = []
+            # Get all data
+            for key in request.form.keys():
+                # Extract ID
+                component = [p[:-1] for p in key.split('[')][1:]
+                if len(component) is 0:
+                    project_data[key] = request.form[key]
+                else:
+                    task_id = component[0]
+                    element = component[1]
+
+                    if task_id not in taskid_list:
+                        taskid_list.extend(task_id)
+                    dic_position = taskid_list.index(task_id)
+
+                    if element == "Skills" or element == "Developers":
+                        project_data['Task'][dic_position][element] = request.form.getlist(
+                            'Task[' + task_id + '][' + element + ']')
+                    else:
+                        project_data['Task'][dic_position][element] = request.form[
+                            'Task[' + task_id + '][' + element + ']']
+            project_id = create_project(kwargs['user'].wks_key, kwargs['user'].user_email, project_data)
+            time.sleep(1)
+            return redirect(url_for('authenticated.view_project_page', wks_id=wks_id, project_id=project_id))
+
+    return render_template('authenticated/html/new_project_page.html',
+                           form=new_project,
+                           user_data=kwargs['user'],
+                           wks_data=kwargs['user'].get_wks_data(),
+                           SIDEBAR=SIDEBAR)
+
+
+
 @authenticated.route('/Workspace/<int:wks_id>/ViewSkills/<int:user_id>', methods=['GET', 'POST'])
 @authenticated.route('/Workspace/<int:wks_id>/MySkills', methods=['GET', 'POST'])
 @login_required({'admin', 'manager'})
@@ -151,9 +228,9 @@ def my_skills_page(wks_id, user_id=None, **kwargs):
                                                     ).fetch()]
 
     if request.method == "POST":
-        create_skill(new_skill.skill_name.data,kwargs['user'].wks_key,look_up_key)
+        create_skill(new_skill.skill_name.data, kwargs['user'].wks_key, look_up_key)
         time.sleep(1)
-        return redirect(url_for('authenticated.my_skills_page',wks_id=wks_id))
+        return redirect(url_for('authenticated.my_skills_page', wks_id=wks_id,user_id=user_id ))
 
     current_skills = UserSkill.query(UserSkill.Wks == kwargs['user'].wks_key, UserSkill.User == look_up_key).fetch()
 
@@ -207,15 +284,6 @@ def view_task_page(wks_id, project_id, task_id, **kwargs):
                            task_data=task_data,
                            developer_choices=developer_choices,
                            log_form=log_form,
-                           wks_data=kwargs['user'].get_wks_data(),
-                           SIDEBAR=SIDEBAR)
-
-
-@authenticated.route('/Workspace/<int:wks_id>/SkillsMatrix', methods=['GET', 'POST'])
-@login_required({'admin', 'manager'})
-def skills_matrix_page(wks_id, **kwargs):
-    return render_template('authenticated/html/skills_matrix_page.html',
-                           user_data=kwargs['user'],
                            wks_data=kwargs['user'].get_wks_data(),
                            SIDEBAR=SIDEBAR)
 
@@ -287,8 +355,6 @@ def my_invites(**kwargs):
 
 
 @authenticated.route('/')
-
-
 @authenticated.route('/Workspaces', methods=['GET', 'POST'])
 @login_required()
 def my_workspaces_page(**kwargs):
@@ -340,46 +406,6 @@ def my_profile_page(**kwargs):
 @login_required({'admin', 'manager'})
 def workspace_homepage(wks_id, **kwargs):
     return render_template('authenticated/html/workspace_homepage.html',
-                           user_data=kwargs['user'],
-                           wks_data=kwargs['user'].get_wks_data(),
-                           SIDEBAR=SIDEBAR)
-
-
-@authenticated.route('/Workspace/<int:wks_id>/NewProject', methods=['GET', 'POST'])
-@login_required({'admin', 'manager'})
-def new_project_page(wks_id, **kwargs):
-    new_project = NewProject()
-
-    if request.method == 'POST':
-        if new_project.validate_on_submit():
-            project_data = DictMissKey()
-            taskid_list = []
-            # Get all data
-            for key in request.form.keys():
-                # Extract ID
-                component = [p[:-1] for p in key.split('[')][1:]
-                if len(component) is 0:
-                    project_data[key] = request.form[key]
-                else:
-                    task_id = component[0]
-                    element = component[1]
-
-                    if task_id not in taskid_list:
-                        taskid_list.extend(task_id)
-                    dic_position = taskid_list.index(task_id)
-
-                    if element == "Skills" or element == "Developers":
-                        project_data['Task'][dic_position][element] = request.form.getlist(
-                            'Task[' + task_id + '][' + element + ']')
-                    else:
-                        project_data['Task'][dic_position][element] = request.form[
-                            'Task[' + task_id + '][' + element + ']']
-            project_id = create_project(kwargs['user'].wks_key, kwargs['user'].user_email, project_data)
-            time.sleep(1)
-            return redirect(url_for('authenticated.view_project_page', wks_id=wks_id, project_id=project_id))
-
-    return render_template('authenticated/html/new_project_page.html',
-                           form=new_project,
                            user_data=kwargs['user'],
                            wks_data=kwargs['user'].get_wks_data(),
                            SIDEBAR=SIDEBAR)

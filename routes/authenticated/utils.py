@@ -204,6 +204,6 @@ def create_skill(skill_id,wk_key,user_key):
         Wks=wk_key,
         User=user_key,
         skill_id=int(skill_id),
-        skill_rating=0
+        skill_rating=1
     ).put()
     return True
