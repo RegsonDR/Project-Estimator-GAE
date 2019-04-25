@@ -84,16 +84,16 @@
                                                     </div>
 
                                                     <div class="form-row mb-3" style="justify-content:center">
-                                                        <select data-placeholder="Select Skills(s)" data-task-number="1" name="Task[1][Skills]" class="col-10 chosen-select form-control" multiple>
-                                                        <option value="1">Python</option>
-                                                        <option value="2">Java</option>
+                                                        <select data-placeholder="Select Skills(s)" data-task-number="1" name="Task[1][Skills]" class="col-10 skill-select chosen-select form-control" multiple>
+                                                        {% for skill in skill_choices %}
+                                                       <option value="{{ skill[0] }}">{{ skill[1] }}</option>
+                                                       {% endfor %}
                                                     </select>
                                                     </div>
 
                                                     <div class="form-row"  style="justify-content:center">
-                                                     <select data-task-number="1" data-placeholder="Select Developer(s)" name="Task[1][Developers]" class="col-10 chosen-select form-control" multiple>
-                                                        <option value="5629499534213120">Regson</option>
-                                                        <option value="5610258080727040">Marcel</option>
+                                                     <select data-task-number="1" data-placeholder="Select Developer(s)" name="Task[1][Developers]" class="col-10 developer-select chosen-select form-control" multiple>
+                                                            <option data-skills="Python" value="5629499534213120">Regson Dr</option>
                                                     </select>
                                                     </div>
                                                 </div>
@@ -167,16 +167,17 @@
                     '                                </div>\n' +
                     '\n' +
                     '                                <div class="form-row mb-3" style="justify-content:center">\n' +
-                    '                                    <select data-placeholder="Select Skills(s)" data-task-number="'+task_number+'" name="Task['+task_number+'][Skills]" class="col-10 chosen-select form-control" multiple>\n' +
-                    '                                    <option value="1">Python</option>\n' +
-                    '                                    <option value="2">Java</option>\n' +
+                    '                                    <select data-placeholder="Select Skills(s)" data-task-number="'+task_number+'" name="Task['+task_number+'][Skills]" class="col-10 skill-select chosen-select form-control" multiple>\n' +
+                                                       {% for skill in skill_choices %}
+                                                       '<option value="{{ skill[0] }}">{{ skill[1] }}</option>\n'+
+                                                        {% endfor %}
                     '                                </select>\n' +
                     '                                </div>\n' +
                     '\n' +
                     '                                <div class="form-row"  style="justify-content:center">\n' +
-                    '                                 <select data-task-number="'+task_number+'" data-placeholder="Select Developer(s)" name="Task['+task_number+'][Developers]" class="col-10 chosen-select form-control" multiple>\n' +
-                    '                                    <option value="5629499534213120">Regson</option>\n' +
-                    '                                    <option value="5610258080727040">Test Manager</option>\n' +
+                    '                                 <select disabled data-task-number="'+task_number+'" data-placeholder="Select Developer(s)" name="Task['+task_number+'][Developers]" class="col-10 developer-select chosen-select form-control" multiple>\n' +
+                    '                                    <option value="5629499534213120">Regson Dr</option>\n' +
+                    '                                    \n' +
                     '\n' +
                     '                                </select>\n' +
                     '                                </div>\n' +
@@ -203,8 +204,8 @@
                     '                        <div class="card-body my-card-body">\n' +
                     '                            <span name="description" data-task-number="'+task_number+'" class="card-text" style="flex-grow: 1;">'+(description)+'</span>\n' +
                     '                            <div class="d-flex justify-content-between">\n' +
-                    '                            <span class="d-flex align-items-start"><i class="far fa-clock" name="allocatedTime" data-task-number="'+task_number+'" > '+timeConvert(minutes)+'</i></span>\n' +
-                    '                            <span class="d-flex align-items-end">test</span>\n' +
+                    '                            <span class="d-flex align-items-start"></span>\n' +
+                    '                            <span class="d-flex align-items-end"><i class="far fa-clock" name="allocatedTime" data-task-number='+task_number+'>'+timeConvert(minutes)+'</i></span>\n' +
                     '                            </div>\n' +
                     '                        </div>\n' +
                     '\n' +
@@ -260,6 +261,28 @@
               $(".chosen-select").chosen({width: "80%"});
               updateTotal(1);
             });
+
+            // On close, clear modal.
+
+             $('#modelFrame').on("change",'.skill-select', function () {
+                task_number = $(this).attr('data-task-number');
+                developers =  $("select[name='Task["+task_number+"][Developers]'][data-task-number="+task_number+"]");
+                developers.val([]).trigger('chosen:updated');
+                {#opt_groups = ["Python"];#}
+
+
+                if (!$(this).val() || $(this).val()=="" ){
+                    developers.prop('disabled', true).trigger("chosen:updated");
+                } else {
+                    chosen_skills = $(this).val();
+
+                    developers.prop('disabled', false).trigger("chosen:updated");
+                }
+
+
+
+             });
+
 
         });
     </script>

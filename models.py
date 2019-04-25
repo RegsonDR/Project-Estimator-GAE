@@ -71,6 +71,12 @@ class ProjectDetails(ndb.Model):
     project_status = ndb.StringProperty(choices={'Running', 'Closed', 'On Hold'})
     project_stage = ndb.StringProperty()
 
+    def delete(self):
+        tasks = TaskDetails.query(TaskDetails.Project == self.key).fetch()
+        for task in tasks:
+            task.delete()
+        self.key.delete()
+        return True
 
 class TaskDetails(ndb.Model):
     Project = ndb.KeyProperty(kind='ProjectDetails')
@@ -88,6 +94,19 @@ class TaskDetails(ndb.Model):
 
     def get_logs(self):
         return TaskLog.query(TaskLog.task_id == self.key.id()).order(TaskLog.log_time).fetch()
+
+    def delete(self):
+        logs = TaskLog.query(TaskLog.task_id == self.key.id()).order(TaskLog.log_time).fetch(keys_only=True)
+        ndb.delete_multi(logs)
+        self.key.delete()
+        return True
+
+    def remove_minutes(self, minutes):
+        self.task_logged_minutes = self.task_logged_minutes - minutes
+        if self.put():
+            return True
+        return False
+
 
 class TaskLog(ndb.Model):
     task_id = ndb.IntegerProperty()
@@ -136,3 +155,7 @@ class UserSkill(ndb.Model):
 
     def skill_name(self):
         return SkillData.get_by_id(self.skill_id).skill_name
+
+    def user_name(self):
+        data = AccountDetails.get_by_id(self.User.id())
+        return data.first_name + " " + data.last_name

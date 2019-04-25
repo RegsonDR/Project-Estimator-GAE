@@ -79,7 +79,7 @@
                         <tr>
                             <td>{{ log.get_username() }}</td>
                             <td>{{ log.log_minutes | int_to_minhour }}</td>
-                            <td style="position: relative;">{{ log.log_comments }} <sub class="timestamp"> {{ log.log_time.strftime('%H:%M | %d-%m-%Y') }} </sub> </td>
+                            <td style="position: relative;">{{ log.log_comments }} <span class="timestamp"><sub> {{ log.log_time.strftime('%H:%M | %d-%m-%Y') }}</sub> <a href="#" class="badge badge-danger delete-log" data-log-id="{{ log.key.id() }}">Delete</a></span></td>
                         </tr>
                         {%  endfor %}
                         </tbody>
@@ -92,6 +92,12 @@
 <a class="fa btn log-task" style="display: table;"  data-toggle="modal" data-target="#LogTask" href="javascript:void(0)">
     <span style="display: table-cell; vertical-align: middle;">
         <i class="fas fa-calendar-plus"></i>
+    </span>
+</a>
+
+<a class="fa btn delete-task" style="display: table;"  data-toggle="modal" data-target="#DeleteTask" href="javascript:void(0)">
+    <span style="display: table-cell; vertical-align: middle;">
+        <i class="fas fa-trash-alt"></i>
     </span>
 </a>
 
@@ -130,6 +136,30 @@
     </div>
 </div>
 
+
+<div class="modal" id="DeleteTask" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalCenterTitle">Confirmation</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+        <form style="font-size:15px;" method="POST" >
+            <div class="modal-body">
+                Are you sure you would like to delete this task?
+      </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button id="DeleteConfirm" type="button" class="btn btn-primary" data-dismiss="modal">Confirm</button>
+      </div>
+        </form>
+    </div>
+  </div>
+</div>
+
+
 {% endblock page_content %}
 
 {# Scripts #}
@@ -162,23 +192,31 @@
 
             var minutes = $('#log_minutes').val();
             var comments = $('#log_comments').val();
-            $.post("{{url_for('ajax.save_task',task_id=task_data.key.id())}}",
+            $.post("{{url_for('ajax.save_logs',task_id=task_data.key.id())}}",
                     {"minutes": minutes, "comments": comments });
-            var currentdate = new Date();
-            var datetime = ("0" + currentdate.getHours()).slice(-2) +
-            ":"+ ("0" + currentdate.getMinutes()).slice(-2) +
-            " | " + ("0" + currentdate.getDate()).slice(-2) +
-            "-" + ("0" + (currentdate.getMonth()+1)).slice(-2) +
-            "-" + currentdate.getFullYear();
-
-            table_row = `<tr><td>`+username+`</td><td>`+timeConvert(minutes)+`</td><td style="position: relative;">`+escapeHtml(comments)+`<sub class="timestamp">`+datetime+`</sub></td></tr>`;
-            $('#body-logs').append(table_row);
-            $('#log_minutes').val("");
-            $('#log_comments').val("");
+            setTimeout(function(){
+                      location.reload()
+                  }, 1000);
 
         });
 
+        $('#DeleteConfirm').on('click', function () {
 
+            $.post("{{url_for('ajax.delete_tasks',task_id=task_data.key.id())}}");
+            setTimeout(function(){
+                     window.location.replace("{{ url_for('authenticated.view_project_page', wks_id=user_data.get_wks_data().key.id(), project_id=user_data.get_project_data().key.id())  }}");
+                  }, 1000);
+
+        });
+
+        $('.delete-log').on('click', function () {
+                $.post("{{url_for('ajax.delete_logs',task_id=task_data.key.id())}}",
+                    {"log-id":$(this).attr("data-log-id")}
+                );
+                setTimeout(function(){
+                      location.reload()
+                  }, 1000);
+        });
     });
 
     </script>

@@ -1,4 +1,4 @@
-from models import AccountDetails, ProjectChat, TaskLog, UserProfile, UserSkill
+from models import AccountDetails, ProjectChat, TaskLog, UserProfile, UserSkill, TaskDetails, ProjectDetails
 from flask import request, url_for, render_template
 from google.appengine.api import mail, urlfetch
 from app_statics import APP_NAME
@@ -134,5 +134,42 @@ def update_user_skill(user_skill_id,rating):
         return True
     if not rating:
         data.key.delete()
+        return True
+    return False
+
+def delete_task(task_id):
+    task = TaskDetails.get_by_id(task_id)
+    if task.delete():
+        return True
+    return False
+
+def delete_log(task_id,log_id):
+    log = TaskLog.get_by_id(log_id)
+    minutes = log.log_minutes
+    log.key.delete()
+    task = TaskDetails.get_by_id(task_id)
+    if task.remove_minutes(minutes):
+        return True
+    return False
+
+
+def create_task(project_id, Title, aMinutes, Description, Skills, Developers):
+    project = ProjectDetails.get_by_id(int(project_id))
+    task_data = TaskDetails(
+        Project=project.key,
+        task_name=Title,
+        task_description=Description,
+        task_skills=map(int, Skills),
+        task_developers=map(int, Developers),
+        task_aminutes=int(aMinutes),
+        task_status="Open"
+    )
+    if task_data.put():
+        return True
+    return False
+
+def delete_project(project_id):
+    project = ProjectDetails.get_by_id(project_id)
+    if project.delete():
         return True
     return False

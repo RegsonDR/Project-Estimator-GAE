@@ -22,6 +22,8 @@ def decode_base64(string):
 def int_to_minhour(minutes):
     if isinstance(minutes, int):
         return '{:02d}:{:02d}'.format(*divmod(minutes, 60))
+    else:
+        return '00:00'
 
 
 def create_initials(full_name):
@@ -34,6 +36,8 @@ def create_initials(full_name):
 app.jinja_env.filters['decodeb64'] = decode_base64
 app.jinja_env.filters['int_to_minhour'] = int_to_minhour
 app.jinja_env.filters['create_initials'] = create_initials
+app.jinja_env.trim_blocks = True
+app.jinja_env.lstrip_blocks = True
 
 
 if __name__ == '__main__':

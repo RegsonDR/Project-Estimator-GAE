@@ -58,7 +58,7 @@ def create_project(wks_key, user_email, form_data):
             task_data.put()
 
     flash('Project successfully created.', 'success')
-    return project_data
+    return project_data.key.id()
 
 
 def get_user_data_by_email(email):
@@ -75,8 +75,8 @@ def get_wks_data_by_id(datastore_id):
 def get_project_data_by_id(project_id):
     return ProjectDetails.get_by_id(project_id)
 
-def get_task_data_by_id(project_id):
-    return TaskDetails.get_by_id(project_id)
+def get_task_data_by_id(task_id):
+    return TaskDetails.get_by_id(task_id)
 
 def check_access(wks_key, user_email):
     return UserProfile.query(UserProfile.Wks == wks_key, UserProfile.invitation_accepted == True, UserProfile.disabled == False,
