@@ -117,6 +117,7 @@ def account_switch(wks_key, email):
         return True
     return False
 
+
 def change_user_role(wks_key, email, role):
     profile = UserProfile.query(UserProfile.Wks == wks_key, UserProfile.UserEmail == email).get()
     profile.role = role
@@ -125,7 +126,7 @@ def change_user_role(wks_key, email, role):
     return False
 
 
-def update_user_skill(user_skill_id,rating):
+def update_user_skill(user_skill_id, rating):
     data = UserSkill.get_by_id(user_skill_id)
     if rating:
         data.skill_rating = int(rating)
@@ -137,13 +138,15 @@ def update_user_skill(user_skill_id,rating):
         return True
     return False
 
+
 def delete_task(task_id):
     task = TaskDetails.get_by_id(task_id)
     if task.delete():
         return True
     return False
 
-def delete_log(task_id,log_id):
+
+def delete_log(task_id, log_id):
     log = TaskLog.get_by_id(log_id)
     minutes = log.log_minutes
     log.key.delete()
@@ -153,12 +156,14 @@ def delete_log(task_id,log_id):
     return False
 
 
-def create_task(project_id, Title, aMinutes, Description, Skills, Developers):
+def create_task(project_id, Title, aMinutes, start, finish, Description, Skills, Developers):
     project = ProjectDetails.get_by_id(int(project_id))
     task_data = TaskDetails(
         Project=project.key,
         task_name=Title,
         task_description=Description,
+        task_startdate=datetime.strptime(str(start), '%d/%m/%Y'),
+        task_finishbydate=datetime.strptime(str(finish), '%d/%m/%Y'),
         task_skills=map(int, Skills),
         task_developers=map(int, Developers),
         task_aminutes=int(aMinutes),
@@ -167,6 +172,7 @@ def create_task(project_id, Title, aMinutes, Description, Skills, Developers):
     if task_data.put():
         return True
     return False
+
 
 def delete_project(project_id):
     project = ProjectDetails.get_by_id(project_id)

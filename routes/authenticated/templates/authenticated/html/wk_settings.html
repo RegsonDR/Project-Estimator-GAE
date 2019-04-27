@@ -1,0 +1,39 @@
+{% extends "authenticated/html/includes/Base_Template.html" %}
+
+{% block header_content %}
+    <link href="{{ url_for('static', filename='authenticated/CSS/wk_settings.css') }}" rel="stylesheet"
+          xmlns="http://www.w3.org/1999/html">{% endblock header_content %}
+
+{% block page_header %}
+    <h1 style="margin-bottom: 0px;">Workspace Settings</h1>
+{% endblock page_header %}
+
+{% block page_content %}
+    <div class="container">
+        <form method="POST" class="my-page">
+            {{ form.hidden_tag() }}
+            <div class="form-row" style="justify-content:center">
+                <div class="col-6 input-group mb-2">
+                    <div class="input-group-prepend">
+                        {{ form.workspace_name.label(class="input-group-text") }}
+                    </div>
+                    {{ form.workspace_name(class="form-control") }}
+                </div>
+            </div>
+            <div class="form-row" style="justify-content:center">
+                <div class="col-6 input-group mb-2">
+                    <div class="input-group-prepend">
+                        {{ form.allow_dev_skills.label(class="input-group-text") }}
+                    </div>
+                    {{ form.allow_dev_skills(class="form-control") }}
+                </div>
+            </div>
+            {{ form.submit(class="fa btn save-button", value='') }}
+        </form>
+    </div>
+
+{% endblock page_content %}
+
+{# Scripts #}
+{% block script %}
+{% endblock script %}

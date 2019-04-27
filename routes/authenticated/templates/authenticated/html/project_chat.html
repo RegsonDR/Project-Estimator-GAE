@@ -41,8 +41,12 @@
                 </div>
             </div>
         </div>
-
     </div>
+         <a class="fa btn back-button" style="display: table;" href="{{ url_for('authenticated.view_project_page', wks_id=user_data.wks_key.id(), project_id=project_data.key.id()) }}">
+    <span style="display: table-cell; vertical-align: middle;">
+        <i class="fas fa-arrow-left"></i>
+    </span>
+    </a>
 {% endblock page_content %}
 
 {# Scripts #}

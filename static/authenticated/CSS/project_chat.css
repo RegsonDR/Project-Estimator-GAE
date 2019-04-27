@@ -78,3 +78,24 @@
     color: #fff;
     background-color: #6c757d;
 }
+
+.back-button{
+    z-index: 1;
+    bottom: 20px;
+    position: fixed;
+    left: 25px;
+    background-color: #212529;
+    color: rgba(255,255,255,.84) !important;
+    border-radius: 50%;
+    font-size: 20px;
+    height: 48px;
+    min-width: 48px;
+    width: 48px;
+    cursor: pointer;
+}
+
+.back-button:hover {
+    background-color: rgba(255,255,255,.84);
+    text-decoration: none;
+    color: #212529 !important;
+}

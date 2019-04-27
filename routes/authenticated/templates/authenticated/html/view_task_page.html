@@ -1,11 +1,12 @@
 {% extends "authenticated/html/includes/Base_Template.html" %}
 
 {% block header_content %}
-        <link href="{{ url_for('static', filename='authenticated/CSS/view_task_page.css') }}" rel="stylesheet" xmlns="http://www.w3.org/1999/html">
+    <link href="{{ url_for('static', filename='authenticated/CSS/view_task_page.css') }}" rel="stylesheet"
+          xmlns="http://www.w3.org/1999/html">
 {% endblock header_content %}
 
 {% block page_header %}
-    <h1 style="margin-bottom: 0px;" > {{user_data.get_project_data().project_name}}</h1>
+    <h1 style="margin-bottom: 0px;">{{ user_data.task_data.task_name }}</h1>
 {% endblock page_header %}
 
 {% block page_content %}
@@ -14,23 +15,44 @@
             <form method="POST" autocomplete="off">
                 {{ form.hidden_tag() }}
                 <div class="form-row" style="justify-content:center">
-                    <div class="col-5 input-group mb-2">
+                    <div class="col-4 input-group mb-2">
                         <div class="input-group-prepend">
                             {{ form.task_name.label(class="input-group-text") }}
                         </div>
                         {{ form.task_name(class="form-control") }}
                     </div>
-                    <div class="col-3 input-group mb-2">
+                     <div class="col-4 input-group mb-2">
                         <div class="input-group-prepend">
-                            {{ form.task_aminutes.label(class="input-group-text") }}
+                            {{ form.parent_task.label(class="input-group-text") }}
                         </div>
-                        {{ form.task_aminutes(class="form-control") }}
+                        {{ form.parent_task(class="form-control") }}
                     </div>
                     <div class="col-3 input-group mb-2">
                         <div class="input-group-prepend">
                             {{ form.task_status.label(class="input-group-text") }}
                         </div>
                         {{ form.task_status(class="form-control") }}
+                    </div>
+                </div>
+                <div class="form-row" style="justify-content:center">
+                    <div class="col-4 input-group mb-2">
+                        <div class="input-group-prepend">
+                            {{ form.task_startdate.label(class="input-group-text") }}
+                        </div>
+                        {{ form.task_startdate(class="form-control") }}
+                    </div>
+                    <div class="col-4 input-group mb-2">
+                        <div class="input-group-prepend">
+                            {{ form.task_finishbydate.label(class="input-group-text") }}
+                        </div>
+                        {{ form.task_finishbydate(class="form-control") }}
+                    </div>
+
+                    <div class="col-3 input-group mb-2">
+                        <div class="input-group-prepend">
+                            {{ form.task_aminutes.label(class="input-group-text") }}
+                        </div>
+                        {{ form.task_aminutes(class="form-control") }}
                     </div>
                 </div>
 
@@ -54,12 +76,23 @@
                         <div class="input-group-prepend">
                             {{ form.task_developers.label(class="input-group-text") }}
                         </div>
-                    <select class="chosen-select" id="{{ form.task_developers.name }}" name="{{ form.task_developers.name }}" multiple required>
-                        {% for option in developer_choices %}
-                            <option{% if option[2] == True %} disabled{% endif %}
-                                    {% if option[0] in form.task_developers.data %} selected{% endif %} value="{{ option[0] }}">{{ option[1] }}</option>
-                        {% endfor %}
-                    </select>
+                        <select {% if user_data.get_role() == "developer" %}
+                            disabled
+                        {% endif %}
+                            data-placeholder="Select Developer(s)" id="{{ form.task_developers.name }}"
+                            name="{{ form.task_developers.name }}" class="chosen-select" multiple>
+                            {% for option in dev_options.iteritems() %}
+                                <option
+                                        {% if option[1]['disabled']==True %} disabled {% endif %}
+                                        {% for choice in form.task_developers.data %}
+                                            {% if option[0]==choice %}
+                                                                             selected
+                                            {% endif %}
+                                        {% endfor %}
+                                                                             data-skills="{{ option[1]['skills'] }}"
+                                                                             value="{{ option[0] }}">{{ option[1]['name']| capitalize }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                 </div>
                 {{ form.submit(class="fa btn save-button", value='') }}
@@ -76,12 +109,18 @@
                         </thead>
                         <tbody id="body-logs">
                         {% for log in task_data.get_logs() %}
-                        <tr>
-                            <td>{{ log.get_username() }}</td>
-                            <td>{{ log.log_minutes | int_to_minhour }}</td>
-                            <td style="position: relative;">{{ log.log_comments }} <span class="timestamp"><sub> {{ log.log_time.strftime('%H:%M | %d-%m-%Y') }}</sub> <a href="#" class="badge badge-danger delete-log" data-log-id="{{ log.key.id() }}">Delete</a></span></td>
-                        </tr>
-                        {%  endfor %}
+                            <tr>
+                                <td>{{ log.get_username() }}</td>
+                                <td>{{ log.log_minutes | int_to_minhour }}</td>
+                                <td style="position: relative;">{{ log.log_comments }} <span
+                                        class="timestamp"><sub> {{ log.log_time.strftime('%H:%M | %d-%m-%Y') }}</sub>
+                                    {% if user_data.get_role() != "developer" %}
+                                        <a href="#" class="badge badge-danger delete-log"
+                                           data-log-id="{{ log.key.id() }}">Delete</a>
+                                    {% endif %}</span>
+                                </td>
+                            </tr>
+                        {% endfor %}
                         </tbody>
                     </table>
                 </div>
@@ -89,75 +128,95 @@
         </div>
     </div>
 
-<a class="fa btn log-task" style="display: table;"  data-toggle="modal" data-target="#LogTask" href="javascript:void(0)">
+    <a class="fa btn log-task" style="display: table;" data-toggle="modal" data-target="#LogTask"
+       href="javascript:void(0)">
     <span style="display: table-cell; vertical-align: middle;">
         <i class="fas fa-calendar-plus"></i>
     </span>
-</a>
+    </a>
 
-<a class="fa btn delete-task" style="display: table;"  data-toggle="modal" data-target="#DeleteTask" href="javascript:void(0)">
+    <a class="fa btn back-button" style="display: table;"
+       href="{{ url_for('authenticated.view_project_page', wks_id=user_data.wks_key.id(), project_id=project_id) }}">
     <span style="display: table-cell; vertical-align: middle;">
-        <i class="fas fa-trash-alt"></i>
+        <i class="fas fa-arrow-left"></i>
     </span>
-</a>
+    </a>
 
-<div class="modal" id="LogTask" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalCenterTitle">Please Enter Details</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-             <div class="form-row" style="justify-content:center">
-                    <div class="input-group mb-2">
-                        <div class="input-group-prepend">
-                            {{ log_form.log_minutes.label(class="input-group-text") }}
+        <a class="fa btn gantt-chart" style="display: table;" href="{{ url_for('authenticated.ganttchart',wks_id=wks_data.key.id(),project_id=user_data.get_project_data().key.id()) }}">
+    <span style="display: table-cell; vertical-align: middle;">
+        <i class="fas fa-stream"></i>
+    </span>
+    </a>
+
+
+    <div class="modal" id="LogTask" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalCenterTitle">Please Enter Details</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-row" style="justify-content:center">
+                        <div class="input-group mb-2">
+                            <div class="input-group-prepend">
+                                {{ log_form.log_minutes.label(class="input-group-text") }}
+                            </div>
+                            {{ log_form.log_minutes(class="form-control") }}
                         </div>
-                        {{ log_form.log_minutes(class="form-control") }}
+                    </div>
+                    <div class="form-row" style="justify-content:center">
+                        <div class="input-group mb-2">
+                            <div class="input-group-prepend">
+                                {{ log_form.log_comments.label(class="input-group-text") }}
+                            </div>
+                            {{ log_form.log_comments(class="form-control") }}
+                        </div>
                     </div>
                 </div>
-             <div class="form-row" style="justify-content:center">
-                    <div class="input-group mb-2">
-                        <div class="input-group-prepend">
-                            {{ log_form.log_comments.label(class="input-group-text") }}
-                        </div>
-                        {{ log_form.log_comments(class="form-control") }}
-                    </div>
-            </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-secondary" id="logTask" data-dismiss="modal">Add</button>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" id="logTask" data-dismiss="modal">Add</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
+    {% if user_data.get_role() != "developer" %}
 
-<div class="modal" id="DeleteTask" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalCenterTitle">Confirmation</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-        <form style="font-size:15px;" method="POST" >
-            <div class="modal-body">
-                Are you sure you would like to delete this task?
-      </div>
-            <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button id="DeleteConfirm" type="button" class="btn btn-primary" data-dismiss="modal">Confirm</button>
-      </div>
-        </form>
-    </div>
-  </div>
-</div>
+        <a class="fa btn delete-task" style="display: table;" data-toggle="modal" data-target="#DeleteTask"
+           href="javascript:void(0)">
+    <span style="display: table-cell; vertical-align: middle;">
+        <i class="fas fa-trash-alt"></i>
+    </span>
+        </a>
+
+        <div class="modal" id="DeleteTask" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalCenterTitle">Confirmation</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form style="font-size:15px;" method="POST">
+                        <div class="modal-body">
+                            Are you sure you would like to delete this task?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button id="DeleteConfirm" type="button" class="btn btn-primary" data-dismiss="modal">
+                                Confirm
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endif %}
 
 
 {% endblock page_content %}
@@ -166,58 +225,101 @@
 {% block script %}
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.css">
+        <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css">
+
     <script>
-    $(document).ready(function () {
-        var username = "{{user_data.get_user_data().first_name}} {{user_data.get_user_data().last_name}}";
+        $(document).ready(function () {
+             $('#task_startdate').datepicker({
+                format: 'dd/mm/yyyy',
+                startDate: '0d',
+                todayHighlight: 'true',
+                todayBtn: 'true'
+            });
 
-        $(".chosen-select").chosen({width: "67.5%"});
+            $('#task_finishbydate').datepicker({
+                format: 'dd/mm/yyyy',
+                startDate: '0d',
+                todayHighlight: 'true',
+                todayBtn: 'true'
+            });
 
-        function timeConvert(n) {
-                var hours = (n / 60);
-                var rhours = Math.floor(hours);
-                var minutes = (hours - rhours) * 60;
-                var rminutes = Math.round(minutes);
-                var numberStr = rminutes.toString();
-                if(numberStr.length < 2){
-                  numberStr = '0' + numberStr;
+            $(".chosen-select").chosen({width: "67.5%"});
+
+            {% if user_data.get_role() == "developer" %}
+                $(".chosen-select").prop('disabled', false);
+            {% endif %}
+
+            $("#submit").on('click', function () {
+
+                if (!$("#task_skills").val() || $("#task_skills").val() == "") {
+                    alert("Skills can not be left empty!");
+                    return false
                 }
-                return rhours + ":" + numberStr;
-            }
+                if (!$("#task_developers").val() || $("#task_developers").val() == "") {
+                    alert("Developers can not be left empty!");
+                    return false
+                }
+            });
 
-        function escapeHtml(unsafe) {
-            return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;").replace(/\//g, "&#x2f;");
-         }
 
-        $('#logTask').on('click', function () {
+            $('#logTask').on('click', function () {
 
-            var minutes = $('#log_minutes').val();
-            var comments = $('#log_comments').val();
-            $.post("{{url_for('ajax.save_logs',task_id=task_data.key.id())}}",
-                    {"minutes": minutes, "comments": comments });
-            setTimeout(function(){
-                      location.reload()
-                  }, 1000);
+                var minutes = $('#log_minutes').val();
+                var comments = $('#log_comments').val();
+                $.post("{{url_for('ajax.save_logs',task_id=task_data.key.id())}}",
+                    {"minutes": minutes, "comments": comments});
+                setTimeout(function () {
+                    location.reload()
+                }, 1000);
 
+            });
+            {% if user_data.get_role() != "developer" %}
+
+                $('#DeleteConfirm').on('click', function () {
+
+                    $.post("{{url_for('ajax.delete_tasks',task_id=task_data.key.id())}}");
+                    setTimeout(function () {
+                        window.location.replace("{{ url_for('authenticated.view_project_page', wks_id=user_data.get_wks_data().key.id(), project_id=user_data.get_project_data().key.id())  }}");
+                    }, 1000);
+
+                });
+
+                $('.delete-log').on('click', function () {
+                    $.post("{{url_for('ajax.delete_logs',task_id=task_data.key.id())}}",
+                        {"log-id": $(this).attr("data-log-id")}
+                    );
+                    setTimeout(function () {
+                        location.reload()
+                    }, 1000);
+                });
+
+                $('#task_skills').change(function () {
+                    developers = $("#task_developers");
+
+                    $('option', developers).each(function () {
+                        $(this).hide()
+                    });
+
+                    if (!$(this).val() || $(this).val() == "") {
+                        developers.prop('disabled', true).trigger("chosen:updated");
+                    } else {
+                        developers.prop('disabled', false).trigger("chosen:updated");
+                        $('option:selected', this).each(function () {
+                            selected_skill = $(this).text();
+                            $('option', developers).each(function () {
+                                user_skills = $(this).attr('data-skills').split(";");
+                                if (user_skills.includes(selected_skill)) {
+                                    $(this).show()
+                                }
+                            });
+                        });
+                    }
+                    developers.val([]).trigger('chosen:updated');
+                });
+            {% endif %}
         });
-
-        $('#DeleteConfirm').on('click', function () {
-
-            $.post("{{url_for('ajax.delete_tasks',task_id=task_data.key.id())}}");
-            setTimeout(function(){
-                     window.location.replace("{{ url_for('authenticated.view_project_page', wks_id=user_data.get_wks_data().key.id(), project_id=user_data.get_project_data().key.id())  }}");
-                  }, 1000);
-
-        });
-
-        $('.delete-log').on('click', function () {
-                $.post("{{url_for('ajax.delete_logs',task_id=task_data.key.id())}}",
-                    {"log-id":$(this).attr("data-log-id")}
-                );
-                setTimeout(function(){
-                      location.reload()
-                  }, 1000);
-        });
-    });
-
     </script>
 {% endblock script %}

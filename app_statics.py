@@ -6,11 +6,10 @@ SIDEBAR = {
             "label":"Projects",
             "view": "authenticated.workspace_homepage",
             "icon": "tachometer-alt",
-        },
-        {
-            "label": "New Project",
-            "view": "authenticated.new_project_page",
-            "icon": "folder-plus",
+        },{
+            "label": "Timelines",
+            "view": "authenticated.timelines",
+            "icon": "calendar-week",
         },{
             "label": "My Skills",
             "view": "authenticated.my_skills_page",
@@ -24,6 +23,10 @@ SIDEBAR = {
             "label": "Users",
             "view": "authenticated.users_page",
             "icon": "users-cog",
+        },{
+            "label": "Settings",
+            "view": "authenticated.wk_settings",
+            "icon": "cogs",
         }
     ],
     'manager': [
@@ -31,11 +34,10 @@ SIDEBAR = {
             "label": "Projects",
             "view": "authenticated.workspace_homepage",
             "icon": "tachometer-alt",
-        },
-        {
-            "label": "New Project",
-            "view": "authenticated.new_project_page",
-            "icon": "plus",
+        },{
+            "label": "Timelines",
+            "view": "authenticated.timelines",
+            "icon": "calendar-week",
         },{
             "label": "My Skills",
             "view": "authenticated.my_skills_page",
@@ -47,6 +49,19 @@ SIDEBAR = {
             "icon": "chart-area",
         }
     ],
-
-
+    'developer':[
+        {
+            "label": "Projects",
+            "view": "authenticated.workspace_homepage",
+            "icon": "tachometer-alt",
+        },{
+            "label": "Timelines",
+            "view": "authenticated.timelines",
+            "icon": "calendar-week",
+        },{
+            "label": "My Skills",
+            "view": "authenticated.my_skills_page",
+            "icon": "sliders-h",
+        }
+    ]
 }

@@ -14,6 +14,14 @@
     background-color: #fbe5d6;
 }
 
+.Open{
+    background-color: #e2f0d970!important;
+}
+
+.Closed{
+    background-color: #fbe5d670!important;
+}
+
 #all-tab, #open-tab, #closed-tab{
     margin: 0 0.5rem;
     color: black;
@@ -169,9 +177,9 @@ a { color: inherit; }
 
 .delete-project{
     z-index: 1;
-    bottom: 85px;
+    bottom: 20px;
     position: fixed;
-    right: 85px;
+    right: 140px;
     background-color: #af150d;
     color: rgba(255,255,255,.84) !important;
     border-radius: 50%;
@@ -183,8 +191,30 @@ a { color: inherit; }
     box-shadow: 0 1px 1.5px 0 rgba(0,0,0,.12), 0 1px 1px 0 rgba(0,0,0,.24);
 }
 
-.delete-project:hover{
-    background-color: rgba(153,153,153,.2);
+.delete-project:hover {
+    background-color: rgba(153, 153, 153, .2);
     text-decoration: none;
     color: #af150d !important;
+}
+
+.gantt-chart{
+    z-index: 1;
+    bottom: 140px;
+    position: fixed;
+    right: 25px;
+    background-color: #9b59b6;
+    color: rgba(255,255,255,.84) !important;
+    border-radius: 50%;
+    font-size: 20px;
+    height: 48px;
+    min-width: 48px;
+    width: 48px;
+    cursor: pointer;
+    box-shadow: 0 1px 1.5px 0 rgba(0,0,0,.12), 0 1px 1px 0 rgba(0,0,0,.24);
+}
+
+.gantt-chart:hover {
+    background-color: rgba(153, 153, 153, .2);
+    text-decoration: none;
+    color: #9b59b6 !important;
 }

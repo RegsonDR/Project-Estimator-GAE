@@ -29,10 +29,12 @@ def new_tasks(project_id, **kwargs):
     try:
         Title = request.form.get('title')
         aMinutes = request.form.get('aMinutes')
+        start = request.form.get('start')
+        finish =  request.form.get('finish')
         Description = request.form.get('description')
         Skills = request.form.getlist('skills[]')
         Developers = request.form.getlist('developers[]')
-        create_task(project_id, Title, aMinutes, Description, Skills, Developers)
+        create_task(project_id, Title, aMinutes, start, finish, Description, Skills, Developers)
         return jsonify({'Request': True})
     except:
         return jsonify({'Request': False})

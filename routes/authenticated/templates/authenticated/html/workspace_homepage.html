@@ -12,7 +12,7 @@
 
 {% block page_content %}
 
-{% macro ProduceProjectCards(ProjectsObject) -%}
+{% macro ProduceProjectCards(ProjectsObject, DateCheck) -%}
     {% if not ProjectsObject %}
        {{ ProduceNoRequestAlert() }}
     {% endif %}
@@ -31,7 +31,7 @@
         <span name="description" data-task-number="1" class="card-text" style="flex-grow: 1; text-align: start!important;">{{request.project_description|capitalize}}</span>
         <div class="d-flex justify-content-between">
         <span class="d-flex align-items-start"><div><i class="fas fa-tasks"></i>  {{user_data.get_open_task_number(request.key)}}/{{user_data.get_total_task_number(request.key)}}</div></span>
-        <span class="d-flex align-items-end"><div><i class="far fa-calendar-alt"></i> {{request.project_deadline}} </div></span>
+        <span class="d-flex align-items-end"><div><i class="far fa-calendar-alt"></i> {{request.project_deadline}} {% if request.project_deadline | check_late %}<span class="badge badge-danger">Late</span>{% endif %} </div></span>
         </div>
     </div>
         <a class="cover-card" href="{{ url_for('authenticated.view_project_page', wks_id=user_data.get_wks_data().key.id(), project_id=request.key.id()) }}"></a>
@@ -49,6 +49,7 @@
     </div>
 {%- endmacro %}
 <div class="container">
+
 <div class="card text-center" style=" border: 1px solid rgba(0,0,0,0.5);">
    <div class="card-header">
       <ul class="nav nav-pills nav-fill" id="Projects" role="tablist">
@@ -65,21 +66,108 @@
    </div>
    <div class="tab-content" id="RequestsContent" >
       <div class="tab-pane tab-cards fade show active" id="running" role="tabpanel" aria-labelledby="running-tab" >
-        {{ ProduceProjectCards(user_data.get_projects("Running")) }}
+        {{ ProduceProjectCards(user_data.get_projects("Running"),True) }}
       </div>
       <div class="tab-pane tab-cards fade" id="closed" role="tabpanel" aria-labelledby="closed-tab">
-        {{ ProduceProjectCards(user_data.get_projects("Closed")) }}
+        {{ ProduceProjectCards(user_data.get_projects("Closed"),False) }}
       </div>
       <div class="tab-pane tab-cards fade" id="on-hold" role="tabpanel" aria-labelledby="on-hold-tab">
-        {{ ProduceProjectCards(user_data.get_projects("On Hold")) }}
+        {{ ProduceProjectCards(user_data.get_projects("On Hold"),False) }}
       </div>
    </div>
 </div>
+{% if user_data.get_role()!="developer" %}
+
+<a class="fa btn new-project-button" data-toggle="modal" data-target="#NewProject" href="javascript:void(0)" >
+    <span style="display: table-cell; vertical-align: middle;">
+    <i class="fas fa-folder-plus"></i>
+    </span>
+</a>
+
+{% endif %}
 </div>
 
+    <div class="modal" id="NewProject" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalCenterTitle">Please Enter  Details</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+        <form style="font-size:15px;" autocomplete="off"  method="POST" >
+            <div class="modal-body">
+                {{ form.hidden_tag() }}
+            <div class="form-row" style="justify-content:center">
+                  <div class="col-11 input-group mb-2">
+                       <div class="input-group-prepend">
+                    {{ form.project_name.label(class="input-group-text") }}
+                </div>
+                      {{ form.project_name(class="form-control") }}
+                  </div>
+            </div>
+                <div class="form-row" style="justify-content:center">
+                  <div class="col-11 input-group mb-2">
+                      <div class="input-group-prepend">
+                          {{ form.project_start.label(class="input-group-text") }}
+                      </div>
+                    {{ form.project_start(class="datepicker form-control", data_provide="datepicker") }}
+                </div>
+                </div>
+                <div class="form-row" style="justify-content:center">
+                  <div class="col-11 input-group mb-2">
+                      <div class="input-group-prepend">
+                          {{ form.project_deadline.label(class="input-group-text") }}
+                      </div>
+                    {{ form.project_deadline(class="datepicker form-control", data_provide="datepicker") }}
+                </div>
+            </div>
+
+
+            <div class="form-row"  style="justify-content:center">
+                <div class="col-11 input-group mb-2">
+                    <div class="input-group-prepend">
+                        {{ form.project_description.label(class="input-group-text") }}
+                    </div>
+                    {{ form.project_description(class="form-control") }}
+                </div>
+            </div>
+            </div>
+            <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            {{form.submit(class="btn btn-secondary")}}
+      </div>
+        </form>
+    </div>
+  </div>
+</div>
 
 {% endblock page_content %}
 
 {# Scripts #}
 {% block script %}
+    {% if user_data.get_role()!="developer" %}
+
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css">
+
+    <script>
+
+        $(document).ready(function () {
+            $('#project_deadline').datepicker({
+                format: 'dd/mm/yyyy',
+                startDate: '0d',
+                todayHighlight:'true',
+                todayBtn:'true'
+            });
+            $('#project_start').datepicker({
+                format: 'dd/mm/yyyy',
+                startDate: '0d',
+                todayHighlight:'true',
+                todayBtn:'true'
+            });
+        });
+    </script>
+    {% endif %}
 {% endblock script %}

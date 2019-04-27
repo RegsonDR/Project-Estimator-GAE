@@ -25,10 +25,10 @@ class AccountDetails(ndb.Model):
 
 class WorkspaceDetails(ndb.Model):
     workspace_name = ndb.StringProperty()
+    allow_dev_skills = ndb.BooleanProperty()
 
 
 class UserProfile(ndb.Model):
-    # User = ndb.KeyProperty(kind='AccountDetails')
     UserEmail = ndb.StringProperty()
     Wks = ndb.KeyProperty(kind='WorkspaceDetails')
     workspace_name = ndb.StringProperty()
@@ -36,6 +36,8 @@ class UserProfile(ndb.Model):
     invitation_token = ndb.StringProperty()
     invitation_accepted = ndb.BooleanProperty()
     disabled = ndb.BooleanProperty()
+    _use_memcache = False
+    _use_cache = False
 
     def get_name(self):
         account_data = AccountDetails.query(AccountDetails.email == self.UserEmail).get()
@@ -67,16 +69,38 @@ class ProjectDetails(ndb.Model):
     project_manager = ndb.StringProperty()
     project_name = ndb.StringProperty()
     project_description = ndb.StringProperty()
+    project_start = ndb.StringProperty()
     project_deadline = ndb.StringProperty()
     project_status = ndb.StringProperty(choices={'Running', 'Closed', 'On Hold'})
     project_stage = ndb.StringProperty()
+    _use_memcache = False
+    _use_cache = False
 
     def delete(self):
         tasks = TaskDetails.query(TaskDetails.Project == self.key).fetch()
         for task in tasks:
             task.delete()
+        messages = ProjectChat.query(ProjectChat.project_id == self.key.id()).fetch()
+        for message in messages:
+            message.key.delete()
         self.key.delete()
         return True
+
+    def get_developers(self):
+        # get tasks
+        tasks = TaskDetails.query(TaskDetails.Project == self.key).fetch()
+        developers = []
+        for task in tasks:
+            for dev in task.task_developers:
+                developers.append(dev) if dev not in developers else developers
+        return developers
+
+    def get_pm_data(self):
+        account_data = AccountDetails.query(AccountDetails.email == self.project_manager).get()
+        if account_data:
+            return account_data.first_name + " " + account_data.last_name
+        return False
+
 
 class TaskDetails(ndb.Model):
     Project = ndb.KeyProperty(kind='ProjectDetails')
@@ -87,10 +111,11 @@ class TaskDetails(ndb.Model):
     task_developers = ndb.IntegerProperty(repeated=True)
     task_status = ndb.StringProperty(choices={'Open', 'Closed'})
     task_logged_minutes = ndb.IntegerProperty()
-
-    def get_username(self, log_developer):
-        account_data = AccountDetails.get_by_id(log_developer)
-        return account_data.first_name + " " + account_data.last_name
+    task_startdate = ndb.DateProperty()
+    task_finishbydate = ndb.DateProperty()
+    parent_task = ndb.IntegerProperty()
+    _use_memcache = False
+    _use_cache = False
 
     def get_logs(self):
         return TaskLog.query(TaskLog.task_id == self.key.id()).order(TaskLog.log_time).fetch()
@@ -106,6 +131,7 @@ class TaskDetails(ndb.Model):
         if self.put():
             return True
         return False
+
 
 
 class TaskLog(ndb.Model):
@@ -159,3 +185,10 @@ class UserSkill(ndb.Model):
     def user_name(self):
         data = AccountDetails.get_by_id(self.User.id())
         return data.first_name + " " + data.last_name
+
+    def disabled_check(self):
+        email = AccountDetails.get_by_id(self.User.id()).email
+        profile = UserProfile.query(UserProfile.Wks == self.Wks ,UserProfile.UserEmail == email).get()
+        if profile.invitation_accepted:
+                return profile.disabled
+        return True

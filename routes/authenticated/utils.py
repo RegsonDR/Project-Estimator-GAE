@@ -1,12 +1,15 @@
-from models import WorkspaceDetails, AccountDetails, UserProfile, ProjectDetails, TaskDetails, ProjectChat, SkillData, UserSkill
+from models import WorkspaceDetails, AccountDetails, UserProfile, ProjectDetails, TaskDetails, ProjectChat, SkillData, \
+    UserSkill
 from flask import flash, request, url_for, render_template
 from google.appengine.api import mail
 from app_statics import APP_NAME
 import uuid
 
+
 def create_wks(workspace_name, user_email):
     workspace_data = WorkspaceDetails(
-        workspace_name=workspace_name
+        workspace_name=workspace_name,
+        allow_dev_skills=True
     )
     if not workspace_data.put():
         flash('Workspace not created.', 'danger')
@@ -28,34 +31,20 @@ def create_wks(workspace_name, user_email):
     return workspace_data
 
 
-def create_project(wks_key, user_email, form_data):
+def create_project(wks_key, user_email, description,start, deadline, name):
     project_data = ProjectDetails(
         Wks=wks_key,
         project_manager=user_email,
-        project_name=form_data['project_name'],
-        project_description=form_data['project_description'],
-        project_deadline=form_data['project_deadline'],
+        project_name=name,
+        project_description=description,
+        project_start = start,
+        project_deadline=deadline,
         project_status="Running",
         project_stage="Planning"
     )
     if not project_data.put():
         flash('Project not created.', 'danger')
         return False
-
-    for task in form_data['Task']:
-        if form_data['Task'][task]['Developers']:
-            print form_data['Task'][task]
-            task_data = TaskDetails(
-                Project=project_data.key,
-                task_name=form_data['Task'][task]['Title'],
-                task_description=form_data['Task'][task]['Description'],
-                task_skills=map(int, form_data['Task'][task]['Skills']),
-                task_developers=map(int, form_data['Task'][task]['Developers']),
-                task_aminutes=int(form_data['Task'][task]['aMinutes']),
-                task_status="Open"
-            )
-
-            task_data.put()
 
     flash('Project successfully created.', 'success')
     return project_data.key.id()
@@ -72,14 +61,18 @@ def get_user_data_by_id(datastore_id):
 def get_wks_data_by_id(datastore_id):
     return WorkspaceDetails.get_by_id(datastore_id)
 
+
 def get_project_data_by_id(project_id):
     return ProjectDetails.get_by_id(project_id)
+
 
 def get_task_data_by_id(task_id):
     return TaskDetails.get_by_id(task_id)
 
+
 def check_access(wks_key, user_email):
-    return UserProfile.query(UserProfile.Wks == wks_key, UserProfile.invitation_accepted == True, UserProfile.disabled == False,
+    return UserProfile.query(UserProfile.Wks == wks_key, UserProfile.invitation_accepted == True,
+                             UserProfile.disabled == False,
                              UserProfile.UserEmail == user_email).get()
 
 
@@ -87,31 +80,68 @@ def check_project_access(projects_data, user_email, role):
     if role == "admin":
         return True
     if role == "manager":
+        project = ProjectDetails.get_by_id(projects_data.key.id())
+        user_id = AccountDetails.query(AccountDetails.email == user_email).get().key.id()
+        if user_id in project.get_developers():
+            return True
         if projects_data.project_manager == user_email:
             return True
-
+    if role == "developer":
+        project = ProjectDetails.get_by_id(projects_data.key.id())
+        user_id = AccountDetails.query(AccountDetails.email == user_email).get().key.id()
+        if user_id in project.get_developers():
+            return True
     return False
 
 
 def get_workspaces(user_email):
-    wks_objects = UserProfile.query(UserProfile.UserEmail == user_email,  UserProfile.disabled == False,
+    wks_objects = UserProfile.query(UserProfile.UserEmail == user_email, UserProfile.disabled == False,
                                     UserProfile.invitation_accepted == True).fetch()
     return wks_objects
 
 
-def get_projects(wks_key, role, user_email, project_status):
+def get_all_projects(wks_key, role, user_email, user_id):
+    if role == "admin":
+        project_objects = ProjectDetails.query(
+            ProjectDetails.Wks == wks_key
+        ).fetch()
+    elif role == "manager":
+        project_objects = []
+        projects = ProjectDetails.query(ProjectDetails.Wks == wks_key).fetch()
+        for project in projects:
+            if user_id in project.get_developers() or project.project_manager == user_email:
+                project_objects.append(project)
+    elif role == "developer":
+        projects = ProjectDetails.query(ProjectDetails.Wks == wks_key
+                                        ).fetch()
+        project_objects = []
+        for project in projects:
+            if user_id in project.get_developers():
+                project_objects.append(project)
+    return project_objects
+
+
+def get_projects(wks_key, role, user_email, project_status, user_id):
     if role == "admin":
         project_objects = ProjectDetails.query(
             ProjectDetails.Wks == wks_key,
             ProjectDetails.project_status == project_status
         ).fetch()
-    else:
-        project_objects = ProjectDetails.query(
-            ProjectDetails.Wks == wks_key,
-            ProjectDetails.project_status == project_status,
-            ProjectDetails.project_manager == user_email
-        ).fetch()
+    elif role == "manager":
+        project_objects = []
+        projects = ProjectDetails.query(ProjectDetails.Wks == wks_key,
+                                        ProjectDetails.project_status == project_status).fetch()
+        for project in projects:
+            if user_id in project.get_developers() or project.project_manager == user_email:
+                project_objects.append(project)
 
+    elif role == "developer":
+        projects = ProjectDetails.query(ProjectDetails.Wks == wks_key,
+                                        ProjectDetails.project_status == project_status).fetch()
+        project_objects = []
+        for project in projects:
+            if user_id in project.get_developers():
+                project_objects.append(project)
     return project_objects
 
 
@@ -172,24 +202,31 @@ def verify_invite(code, email):
     flash('Invitation is invalid', 'danger')
     return False
 
+
 def get_chat_messages(project_id):
-    messages = ProjectChat.query(ProjectChat.project_id == project_id).order(ProjectChat.message_time).fetch(projection=[ProjectChat.username,
-                                                                                         ProjectChat.message,ProjectChat.message_time,ProjectChat.email,ProjectChat.role])
+    messages = ProjectChat.query(ProjectChat.project_id == project_id).order(ProjectChat.message_time).fetch(
+        projection=[ProjectChat.username,
+                    ProjectChat.message, ProjectChat.message_time, ProjectChat.email, ProjectChat.role])
     return messages
 
 
-def get_tasks(project_key):
-    return TaskDetails.query(TaskDetails.Project == project_key).fetch()
+def get_tasks(project_key, role, user_id):
+    if role == "developer":
+        return TaskDetails.query(TaskDetails.Project == project_key, TaskDetails.task_developers == user_id).order(TaskDetails.task_startdate).fetch()
+    return TaskDetails.query(TaskDetails.Project == project_key).order(TaskDetails.task_startdate).fetch()
 
 
 def get_invites_number(email):
-    return UserProfile.query(UserProfile.UserEmail == email, UserProfile.invitation_accepted == False, UserProfile.disabled==False).count()
+    return UserProfile.query(UserProfile.UserEmail == email, UserProfile.invitation_accepted == False,
+                             UserProfile.disabled == False).count()
+
 
 def get_invites(email):
-    return UserProfile.query(UserProfile.UserEmail == email, UserProfile.invitation_accepted == False, UserProfile.disabled==False).fetch()
+    return UserProfile.query(UserProfile.UserEmail == email, UserProfile.invitation_accepted == False,
+                             UserProfile.disabled == False).fetch()
 
 
-def create_skill(skill_id,wk_key,user_key):
+def create_skill(skill_id, wk_key, user_key):
     try:
         int(skill_id)
     except ValueError:
@@ -207,3 +244,72 @@ def create_skill(skill_id,wk_key,user_key):
         skill_rating=1
     ).put()
     return True
+
+
+def get_total_allocated_minutes(project_key):
+    task_data = TaskDetails.query(TaskDetails.Project == project_key).fetch(projection=TaskDetails.task_aminutes)
+    total_allocated = 0
+    for task in task_data:
+        total_allocated += task.task_aminutes
+    return total_allocated
+
+
+def get_total_logged_minutes(project_key):
+    task_data = TaskDetails.query(TaskDetails.Project == project_key, TaskDetails.task_logged_minutes != None).fetch(
+        projection=TaskDetails.task_logged_minutes)
+    total = 0
+    for task in task_data:
+        total += task.task_logged_minutes
+    return total
+
+
+
+
+def convert_tasks(tasks):
+    tasks_list = []
+    level = 1
+    for task in tasks:
+        if not task.parent_task:
+            tasks_list.append({
+                'level':level,
+                'id': task.key.id(),
+                'key': task.key,
+                'Project': task.Project,
+                'task_name': task.task_name,
+                'task_aminutes': task.task_aminutes,
+                'task_description': task.task_description,
+                'task_skills': task.task_skills,
+                'task_developers': task.task_developers,
+                'task_logged_minutes': task.task_logged_minutes,
+                'task_startdate': task.task_startdate,
+                'task_finishbydate': task.task_finishbydate,
+                'task_status': task.task_status,
+                'children': get_children(task.key.id(), tasks,level)
+            })
+            level=level+1
+    return tasks_list
+
+
+def get_children(parent_id,tasks,level):
+    data = []
+    sublevel = 1
+    for task in tasks:
+        if task.parent_task == parent_id:
+            data.append({
+                'level':str(level)+"."+str(sublevel),
+                'id': task.key.id(),
+                'key': task.key,
+                'Project': task.Project,
+                'task_name': task.task_name,
+                'task_aminutes': task.task_aminutes,
+                'task_description': task.task_description,
+                'task_skills': task.task_skills,
+                'task_developers': task.task_developers,
+                'task_logged_minutes': task.task_logged_minutes,
+                'task_startdate': task.task_startdate,
+                'task_finishbydate': task.task_finishbydate,
+                'task_status': task.task_status,
+                'children': get_children(task.key.id(),tasks,str(level)+"."+str(sublevel))
+            })
+            sublevel = sublevel +1
+    return data

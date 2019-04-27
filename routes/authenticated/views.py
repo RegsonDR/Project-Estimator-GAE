@@ -57,14 +57,16 @@ class LoggedUser:
         return get_workspaces(self.user_email)
 
     def get_tasks(self):
-        return get_tasks(self.projects_key)
+        return get_tasks(self.projects_key, self.get_role(), self.user_data.key.id())
 
     def get_invites(self):
         return get_invites(self.user_email)
 
-
     def get_projects(self, project_status):
-        return get_projects(self.wks_key, self.get_role(), self.user_email, project_status)
+        return get_projects(self.wks_key, self.get_role(), self.user_email, project_status, self.user_key.id())
+
+    def get_all_projects(self):
+        return get_all_projects(self.wks_key, self.get_role(), self.user_email, self.user_key.id())
 
     # This is used to get number on any task, not the one the page is on.
     def get_open_task_number(self, project_key):
@@ -79,6 +81,15 @@ class LoggedUser:
     def get_all_users(self):
         return get_all_users(self.wks_key)
 
+    def get_total_allocated_minutes(self):
+        return get_total_allocated_minutes(self.projects_key)
+
+    def get_total_logged_minutes(self):
+        return get_total_logged_minutes(self.projects_key)
+
+    def get_username(self, log_developer):
+        account_data = AccountDetails.get_by_id(log_developer)
+        return account_data.first_name + " " + account_data.last_name
 
 # Permissions decorator, used and re-checked on every page load, first check login, account active, then workspace + role.
 def login_required(roles=None):
@@ -154,11 +165,44 @@ def users_page(wks_id, **kwargs):
                            wks_data=kwargs['user'].get_wks_data(),
                            SIDEBAR=SIDEBAR)
 
+
+@authenticated.route('/Workspace/<int:wks_id>/Settings', methods=['GET', 'POST'])
+@login_required('admin')
+def wk_settings(wks_id, **kwargs):
+    form = WKSettings()
+
+    wk_data = kwargs['user'].get_wks_data()
+    if request.method == "POST" and form.validate_on_submit():
+        wk_data.workspace_name = form.workspace_name.data
+        if form.allow_dev_skills.data == "False":
+            allow = False
+        else:
+            allow = True
+        wk_data.allow_dev_skills = allow
+        if wk_data.put():
+            flash('Details updated!', 'success')
+            return redirect(url_for('authenticated.wk_settings', wks_id=wks_id))
+        flash('Error occurred, please try again!', 'danger')
+
+    form.workspace_name.data = wk_data.workspace_name
+    form.allow_dev_skills.data = str(wk_data.allow_dev_skills)
+
+    return render_template('authenticated/html/wk_settings.html',
+                           form=form,
+                           user_data=kwargs['user'],
+                           wks_data=kwargs['user'].get_wks_data(),
+                           SIDEBAR=SIDEBAR)
+
+
 # Manager or higher:
 @authenticated.route('/Workspace/<int:wks_id>/Skills/<int:user_id>', methods=['GET', 'POST'])
 @authenticated.route('/Workspace/<int:wks_id>/MySkills', methods=['GET', 'POST'])
-@login_required({'admin', 'manager'})
+@login_required({'admin', 'manager', 'developer'})
 def my_skills_page(wks_id, user_id=None, **kwargs):
+    if not kwargs['user'].get_wks_data().allow_dev_skills and kwargs['user'].get_role() == "developer":
+        flash('Your Manager handles your skills, contact them to update!', 'warning')
+        return redirect(url_for('authenticated.workspace_homepage', wks_id=wks_id))
+
     if user_id and (kwargs['user'].get_role() == "admin" or kwargs['user'].get_role() == "manager"):
         account_data = AccountDetails.get_by_id(user_id)
         look_up_key = account_data.key
@@ -187,6 +231,7 @@ def my_skills_page(wks_id, user_id=None, **kwargs):
                            form=new_skill,
                            SIDEBAR=SIDEBAR)
 
+
 @authenticated.route('/Workspace/<int:wks_id>/SkillsMatrix', methods=['GET', 'POST'])
 @login_required({'admin', 'manager'})
 def skills_matrix_page(wks_id, **kwargs):
@@ -214,8 +259,6 @@ def skills_matrix_page(wks_id, **kwargs):
             else:
                 user_skill[user[0]][skill[0]] = 0
 
-    print user_skill
-
     return render_template('authenticated/html/skills_matrix_page.html',
                            skill_data=skill_data,
                            user_skill=user_skill,
@@ -223,75 +266,119 @@ def skills_matrix_page(wks_id, **kwargs):
                            wks_data=kwargs['user'].get_wks_data(),
                            SIDEBAR=SIDEBAR)
 
-@authenticated.route('/Workspace/<int:wks_id>/NewProject', methods=['GET', 'POST'])
+
+# Developer or higher (basically must be a user of the workspace):
+@authenticated.route('/Workspace/<int:wks_id>/Timeline', methods=['GET', 'POST'])
+@login_required({'admin', 'manager', 'developer'})
+def timelines(wks_id, **kwargs):
+    resources = []
+    events = []
+
+    for project in kwargs['user'].get_all_projects():
+        data = filter(lambda pm: pm['id'] == project.project_manager, resources)
+        if data:
+            data[0]['children'].append({'id': str(project.key.id()), 'title': project.project_name})
+        else:
+            resources.append({
+                'id': project.project_manager,
+                'title': project.get_pm_data(),
+                'children': [{'id': str(project.key.id()), 'title': project.project_name}]
+            })
+
+        project_start = datetime.strptime(project.project_start, '%d/%m/%Y').strftime('%Y-%m-%d')
+        project_deadline = datetime.strptime(project.project_deadline, '%d/%m/%Y').strftime('%Y-%m-%d')
+        events.append({
+            'resourceId': str(project.key.id()),
+            'title': project.project_name,
+            'start': project_start,
+            'end': project_deadline,
+            'url': url_for('authenticated.view_project_page', wks_id=wks_id, project_id=project.key.id())
+        })
+
+    return render_template('authenticated/html/timelines.html',
+                           user_data=kwargs['user'],
+                           resources=resources,
+                           events=events,
+                           wks_data=kwargs['user'].get_wks_data(),
+                           SIDEBAR=SIDEBAR)
+
+@authenticated.route('/Workspace/<int:wks_id>/Project/<int:project_id>/GanttChart', methods=['GET', 'POST'])
 @login_required({'admin', 'manager'})
-def new_project_page(wks_id, **kwargs):
+def ganttchart(wks_id,project_id, **kwargs):
+    # only show if manager of project
+    tasks = kwargs['user'].get_tasks()
+    project_data = kwargs['user'].get_project_data()
+    resources = [{
+        'id': str(project_data.key.id()),
+        'title': project_data.project_name,
+         'children':[]}]
+    events = []
+    for task in tasks:
+        resources[0]['children'].append({
+            'id': str(task.key.id()),
+            'title': task.task_name,
+        })
+        task_start = datetime.strftime(task.task_startdate,'%Y-%m-%d')
+        task_deadline = datetime.strftime(task.task_finishbydate,'%Y-%m-%d')
+
+        events.append({
+            'resourceId': str(task.key.id()),
+            'title': task.task_name,
+            'start': task_start,
+            'end': task_deadline,
+            'url': url_for('authenticated.view_task_page',wks_id=wks_id,project_id=project_id,task_id=task.key.id())
+        })
+
+        project_start = datetime.strptime(project_data.project_start, '%d/%m/%Y').strftime('%Y-%m-%d')
+        project_deadline = datetime.strptime(project_data.project_deadline, '%d/%m/%Y').strftime('%Y-%m-%d')
+    events.append({
+        'resourceId':str(project_data.key.id()),
+        'title':  project_data.project_name,
+        'color':'green',
+        'start': project_start,
+        'end': project_deadline,
+    })
+
+    return render_template('authenticated/html/ganttchart.html',
+                           user_data=kwargs['user'],
+                           resources=resources,
+                           events=events,
+                           project_id=project_id,
+                           wks_data=kwargs['user'].get_wks_data(),
+                           SIDEBAR=SIDEBAR)
+
+
+@authenticated.route('/Workspace/<int:wks_id>/Projects', methods=['GET', 'POST'])
+@login_required({'admin', 'manager', 'developer'})
+def workspace_homepage(wks_id, **kwargs):
     new_project = NewProject()
 
+    total = 0
+    for skill in SkillData.query(SkillData.Wks == kwargs['user'].wks_key):
+        total = total + skill.usage()
+
+    if total == 0:
+        flash("To begin, please let up skills for at least one user!", "Warning")
+
     if request.method == 'POST':
-        if new_project.validate_on_submit():
-            project_data = DictMissKey()
-            taskid_list = []
-            # Get all data
-            for key in request.form.keys():
-                # Extract ID
-                component = [p[:-1] for p in key.split('[')][1:]
-                if len(component) is 0:
-                    project_data[key] = request.form[key]
-                else:
-                    task_id = component[0]
-                    element = component[1]
+        if new_project.validate_on_submit() and kwargs['user'].get_role() != "developer":
+            project_id = create_project(kwargs['user'].wks_key, kwargs['user'].user_email,
+                                        new_project.project_description.data, new_project.project_start.data,
+                                        new_project.project_deadline.data,
+                                        new_project.project_name.data)
 
-                    if task_id not in taskid_list:
-                        taskid_list.extend(task_id)
-                    dic_position = taskid_list.index(task_id)
-
-                    if element == "Skills" or element == "Developers":
-                        project_data['Task'][dic_position][element] = request.form.getlist(
-                            'Task[' + task_id + '][' + element + ']')
-                    else:
-                        project_data['Task'][dic_position][element] = request.form[
-                            'Task[' + task_id + '][' + element + ']']
-            project_id = create_project(kwargs['user'].wks_key, kwargs['user'].user_email, project_data)
             time.sleep(1)
             return redirect(url_for('authenticated.view_project_page', wks_id=wks_id, project_id=project_id))
 
-    skill_choices = [(skill.key.id(), skill.skill_name) for skill in
-                         SkillData.query(SkillData.Wks == kwargs['user'].wks_key
-                                         ).fetch(projection=[SkillData.skill_name]) if skill.usage() > 0]
-
-    users_choices = [(u_s.User.id(),u_s.user_name() ,u_s.skill_name()) for u_s in UserSkill.query().fetch() ]
-    options = DictMissKey()
-
-    for choice in users_choices:
-        options[choice[0]]['name'] = choice[1]
-
-        if options[choice[0]]['skills']:
-            options[choice[0]]['skills'] = options[choice[0]]['skills'] +";"+ choice[2]
-        else:
-            options[choice[0]]['skills'] = choice[2]
-
-    print options
-
-
-    return render_template('authenticated/html/new_project_page.html',
-                           skill_choices=skill_choices,
+    return render_template('authenticated/html/workspace_homepage.html',
                            form=new_project,
                            user_data=kwargs['user'],
                            wks_data=kwargs['user'].get_wks_data(),
                            SIDEBAR=SIDEBAR)
 
-# Developer or higher (basically must be a user of the workspace):
-@authenticated.route('/Workspace/<int:wks_id>/Projects', methods=['GET', 'POST'])
-@login_required({'admin', 'manager','developer'})
-def workspace_homepage(wks_id, **kwargs):
-    return render_template('authenticated/html/workspace_homepage.html',
-                           user_data=kwargs['user'],
-                           wks_data=kwargs['user'].get_wks_data(),
-                           SIDEBAR=SIDEBAR)
 
 @authenticated.route('/Workspace/<int:wks_id>/Project/<int:project_id>', methods=['GET', 'POST'])
-@login_required({'admin', 'manager','developer'})
+@login_required({'admin', 'manager', 'developer'})
 def view_project_page(wks_id, project_id, **kwargs):
     project_form = Project()
     project_form.project_manager.choices = [(user.UserEmail, user.get_name()) for user in
@@ -306,27 +393,60 @@ def view_project_page(wks_id, project_id, **kwargs):
                         projection=[UserProfile.UserEmail, UserProfile.disabled])]
 
     project_data = kwargs['user'].get_project_data()
-    if request.method == "POST" and project_form.validate_on_submit():
+    if request.method == "POST" and project_form.validate_on_submit() and kwargs['user'].get_role() != "developer":
         project_data.project_name = project_form.project_name.data
+        project_data.project_start = project_form.project_start.data
         project_data.project_deadline = project_form.project_deadline.data
         project_data.project_description = project_form.project_description.data
         project_data.project_manager = project_form.project_manager.data
-        project_data.project_status = project_form.project_status.data
         project_data.project_stage = project_form.project_stage.data
+        project_data.project_status = project_form.project_status.data
         if project_data.put():
             flash('Project details updated!', 'success')
             return redirect(url_for('authenticated.view_project_page', wks_id=wks_id, project_id=project_id))
         flash('Error occurred, please try again!', 'danger')
 
     project_form.project_name.data = project_data.project_name
+    project_form.project_start.data = project_data.project_start
     project_form.project_deadline.data = project_data.project_deadline
     project_form.project_description.data = project_data.project_description
     project_form.project_manager.data = project_data.project_manager
-    project_form.project_status.data = project_data.project_status
     project_form.project_stage.data = project_data.project_stage
+    project_form.project_status.data = project_data.project_status
+
+    if kwargs['user'].get_role() == "developer":
+        project_form.project_name.render_kw = {"disabled": True}
+        project_form.project_start.render_kw = {"disabled": True}
+        project_form.project_deadline.render_kw = {"disabled": True}
+        project_form.project_description.render_kw = {"disabled": True}
+        project_form.project_stage.render_kw = {"disabled": True}
+        project_form.project_status.render_kw = {"disabled": True}
+
+    skill_choices = [(skill.key.id(), skill.skill_name) for skill in
+                     SkillData.query(SkillData.Wks == kwargs['user'].wks_key
+                                     ).fetch(projection=[SkillData.skill_name]) if skill.usage() > 0]
+
+    users_choices = [(u_s.User.id(), u_s.user_name(), u_s.skill_name(), u_s.disabled_check()) for u_s in
+                     UserSkill.query().fetch()]
+
+    dev_options = DictMissKey()
+    for choice in users_choices:
+        dev_options[choice[0]]['name'] = choice[1]
+        dev_options[choice[0]]['disabled'] = choice[3]
+
+        if dev_options[choice[0]]['skills']:
+            dev_options[choice[0]]['skills'] = dev_options[choice[0]]['skills'] + ";" + choice[2]
+        else:
+            dev_options[choice[0]]['skills'] = choice[2]
+
+    tasks = convert_tasks(kwargs['user'].get_tasks())
+
 
     return render_template('authenticated/html/view_project_page.html',
-                           tasks=kwargs['user'].get_tasks(),
+                           # tasks=kwargs['user'].get_tasks(),
+                           tasks=tasks,
+                           dev_options=dev_options,
+                           skill_choices=skill_choices,
                            user_data=kwargs['user'],
                            wks_data=kwargs['user'].get_wks_data(),
                            form=project_form,
@@ -334,29 +454,55 @@ def view_project_page(wks_id, project_id, **kwargs):
                            manager_data=manager_data,
                            SIDEBAR=SIDEBAR)
 
+
 @authenticated.route('/Workspace/<int:wks_id>/Project/<int:project_id>/Task/<int:task_id>', methods=['GET', 'POST'])
-@login_required({'admin', 'manager','developer'})
+@login_required({'admin', 'manager', 'developer'})
 def view_task_page(wks_id, project_id, task_id, **kwargs):
-    log_form = LogTask()
     task_form = Task()
+    log_form = LogTask()
+    task_form.parent_task.choices = [(str(task.key.id()), task.task_name) for task in
+                                     TaskDetails.query(TaskDetails.Project == kwargs['user'].projects_key, ).fetch(
+                                         projection=TaskDetails.task_name) if task.key.id() != task_id]
+    task_form.parent_task.choices.append(['None', 'None'])
+
+    task_form.task_skills.choices = [(str(skill.key.id()), skill.skill_name) for skill in
+                                     SkillData.query(SkillData.Wks == kwargs['user'].wks_key
+                                                     ).fetch(projection=[SkillData.skill_name]) if skill.usage() > 0]
+
     task_form.task_developers.choices = [(str(user.get_id()), user.get_name()) for user in
                                          UserProfile.query(UserProfile.Wks == kwargs['user'].wks_key,
                                                            UserProfile.invitation_accepted == True).fetch(
                                              projection=[UserProfile.UserEmail])]
-    developer_choices = [(str(user.get_id()), user.get_name(), user.disabled) for user in
-                         UserProfile.query(UserProfile.Wks == kwargs['user'].wks_key,
-                                           UserProfile.invitation_accepted == True).fetch(
-                             projection=[UserProfile.UserEmail, UserProfile.disabled])]
+
+    users_choices = [(str(u_s.User.id()), u_s.user_name(), u_s.skill_name(), u_s.disabled_check()) for u_s in
+                     UserSkill.query().fetch()]
+
+    dev_options = DictMissKey()
+    for choice in users_choices:
+        dev_options[choice[0]]['name'] = choice[1]
+        dev_options[choice[0]]['disabled'] = choice[3]
+
+        if dev_options[choice[0]]['skills']:
+            dev_options[choice[0]]['skills'] = dev_options[choice[0]]['skills'] + ";" + choice[2]
+        else:
+            dev_options[choice[0]]['skills'] = choice[2]
 
     task_data = kwargs['user'].get_task_data()
 
     if request.method == "POST" and task_form.validate_on_submit():
-        task_data.task_name = task_form.task_name.data
-        task_data.task_aminutes = task_form.task_aminutes.data
+        if kwargs['user'].get_role() != "developer":
+            task_data.task_name = task_form.task_name.data
+            task_data.task_aminutes = task_form.task_aminutes.data
+            task_data.task_startdate = datetime.strptime(str(task_form.task_startdate.data),  '%d/%m/%Y')
+            task_data.task_finishbydate = datetime.strptime(str(task_form.task_finishbydate.data),  '%d/%m/%Y')
+            task_data.task_description = task_form.task_description.data
+            task_data.task_skills = map(int, task_form.task_skills.data)
+            task_data.task_developers = map(int, task_form.task_developers.data)
+            if task_form.parent_task.data == "None":
+                task_data.parent_task = None
+            else:
+                task_data.parent_task = int(task_form.parent_task.data)
         task_data.task_status = task_form.task_status.data
-        task_data.task_description = task_form.task_description.data
-        task_data.task_skills = map(int, task_form.task_skills.data)
-        task_data.task_developers = map(int, task_form.task_developers.data)
         if task_data.put():
             flash('Task details updated!', 'success')
             return redirect(
@@ -365,19 +511,35 @@ def view_task_page(wks_id, project_id, task_id, **kwargs):
 
     task_form.task_name.data = task_data.task_name
     task_form.task_aminutes.data = task_data.task_aminutes
+    task_form.task_startdate.data = datetime.strftime(task_data.task_startdate,'%d/%m/%Y')
+    task_form.task_finishbydate.data = datetime.strftime(task_data.task_finishbydate,'%d/%m/%Y')
     task_form.task_status.data = task_data.task_status
     task_form.task_description.data = task_data.task_description
     task_form.task_skills.data = map(str, task_data.task_skills)
     task_form.task_developers.data = map(str, task_data.task_developers)
+    task_form.parent_task.data = str(task_data.parent_task)
+    print task_data.parent_task
+
+    if kwargs['user'].get_role() == "developer":
+        task_form.task_name.render_kw = {'readonly': True}
+        task_form.task_aminutes.render_kw = {'readonly': True}
+        task_form.task_startdate.render_kw = {'readonly': True}
+        task_form.task_finishbydate.render_kw = {'readonly': True}
+        task_form.task_description.render_kw = {'readonly': True}
+        task_form.task_skills.render_kw = {'disabled': True}
+        task_form.task_developers.render_kw = {'readonly': True}
+        task_form.parent_task.render_kw = {'readonly': True}
 
     return render_template('authenticated/html/view_task_page.html',
                            user_data=kwargs['user'],
                            form=task_form,
                            task_data=task_data,
-                           developer_choices=developer_choices,
+                           dev_options=dev_options,
                            log_form=log_form,
+                           project_id=project_id,
                            wks_data=kwargs['user'].get_wks_data(),
                            SIDEBAR=SIDEBAR)
+
 
 @authenticated.route('/Workspace/<int:wks_id>/Project/<int:project_id>/Chat/', methods=['GET', 'POST'])
 @login_required({'admin', 'manager', 'developer'})
@@ -407,6 +569,7 @@ def my_workspaces_page(**kwargs):
     return render_template('authenticated/html/my_workspaces_page.html',
                            form=new_wks,
                            user_data=kwargs['user'])
+
 
 @authenticated.route('/MyProfile', methods=['GET', 'POST'])
 @login_required()
@@ -438,6 +601,7 @@ def my_profile_page(**kwargs):
                            form=user_profile,
                            user_data=kwargs['user'])
 
+
 @authenticated.route('/MyInvites', methods=['GET', 'POST'])
 @login_required()
 def my_invites(**kwargs):
@@ -446,6 +610,7 @@ def my_invites(**kwargs):
         return redirect(url_for('authenticated.my_workspaces_page'))
     return render_template('authenticated/html/my_invites.html',
                            user_data=kwargs['user'])
+
 
 @authenticated.route('/Invitation', methods=['GET', 'POST'])
 @login_required()
@@ -470,6 +635,7 @@ def open_invitation(**kwargs):
                            user_data=kwargs['user'],
                            wks_data=verify_invite(code, email)
                            )
+
 
 @authenticated.route('/Logout')
 @login_required()

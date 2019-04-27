@@ -1,0 +1,85 @@
+{% extends "authenticated/html/includes/Base_Template.html" %}
+
+{% block header_content %}
+    <link href="{{ url_for('static', filename='authenticated/CSS/timelines.css') }}" rel="stylesheet"
+          xmlns="http://www.w3.org/1999/html">
+    <script src="https://fullcalendar.io/releases/core/4.1.0/main.min.js"></script>
+    <script src="https://fullcalendar.io/releases/interaction/4.1.0/main.min.js"></script>
+    <script src="https://fullcalendar.io/releases/timeline/4.1.0/main.min.js"></script>
+    <script src="https://fullcalendar.io/releases/resource-common/4.1.0/main.min.js"></script>
+    <script src="https://fullcalendar.io/releases/resource-timeline/4.1.0/main.min.js"></script>
+
+    <link rel="stylesheet" href="https://fullcalendar.io/releases/core/4.1.0/main.min.css"/>
+    <link rel="stylesheet" href="https://fullcalendar.io/releases/timeline/4.1.0/main.min.css"/>
+    <link rel="stylesheet" href="https://fullcalendar.io/releases/resource-timeline/4.1.0/main.min.css"/>
+{% endblock header_content %}
+
+{% block page_header %}
+    <h1 style="margin-bottom: 0px;">Project Timelines</h1>
+{% endblock page_header %}
+
+{% block page_content %}
+    <div class="container">
+        <div class="my-page">
+            <div id="gantt-chart-page">
+                <div id='calendar'></div>
+            </div>
+        </div>
+    </div>
+
+{% endblock page_content %}
+{# Scripts #}
+{% block script %}
+    <script>
+        $(document).ready(function () {
+
+            var calendarEl = document.getElementById('calendar');
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                    plugins: ['interaction', 'resourceTimeline'],
+                    timeZone: 'UTC',
+                    header: {
+                        left: 'prev,next',
+                        center: 'title',
+                        right: 'myTimelineDays,myTimelineWeek,myTimelineMonth'
+                    },
+                    defaultView: 'myTimelineWeek',
+                    aspectRatio: 2,
+                    views: {
+                        myTimelineDays: {
+                            type: 'resourceTimeline',
+                            defaultDate: '2019-06-01',
+                            duration: {year: 1},
+                            slotDuration: {day: 1},
+                            slotLabelFormat: [{month: 'long'}, {day: "2-digit"}],
+                            buttonText: 'By Days'
+                        },
+                        myTimelineWeek: {
+                            type: 'resourceTimeline',
+                            duration: {year: 1},
+                            slotDuration: {day: 7},
+                            slotLabelFormat: [{month: 'short', year: 'numeric'}, {day: '2-digit'}],
+                            buttonText: 'By Weeks',
+                        },
+                        myTimelineMonth: {
+                            type: 'resourceTimeline',
+                            duration: {year: 1},
+                            slotDuration: {month: 1},
+                            slotLabelFormat: [{month: 'short'}],
+                            buttonText: 'By Months',
+                        }
+                    },
+                    editable: false,
+                    firstDay: 1,
+                    resourceLabelText: 'Projects',
+                    resources: {{ resources|tojson|safe }},
+                    events: {{ events|tojson|safe }}
+                });
+
+            calendar.render();
+
+        });
+
+
+    </script>
+{% endblock script %}

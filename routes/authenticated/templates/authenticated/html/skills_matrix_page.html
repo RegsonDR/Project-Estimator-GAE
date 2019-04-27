@@ -31,10 +31,12 @@
                         {% for user, skill_item in user_skill.iteritems()|sort(attribute=0) %}
                             <tr>
                                 <td class="row-header">
-                                    <div><a href="{{ url_for('authenticated.my_skills_page',wks_id=wks_data.key.id(), user_id=skill_item['id']) }}">{{user}}</a></div>
+                                    <div>
+                                        <a href="{{ url_for('authenticated.my_skills_page',wks_id=wks_data.key.id(), user_id=skill_item['id']) }}">{{ user }}</a>
+                                    </div>
                                 </td>
                                 {% for skill in skill_data %}
-                                    <td class="level-{{skill_item[skill[0]]}}" >{{ skill_item[skill[0]] }}</td>
+                                    <td class="level-{{ skill_item[skill[0]] }}">{{ skill_item[skill[0]] }}</td>
                                 {% endfor %}
                             </tr>
                         {% endfor %}
@@ -44,6 +46,31 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div id="key">
+        <table>
+            <thead style="text-align: center">
+            <th>Key</th>
+            </thead>
+            <tbody>
+            <tr class="level-1">
+                <td>1 - Novice</td>
+            </tr>
+            <tr class="level-2">
+                <td>2 - Advanced Beginner</td>
+            </tr>
+            <tr class="level-3">
+                <td>3 - Competent</td>
+            </tr>
+            <tr class="level-4">
+                <td>4 - Proficient</td>
+            </tr>
+            <tr class="level-5">
+                <td>5 - Expert</td>
+            </tr>
+            </tbody>
+        </table>
+
     </div>
 
 {% endblock page_content %}

@@ -9,12 +9,12 @@
 {% endblock page_header %}
 {% block page_content %}
     {% macro ProduceTaskCards(TasksObject, Status) -%}
-        {% for task in TasksObject |sort(attribute='task_name') if task.task_status == Status or Status == "All" %}
+        {% for task in TasksObject|sort(attribute='level') if task.task_status == Status or Status == "All" %}
             <div class="col-lg-11 my-3" style="margin: auto;">
-                <div class="card my-card o-hidden h-100">
+                <div class="card my-card o-hidden h-100 {{ task.task_status }}">
                     <div class="main-card">
                         <div class="card-header my-card-header">
-                            <h6>{{ task.task_name }}</h6>
+                            <h6>{{ task.level }}: {{ task.task_name }}</h6>
                         </div>
                         <div class="card-body my-card-body">
                             <span class="card-text" style="flex-grow: 1;">{{ task.task_description }}</span>
@@ -23,10 +23,10 @@
                             <i class="fa fa-users">
                             </i>
                             {% for dev in task.task_developers %}
-                                    <span class="badge badge-secondary">
-                                  {{ task.get_username(dev) | create_initials }}
+                                <span class="badge badge-secondary">
+                                  {{ user_data.get_username(dev) | create_initials }}
                                   </span>
-                                {% endfor %}
+                            {% endfor %}
                         </div>
                     </div>
                     <div class="side-card" {% if task.task_logged_minutes > task.task_aminutes %}
@@ -38,6 +38,9 @@
                        href="{{ url_for('authenticated.view_task_page',wks_id=wks_data.key.id(),project_id=project_data.key.id(),task_id=task.key.id()) }}"></a>
                 </div>
             </div>
+            {% if task.children %}
+                {{ ProduceTaskCards(task.children,Status) }}
+            {% endif %}
         {% else %}
             <div class="alert alert-info col-lg-11">
                 There are no tasks in this category.
@@ -50,13 +53,19 @@
         <form method="POST" autocomplete="off" class="my-page">
             {{ form.hidden_tag() }}
             <div class="form-row" style="justify-content:center">
-                <div class="col-8 input-group mb-2">
+                <div class="col-5 input-group mb-2">
                     <div class="input-group-prepend">
                         {{ form.project_name.label(class="input-group-text") }}
                     </div>
                     {{ form.project_name(class="form-control") }}
                 </div>
 
+                <div class="col-3 input-group mb-2">
+                    <div class="input-group-prepend">
+                        {{ form.project_start.label(class="input-group-text") }}
+                    </div>
+                    {{ form.project_start(class="form-control") }}
+                </div>
                 <div class="col-3 input-group mb-2">
                     <div class="input-group-prepend">
                         {{ form.project_deadline.label(class="input-group-text") }}
@@ -79,8 +88,12 @@
                     <div class="input-group-prepend">
                         {{ form.project_manager.label(class="input-group-text") }}
                     </div>
-                    <select class="custom-select" id="{{ form.project_manager.name }}"
-                            name="{{ form.project_manager.name }}" required>
+                    <select
+                            {% if user_data.get_role() == "developer" %}
+                                disabled
+                            {% endif %}
+                                class="custom-select" id="{{ form.project_manager.name }}"
+                                name="{{ form.project_manager.name }}" required>
                         {% for option in manager_data %}
                             <option
                                     {% if option[2] == True %}
@@ -106,8 +119,6 @@
                     {{ form.project_stage(class="form-control") }}
                 </div>
             </div>
-
-            {{ form.submit(class="fa btn save-button", value='') }}
 
             <div class="card text-center remove-border">
                 <div class="card-header remove-border">
@@ -138,96 +149,146 @@
                     </div>
                 </div>
             </div>
-            <div style="margin: 5px 5px 0px 5px; text-align: right; color:#495057;">
-                {{ user_data.get_open_task_number(project_data.key) }}/{{ user_data.get_total_task_number(project_data.key) }}
-                Tasks Open
-            </div>
-            <a class="fa btn chat-button" style="display: table;"
-               href="{{ url_for('authenticated.project_chat',wks_id=wks_data.key.id(),project_id=project_data.key.id()) }}">
-            <span style="display: table-cell; vertical-align: middle;">
-                <i class="fas fa-comments"></i>
-            </span>
-            </a>
+            {% if user_data.get_role() != "developer" %}
+                <div class="badge badge-primary" style="margin: 5px 5px 0px 5px; text-align: left; font-size:13px;">
+                    {{ user_data.get_open_task_number(project_data.key) }}/{{ user_data.get_total_task_number(project_data.key) }}
+                    Tasks Open
+                </div>
+                {% set a_time = user_data.get_total_allocated_minutes() %}
+                {% set l_time = user_data.get_total_logged_minutes() %}
+                <div class="badge badge-primary" style="margin: 5px 5px 0px 5px; text-align: left; font-size:13px;">
+                    Allocated Time: {{ a_time | int_to_minhour }}
+                </div>
+                <div class="badge badge-{% if l_time > a_time %}danger{% else %}primary{% endif %}"
+                     style="margin: 5px 5px 0px 5px; text-align: left; font-size:13px;">
+                    Logged Time: {{ l_time | int_to_minhour }}
+                </div>
+                {{ form.submit(class="fa btn save-button", value='') }}
+                <a class="fa btn delete-project" style="display: table;" data-toggle="modal"
+                   data-target="#DeleteProject" href="javascript:void(0)">
+                <span style="display: table-cell; vertical-align: middle;">
+                    <i class="fas fa-trash-alt"></i>
+                </span>
+                </a>
 
-        <a class="fa btn delete-project" style="display: table;"  data-toggle="modal" data-target="#DeleteProject" href="javascript:void(0)">
-    <span style="display: table-cell; vertical-align: middle;">
-        <i class="fas fa-trash-alt"></i>
-    </span>
-</a>
+                <a class="fa btn gantt-chart" style="display: table;" href="{{ url_for('authenticated.ganttchart',wks_id=wks_data.key.id(),project_id=project_data.key.id()) }}">
+                <span style="display: table-cell; vertical-align: middle;">
+                    <i class="fas fa-stream"></i>
+                </span>
+                </a>
 
-        <a class="fa btn add-task" style="display: table;"  data-toggle="modal" data-target="#NewTask" href="javascript:void(0)">
+                <a class="fa btn add-task" style="display: table;" data-toggle="modal" data-target="#NewTask"
+                   href="javascript:void(0)">
             <span style="display: table-cell; vertical-align: middle;">
                 <i class="fas fa-plus"></i>
             </span>
-        </a>
-        </form>
-    <div class="modal" id="DeleteProject" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalCenterTitle">Confirmation</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-        <form style="font-size:15px;" method="POST" >
-            <div class="modal-body">
-                Are you sure you would like to delete this project? This will also delete all tasks and messages in the chat!
-      </div>
-            <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button id="DeleteConfirm" type="button" class="btn btn-danger" data-dismiss="modal">Confirm</button>
-      </div>
-        </form>
-    </div>
-  </div>
-</div>
+                </a>
+                </form>
+                <div class="modal" id="DeleteProject" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalCenterTitle">Confirmation</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <form style="font-size:15px;" method="POST">
+                                <div class="modal-body">
+                                    Are you sure you would like to delete this project? This will also delete all tasks
+                                    and
+                                    messages in the chat!
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button id="DeleteConfirm" type="button" class="btn btn-danger"
+                                            data-dismiss="modal">
+                                        Confirm
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
 
-        <div id="modelFrame">
-                <div class="modal" id="NewTask" tabindex="-1" role="dialog" aria-hidden="true">
-                                        <div class="modal-dialog modal-dialog-centered" role="document">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" id="exampleModalCenterTitle">Please Enter Details</h5>
-                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                        <span aria-hidden="true">&times;</span>
-                                                    </button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <div class="form-row" style="justify-content:center">
-                                                        <div class="col-7 mb-3">
-                                                          <input placeholder="Task Title" data-task-number="1" id="Title" type="text" class="form-control">
-                                                        </div>
-                                                        <div class="col-5 mb-3">
-                                                          <input placeholder="Allocated Minutes" data-task-number="1" id="aMinutes" type="number" class="form-control">
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="form-row mb-3" style="justify-content:center">
-                                                      <textarea placeholder="Task Description" data-task-number="1" id="Description" class="form-control"></textarea>
-                                                    </div>
-
-                                                    <div class="form-row mb-3" style="justify-content:center">
-                                                        <select data-placeholder="Select Skills(s)" data-task-number="1" id="Skills" class="col-10 chosen-select form-control" multiple>
-                                                        <option value="1">Python</option>
-                                                        <option value="2">Java</option>
-                                                    </select>
-                                                    </div>
-
-                                                    <div class="form-row"  style="justify-content:center">
-                                                     <select data-task-number="1" data-placeholder="Select Developer(s)" id="Developers" class="col-10 chosen-select form-control" multiple>
-                                                        <option value="5629499534213120">Regson</option>
-                                                    </select>
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                                    <button type="button" class="btn btn-secondary addTask" data-dismiss="modal" data-task-number="1">Add</button>
-                                                </div>
-                                            </div>
+                <div id="modelFrame">
+                    <div class="modal" id="NewTask" tabindex="-1" role="dialog" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalCenterTitle">Please Enter Details</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="form-row" style="justify-content:center">
+                                        <div class="col-7 mb-3">
+                                            <input placeholder="Task Title" data-task-number="1" id="Title" type="text"
+                                                   class="form-control">
+                                        </div>
+                                        <div class="col-5 mb-3">
+                                            <input placeholder="Allocated Minutes" data-task-number="1" id="aMinutes"
+                                                   type="number" class="form-control">
                                         </div>
                                     </div>
-            </div>
+
+                                    <div class="form-row" style="justify-content:center">
+                                        <div class="col-6 mb-3">
+                                            <input data-provide="datepicker" placeholder="Start Date"
+                                                   data-task-number="1" id="Start" class="datepicker form-control">
+                                        </div>
+                                        <div class="col-6 mb-3">
+                                            <input data-provide="datepicker" placeholder="Finish Date"
+                                                   data-task-number="1" id="End" class="datepicker form-control">
+                                        </div>
+                                    </div>
+
+
+                                    <div class="form-row mb-3" style="justify-content:center">
+                                <textarea placeholder="Task Description" data-task-number="1" id="Description"
+                                          class="form-control"></textarea>
+                                    </div>
+
+                                    <div class="form-row mb-3" style="justify-content:center">
+                                        <select data-placeholder="Select Skills(s)" data-task-number="1" id="Skills"
+                                                class="col-10 chosen-select form-control" multiple>
+                                            {% for skill in skill_choices %}
+                                                <option value="{{ skill[0] }}">{{ skill[1] }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+
+                                    <div class="form-row" style="justify-content:center">
+                                        <select disabled data-task-number="1" data-placeholder="Select Developer(s)"
+                                                id="Developers" class="col-10 chosen-select form-control" multiple>
+                                            {% for option in dev_options.iteritems() %}
+                                                <option {% if option[1]['disabled']==True %} disabled {% endif %}
+                                                                                             data-skills="{{ option[1]['skills'] }}"
+                                                                                             value="{{ option[0] }}">{{ option[1]['name']| capitalize }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-secondary addTask" data-dismiss="modal"
+                                            data-task-number="1">Add
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+        <a class="fa btn chat-button" style="display: table;"
+           href="{{ url_for('authenticated.project_chat',wks_id=wks_data.key.id(),project_id=project_data.key.id()) }}">
+            <span style="display: table-cell; vertical-align: middle;">
+                <i class="fas fa-comments"></i>
+            </span>
+        </a>
+
 
     </div>
 {% endblock page_content %}
@@ -249,28 +310,114 @@
                 todayHighlight: 'true',
                 todayBtn: 'true'
             });
+            $('#project_start').datepicker({
+                format: 'dd/mm/yyyy',
+                startDate: '0d',
+                todayHighlight: 'true',
+                todayBtn: 'true'
+            });
+            $('#Start').datepicker({
+                format: 'dd/mm/yyyy',
+                startDate: '0d',
+                todayHighlight: 'true',
+                todayBtn: 'true'
+            });
+            $('#End').datepicker({
+                format: 'dd/mm/yyyy',
+                startDate: '0d',
+                todayHighlight: 'true',
+                todayBtn: 'true'
+            });
+
             $(".chosen-select").chosen({width: "80%"});
-            $(".addTask").on('click', function () {
+            {% if user_data.get_role() != "developer" %}
 
-                $.post("{{url_for('ajax.new_tasks',project_id=user_data.get_project_data().key.id())}}",{
-                    "title":  $("#Title").val(),
-                    "aMinutes": $("#aMinutes").val(),
-                    "description":$("#Description").val(),
-                    "skills": $("#Skills").val(),
-                    "developers": $("#Developers").val()
+                $(".addTask").on('click', function () {
+
+                    if (!$("#Title").val() || $("#Title").val() == "") {
+                        alert("Task Title can not be left empty!");
+                        return false
+                    }
+                    if (!$("#aMinutes").val() || $("#aMinutes").val() == "") {
+                        alert("Allocated Minutes can not be left empty!");
+                        return false
+                    }
+                    if (!$("#Start").val() || $("#Start").val() == "") {
+                        alert("Start Date can not be left empty!");
+                        return false
+                    }
+                    if (!$("#End").val() || $("#End").val() == "") {
+                        alert("End Date can not be left empty!");
+                        return false
+                    }
+                    if (!$("#Description").val() || $("#Description").val() == "") {
+                        alert("Task Description can not be left empty!");
+                        return false
+                    }
+                    if (!$("#Skills").val() || $("#Skills").val() == "") {
+                        alert("Skills can not be left empty!");
+                        return false
+                    }
+                    if (!$("#Developers").val() || $("#Developers").val() == "") {
+                        alert("Developers can not be left empty!");
+                        return false
+                    }
+                    start = $("#Start").val().split("/");
+                    new_start = new Date(start[2], start[1] - 1, start[0]);
+
+                    end = $("#End").val().split("/");
+                    new_end = new Date(end[2], end[1] - 1, end[0]);
+
+                    if (new_start > new_end) {
+                        alert("Start date must be lower than finish date!");
+                        return false
+                    }
+
+                    $.post("{{url_for('ajax.new_tasks',project_id=user_data.get_project_data().key.id())}}", {
+                        "title": $("#Title").val(),
+                        "aMinutes": $("#aMinutes").val(),
+                        "start": $("#Start").val(),
+                        "finish": $("#End").val(),
+                        "description": $("#Description").val(),
+                        "skills": $("#Skills").val(),
+                        "developers": $("#Developers").val()
+                    });
+                    setTimeout(function () {
+                        location.reload()
+                    }, 1000);
                 });
-                setTimeout(function(){
-                      location.reload()
-                  }, 1000);
-            });
 
-            $("#DeleteConfirm").on('click', function () {
-                $.post("{{url_for('ajax.delete_projects',project_id=user_data.get_project_data().key.id())}}");
-                setTimeout(function(){
-                     window.location.replace("{{ url_for('authenticated.workspace_homepage', wks_id=user_data.get_wks_data().key.id())}}");
-                  }, 1000);
-            });
+                $("#DeleteConfirm").on('click', function () {
+                    $.post("{{url_for('ajax.delete_projects',project_id=user_data.get_project_data().key.id())}}");
+                    setTimeout(function () {
+                        window.location.replace("{{ url_for('authenticated.workspace_homepage', wks_id=user_data.get_wks_data().key.id())}}");
+                    }, 1000);
+                });
 
+                $('#Skills').change(function () {
+                    developers = $("#Developers");
+
+                    $('option', developers).each(function () {
+                        $(this).hide()
+                    });
+
+                    if (!$(this).val() || $(this).val() == "") {
+                        developers.prop('disabled', true).trigger("chosen:updated");
+                    } else {
+                        developers.prop('disabled', false).trigger("chosen:updated");
+                        $('option:selected', this).each(function () {
+                            selected_skill = $(this).text();
+                            $('option', developers).each(function () {
+                                user_skills = $(this).attr('data-skills').split(";");
+                                if (user_skills.includes(selected_skill)) {
+                                    $(this).show()
+                                }
+                            });
+                        });
+                    }
+                    developers.val([]).trigger('chosen:updated');
+                });
+            {% endif %}
         });
     </script>
 {% endblock script %}

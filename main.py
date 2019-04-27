@@ -4,6 +4,7 @@ from routes.unauthenticated.views import unauthenticated
 from routes.ajax.views import ajax
 from routes.api.views import api
 import base64
+from datetime import datetime
 
 
 app = Flask(__name__)
@@ -33,9 +34,15 @@ def create_initials(full_name):
     return names[0][0].upper()+names[1][0].upper()
 
 
+def check_late(date):
+    today = datetime.today().date()
+    check = datetime.strptime(date, '%d/%m/%Y').date()
+    return check < today
+
 app.jinja_env.filters['decodeb64'] = decode_base64
 app.jinja_env.filters['int_to_minhour'] = int_to_minhour
 app.jinja_env.filters['create_initials'] = create_initials
+app.jinja_env.filters['check_late'] = check_late
 app.jinja_env.trim_blocks = True
 app.jinja_env.lstrip_blocks = True
 
