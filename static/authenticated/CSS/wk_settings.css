@@ -20,3 +20,10 @@
     text-decoration: none;
     color: #4caf50;
 }
+
+.btn-outline-secondary {
+    color: #6c757d;
+    background-color: #ffffff;
+    background-image: none;
+    border-color: #6c757d;
+}

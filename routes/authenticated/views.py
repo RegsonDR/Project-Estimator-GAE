@@ -174,6 +174,11 @@ def wk_settings(wks_id, **kwargs):
     wk_data = kwargs['user'].get_wks_data()
     if request.method == "POST" and form.validate_on_submit():
         wk_data.workspace_name = form.workspace_name.data
+        if form.enable_api.data == "False":
+            allow_api = False
+        else:
+            allow_api = True
+        wk_data.enable_api = allow_api
         if form.allow_dev_skills.data == "False":
             allow = False
         else:
@@ -186,6 +191,8 @@ def wk_settings(wks_id, **kwargs):
 
     form.workspace_name.data = wk_data.workspace_name
     form.allow_dev_skills.data = str(wk_data.allow_dev_skills)
+    form.api_key.data = wk_data.api_key
+    form.enable_api.data = str(wk_data.enable_api)
 
     return render_template('authenticated/html/wk_settings.html',
                            form=form,
@@ -358,7 +365,7 @@ def workspace_homepage(wks_id, **kwargs):
         total = total + skill.usage()
 
     if total == 0:
-        flash("To begin, please let up skills for at least one user!", "Warning")
+        flash("To begin, please let up skills for at least one user!", "warning")
 
     if request.method == 'POST':
         if new_project.validate_on_submit() and kwargs['user'].get_role() != "developer":

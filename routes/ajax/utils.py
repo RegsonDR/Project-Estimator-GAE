@@ -1,4 +1,4 @@
-from models import AccountDetails, ProjectChat, TaskLog, UserProfile, UserSkill, TaskDetails, ProjectDetails
+from models import AccountDetails, ProjectChat, TaskLog, UserProfile, UserSkill, TaskDetails, ProjectDetails,WorkspaceDetails
 from flask import request, url_for, render_template
 from google.appengine.api import mail, urlfetch
 from app_statics import APP_NAME
@@ -178,4 +178,12 @@ def delete_project(project_id):
     project = ProjectDetails.get_by_id(project_id)
     if project.delete():
         return True
+    return False
+
+def regenerate(wk_id,key):
+    wk = WorkspaceDetails.get_by_id(wk_id)
+    if wk.api_key == key:
+        wk.api_key = uuid.uuid4().hex
+        if wk.put():
+            return True
     return False

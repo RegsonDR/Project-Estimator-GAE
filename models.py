@@ -26,6 +26,8 @@ class AccountDetails(ndb.Model):
 class WorkspaceDetails(ndb.Model):
     workspace_name = ndb.StringProperty()
     allow_dev_skills = ndb.BooleanProperty()
+    api_key = ndb.StringProperty()
+    enable_api = ndb.BooleanProperty()
 
 
 class UserProfile(ndb.Model):

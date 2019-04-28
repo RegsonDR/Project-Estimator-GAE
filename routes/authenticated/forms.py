@@ -84,4 +84,6 @@ class AddSkill(FlaskForm):
 class WKSettings(FlaskForm):
     workspace_name = StringField('Workspace Name', validators=[DataRequired()])
     allow_dev_skills = SelectField('Allow Developers to set their skills', choices=[("False", "No"), ("True", "Yes")], validators=[DataRequired()])
+    api_key = StringField('API Key', validators=[DataRequired()], render_kw ={'readonly': True})
+    enable_api = SelectField('Enable API Access?', choices=[("False", "No"), ("True", "Yes")], validators=[DataRequired()])
     submit = SubmitField('Save')

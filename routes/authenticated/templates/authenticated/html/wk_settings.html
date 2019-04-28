@@ -28,6 +28,23 @@
                     {{ form.allow_dev_skills(class="form-control") }}
                 </div>
             </div>
+            <div class="form-row" style="justify-content:center">
+                <div class="col-5 input-group mb-2">
+                    <div class="input-group-prepend">
+                        {{ form.api_key.label(class="input-group-text") }}
+                    </div>
+                    {{ form.api_key(class="form-control") }}
+                      <div class="input-group-append">
+                        <input id="regenerate" class="fa btn btn-outline-secondary" type="button"  value=''>
+                      </div>
+                </div>
+                <div class="col-3 input-group mb-2">
+                    <div class="input-group-prepend">
+                        {{ form.enable_api.label(class="input-group-text") }}
+                    </div>
+                    {{ form.enable_api(class="form-control") }}
+                </div>
+            </div>
             {{ form.submit(class="fa btn save-button", value='') }}
         </form>
     </div>
@@ -36,4 +53,15 @@
 
 {# Scripts #}
 {% block script %}
+    <script>
+$(document).ready( function () {
+    $('#regenerate').on('click',function(){
+         $.post("{{url_for('ajax.regenerate_token',wks_id=wks_data.key.id())}}",{"currentAuth": $('#api_key').val()});
+         setTimeout(function(){
+              location.reload()
+          }, 1000);
+     });
+});
+    </script>
+
 {% endblock script %}

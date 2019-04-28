@@ -9,7 +9,9 @@ import uuid
 def create_wks(workspace_name, user_email):
     workspace_data = WorkspaceDetails(
         workspace_name=workspace_name,
-        allow_dev_skills=True
+        allow_dev_skills=True,
+        api_key = uuid.uuid4().hex,
+        enable_api=False
     )
     if not workspace_data.put():
         flash('Workspace not created.', 'danger')

@@ -116,3 +116,13 @@ def chat_message(project_id, **kwargs):
         return jsonify({'Request': True})
     except:
         return jsonify({'Request': False})
+
+@ajax.route('/Workspace/<int:wks_id>/Regenerate', methods=['POST'])
+@login_required({'admin'})
+def regenerate_token(wks_id, **kwargs):
+    try:
+        currentAuth = request.form.get('currentAuth')
+        regenerate(wks_id,currentAuth)
+        return jsonify({'Request': False})
+    except:
+        return jsonify({'Request': False})
