@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, session
 from routes.ajax.utils import *
 from datetime import datetime, timedelta
 from routes.authenticated.views import login_required
+from routes.webhook.utils import call_webhook
 import pytz
 
 ajax = Blueprint('ajax', __name__, url_prefix='/ajax', template_folder='templates')
@@ -123,6 +124,15 @@ def regenerate_token(wks_id, **kwargs):
     try:
         currentAuth = request.form.get('currentAuth')
         regenerate(wks_id,currentAuth)
+        return jsonify({'Request': False})
+    except:
+        return jsonify({'Request': False})
+
+@ajax.route('/Workspace/<int:wks_id>/Trigger', methods=['POST'])
+@login_required({'admin'})
+def trigger_webhook(wks_id, **kwargs):
+    try:
+        call_webhook(wks_id, request.form.get('testURL'))
         return jsonify({'Request': False})
     except:
         return jsonify({'Request': False})

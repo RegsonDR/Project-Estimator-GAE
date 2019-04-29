@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms.fields import SubmitField, StringField, SelectField, PasswordField, SelectMultipleField
-from wtforms.fields.html5 import EmailField, TelField, IntegerField
+from wtforms.fields.html5 import EmailField, TelField, IntegerField, URLField
 from wtforms.widgets import TextArea, html_params, HTMLString
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
 from cgi import escape
@@ -86,4 +86,6 @@ class WKSettings(FlaskForm):
     allow_dev_skills = SelectField('Allow Developers to set their skills', choices=[("False", "No"), ("True", "Yes")], validators=[DataRequired()])
     api_key = StringField('API Key', validators=[DataRequired()], render_kw ={'readonly': True})
     enable_api = SelectField('Enable API Access?', choices=[("False", "No"), ("True", "Yes")], validators=[DataRequired()])
+    webhook_url = URLField('Webhook URL', validators=[DataRequired()])
+    enable_webhook = SelectField('Enable Webhook?', choices=[("False", "No"), ("True", "Yes")], validators=[DataRequired()])
     submit = SubmitField('Save')

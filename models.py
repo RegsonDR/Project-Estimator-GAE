@@ -28,7 +28,8 @@ class WorkspaceDetails(ndb.Model):
     allow_dev_skills = ndb.BooleanProperty()
     api_key = ndb.StringProperty()
     enable_api = ndb.BooleanProperty()
-
+    webhook_url = ndb.StringProperty()
+    enable_webhook = ndb.BooleanProperty()
 
 class UserProfile(ndb.Model):
     UserEmail = ndb.StringProperty()
@@ -110,7 +111,7 @@ class TaskDetails(ndb.Model):
     task_description = ndb.StringProperty()
     task_aminutes = ndb.IntegerProperty()
     task_skills = ndb.IntegerProperty(repeated=True)
-    task_developers = ndb.IntegerProperty(repeated=True)
+    task_developers = ndb.IntegerProperty(repeated=True) # account ids
     task_status = ndb.StringProperty(choices={'Open', 'Closed'})
     task_logged_minutes = ndb.IntegerProperty()
     task_startdate = ndb.DateProperty()
@@ -118,6 +119,9 @@ class TaskDetails(ndb.Model):
     parent_task = ndb.IntegerProperty()
     _use_memcache = False
     _use_cache = False
+
+    def get_wks(self):
+        return ProjectDetails.get_by_id(self.Project.id()).Wks
 
     def get_logs(self):
         return TaskLog.query(TaskLog.task_id == self.key.id()).order(TaskLog.log_time).fetch()
@@ -133,6 +137,9 @@ class TaskDetails(ndb.Model):
         if self.put():
             return True
         return False
+
+    def get_all_other_tasks(self):
+        return [(task.key.id()) for task in TaskDetails.query(TaskDetails.Project == self.Project).fetch() if task.key.id() != self.key.id()]
 
 
 
@@ -172,8 +179,6 @@ class SkillData(ndb.Model):
 
     def usage(self):
         return UserSkill.query(UserSkill.skill_id==self.key.id()).count()
-
-
 
 class UserSkill(ndb.Model):
     Wks = ndb.KeyProperty(kind='WorkspaceDetails')

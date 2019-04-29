@@ -8,6 +8,7 @@ from flask import Blueprint, session, abort, redirect
 from forms import *
 from models import *
 from routes.authenticated.utils import *
+from routes.webhook.utils import call_webhook
 
 authenticated = Blueprint('authenticated', __name__, template_folder='templates')
 
@@ -90,6 +91,9 @@ class LoggedUser:
     def get_username(self, log_developer):
         account_data = AccountDetails.get_by_id(log_developer)
         return account_data.first_name + " " + account_data.last_name
+
+    def call_webhook(self):
+        call_webhook(self.wks_key.id(),False)
 
 # Permissions decorator, used and re-checked on every page load, first check login, account active, then workspace + role.
 def login_required(roles=None):
@@ -175,15 +179,22 @@ def wk_settings(wks_id, **kwargs):
     if request.method == "POST" and form.validate_on_submit():
         wk_data.workspace_name = form.workspace_name.data
         if form.enable_api.data == "False":
-            allow_api = False
+            wk_data.enable_api = False
         else:
-            allow_api = True
-        wk_data.enable_api = allow_api
+            wk_data.enable_api = True
+
         if form.allow_dev_skills.data == "False":
-            allow = False
+            wk_data.allow_dev_skills = False
         else:
-            allow = True
-        wk_data.allow_dev_skills = allow
+            wk_data.allow_dev_skills = True
+
+        if form.enable_webhook.data == "False":
+            wk_data.enable_webhook = False
+        else:
+            wk_data.enable_webhook = True
+
+        wk_data.webhook_url = form.webhook_url.data
+
         if wk_data.put():
             flash('Details updated!', 'success')
             return redirect(url_for('authenticated.wk_settings', wks_id=wks_id))
@@ -193,6 +204,9 @@ def wk_settings(wks_id, **kwargs):
     form.allow_dev_skills.data = str(wk_data.allow_dev_skills)
     form.api_key.data = wk_data.api_key
     form.enable_api.data = str(wk_data.enable_api)
+    form.webhook_url.data = wk_data.webhook_url
+    form.enable_webhook.data = str(wk_data.enable_webhook)
+
 
     return render_template('authenticated/html/wk_settings.html',
                            form=form,
@@ -525,7 +539,6 @@ def view_task_page(wks_id, project_id, task_id, **kwargs):
     task_form.task_skills.data = map(str, task_data.task_skills)
     task_form.task_developers.data = map(str, task_data.task_developers)
     task_form.parent_task.data = str(task_data.parent_task)
-    print task_data.parent_task
 
     if kwargs['user'].get_role() == "developer":
         task_form.task_name.render_kw = {'readonly': True}

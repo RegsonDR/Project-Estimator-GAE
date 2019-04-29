@@ -45,6 +45,23 @@
                     {{ form.enable_api(class="form-control") }}
                 </div>
             </div>
+                        <div class="form-row" style="justify-content:center">
+                <div class="col-5 input-group mb-2">
+                    <div class="input-group-prepend">
+                        {{ form.webhook_url.label(class="input-group-text") }}
+                    </div>
+                    {{ form.webhook_url(class="form-control") }}
+                      <div class="input-group-append">
+                        <input id="trigger" class="fa btn btn-outline-secondary" type="button"  value='Test'>
+                      </div>
+                </div>
+                <div class="col-3 input-group mb-2">
+                    <div class="input-group-prepend">
+                        {{ form.enable_webhook.label(class="input-group-text") }}
+                    </div>
+                    {{ form.enable_webhook(class="form-control") }}
+                </div>
+            </div>
             {{ form.submit(class="fa btn save-button", value='') }}
         </form>
     </div>
@@ -61,6 +78,14 @@ $(document).ready( function () {
               location.reload()
           }, 1000);
      });
+
+    $('#trigger').on('click',function(){
+         $.post("{{url_for('ajax.trigger_webhook',wks_id=wks_data.key.id())}}",{"testURL":$('#webhook_url').val()});
+          alert("Data Payload Sent!");
+     });
+
+
+
 });
     </script>
 
