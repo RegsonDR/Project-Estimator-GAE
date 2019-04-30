@@ -1,11 +1,11 @@
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileRequired
 from wtforms.fields import SubmitField, StringField, SelectField, PasswordField, SelectMultipleField
 from wtforms.fields.html5 import EmailField, TelField, IntegerField, URLField
 from wtforms.widgets import TextArea, html_params, HTMLString
-from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
+from wtforms.validators import DataRequired, Email, EqualTo, ValidationError, regexp
 from cgi import escape
 from datetime import datetime
-
 
 def validate_dates(form,field):
     start = datetime.strptime(field.data, '%d/%m/%Y').date()
@@ -89,3 +89,7 @@ class WKSettings(FlaskForm):
     webhook_url = URLField('Webhook URL', validators=[DataRequired()])
     enable_webhook = SelectField('Enable Webhook?', choices=[("False", "No"), ("True", "Yes")], validators=[DataRequired()])
     submit = SubmitField('Save')
+
+class UploadHistorical(FlaskForm):
+    file = FileField("Historical Data",validators=[FileRequired()])
+    save = SubmitField('Upload')

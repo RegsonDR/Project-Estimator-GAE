@@ -10,60 +10,103 @@
 
 {% block page_content %}
     <div class="container">
-        <form method="POST" class="my-page">
-            {{ form.hidden_tag() }}
+        <div class="my-page">
+
+            <form method="POST">
+                {{ form.hidden_tag() }}
+                <div class="form-row" style="justify-content:center">
+                    <div class="col-6 input-group mb-2">
+                        <div class="input-group-prepend">
+                            {{ form.workspace_name.label(class="input-group-text") }}
+                        </div>
+                        {{ form.workspace_name(class="form-control") }}
+                    </div>
+                </div>
+                <div class="form-row" style="justify-content:center">
+                    <div class="col-6 input-group mb-2">
+                        <div class="input-group-prepend">
+                            {{ form.allow_dev_skills.label(class="input-group-text") }}
+                        </div>
+                        {{ form.allow_dev_skills(class="form-control") }}
+                    </div>
+                </div>
+                <div class="form-row" style="justify-content:center">
+                    <div class="col-5 input-group mb-2">
+                        <div class="input-group-prepend">
+                            {{ form.api_key.label(class="input-group-text") }}
+                        </div>
+                        {{ form.api_key(class="form-control") }}
+                        <div class="input-group-append">
+                            <input id="regenerate" class="fa btn btn-outline-secondary" type="button" value=''>
+                        </div>
+                    </div>
+                    <div class="col-3 input-group mb-2">
+                        <div class="input-group-prepend">
+                            {{ form.enable_api.label(class="input-group-text") }}
+                        </div>
+                        {{ form.enable_api(class="form-control") }}
+                    </div>
+                </div>
+                <div class="form-row" style="justify-content:center">
+                    <div class="col-5 input-group mb-2">
+                        <div class="input-group-prepend">
+                            {{ form.webhook_url.label(class="input-group-text") }}
+                        </div>
+                        {{ form.webhook_url(class="form-control") }}
+                        <div class="input-group-append">
+                            <input id="trigger" class="btn btn-outline-secondary" type="button" value='Test'>
+                        </div>
+                    </div>
+                    <div class="col-3 input-group mb-2">
+                        <div class="input-group-prepend">
+                            {{ form.enable_webhook.label(class="input-group-text") }}
+                        </div>
+                        {{ form.enable_webhook(class="form-control") }}
+                    </div>
+                </div>
+                {{ form.submit(class="fa btn save-button", value='') }}
+            </form>
+            <br>
             <div class="form-row" style="justify-content:center">
-                <div class="col-6 input-group mb-2">
-                    <div class="input-group-prepend">
-                        {{ form.workspace_name.label(class="input-group-text") }}
-                    </div>
-                    {{ form.workspace_name(class="form-control") }}
+                <div class="col-8 input-group" style="justify-content:center">
+
+                    <h4>Prediction Options</h4>
+
                 </div>
             </div>
+            <br>
+
+            <form action="{{ uploadUri }}" method="POST" enctype="multipart/form-data">
+                <div class="form-row" style="justify-content:center">
+                    {{ form.hidden_tag() }}
+                    <div class="col-8 input-group mb-2">
+                        <div class="custom-file">
+                            {{ file_form.file(class="custom-file-input", id="inputGroupFile01") }}
+                            <label class="custom-file-label" for="inputGroupFile01">
+                                {% if user_data.get_file() %}Old File ({{ user_data.get_file()[1]|format_date}}): {{user_data.get_file()[0] }}{% else %}Choose file to upload..{% endif %}
+                            </label>
+                        </div>
+                        <div class="input-group-append">
+                            {{ file_form.save(class="input-group-text", id="inputGroupFileAddon01") }}
+                        </div>
+sdfafa                </div>
+            </form>
+
+
             <div class="form-row" style="justify-content:center">
-                <div class="col-6 input-group mb-2">
-                    <div class="input-group-prepend">
-                        {{ form.allow_dev_skills.label(class="input-group-text") }}
-                    </div>
-                    {{ form.allow_dev_skills(class="form-control") }}
+                <div class="col-3 input-group">
+                    <button id="recalibrate" type="button" class="btn btn-info">Recalibrate Algorithm</button>
+                </div>
+                <div class="col-2 input-group">
+                    <button id="delete" class="btn btn-danger" type="button">Delete Historical Data</button>
                 </div>
             </div>
-            <div class="form-row" style="justify-content:center">
-                <div class="col-5 input-group mb-2">
-                    <div class="input-group-prepend">
-                        {{ form.api_key.label(class="input-group-text") }}
-                    </div>
-                    {{ form.api_key(class="form-control") }}
-                      <div class="input-group-append">
-                        <input id="regenerate" class="fa btn btn-outline-secondary" type="button"  value=''>
-                      </div>
-                </div>
-                <div class="col-3 input-group mb-2">
-                    <div class="input-group-prepend">
-                        {{ form.enable_api.label(class="input-group-text") }}
-                    </div>
-                    {{ form.enable_api(class="form-control") }}
+            <div class="form-row" style="justify-content:end">
+                <div class="col-5 input-group" style="text-align: right">
+                    <sub>Last Calibration Date:</sub>
                 </div>
             </div>
-                        <div class="form-row" style="justify-content:center">
-                <div class="col-5 input-group mb-2">
-                    <div class="input-group-prepend">
-                        {{ form.webhook_url.label(class="input-group-text") }}
-                    </div>
-                    {{ form.webhook_url(class="form-control") }}
-                      <div class="input-group-append">
-                        <input id="trigger" class="fa btn btn-outline-secondary" type="button"  value='Test'>
-                      </div>
-                </div>
-                <div class="col-3 input-group mb-2">
-                    <div class="input-group-prepend">
-                        {{ form.enable_webhook.label(class="input-group-text") }}
-                    </div>
-                    {{ form.enable_webhook(class="form-control") }}
-                </div>
-            </div>
-            {{ form.submit(class="fa btn save-button", value='') }}
-        </form>
+        </div>
     </div>
 
 {% endblock page_content %}
@@ -71,22 +114,24 @@
 {# Scripts #}
 {% block script %}
     <script>
-$(document).ready( function () {
-    $('#regenerate').on('click',function(){
-         $.post("{{url_for('ajax.regenerate_token',wks_id=wks_data.key.id())}}",{"currentAuth": $('#api_key').val()});
-         setTimeout(function(){
-              location.reload()
-          }, 1000);
-     });
+        $(document).ready(function () {
+            $('#regenerate').on('click', function () {
+                $.post("{{url_for('ajax.regenerate_token',wks_id=wks_data.key.id())}}", {"currentAuth": $('#api_key').val()});
+                setTimeout(function () {
+                    location.reload()
+                }, 1000);
+            });
 
-    $('#trigger').on('click',function(){
-         $.post("{{url_for('ajax.trigger_webhook',wks_id=wks_data.key.id())}}",{"testURL":$('#webhook_url').val()});
-          alert("Data Payload Sent!");
-     });
+            $('#trigger').on('click', function () {
+                $.post("{{url_for('ajax.trigger_webhook',wks_id=wks_data.key.id())}}", {"testURL": $('#webhook_url').val()});
+                alert("Data Payload Sent!");
+            });
 
-
-
-});
+            $(".custom-file-input").on("change", function () {
+                var fileName = $(this).val().split("\\").pop();
+                $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+            });
+        });
     </script>
 
 {% endblock script %}

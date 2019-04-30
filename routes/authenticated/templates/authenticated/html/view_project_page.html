@@ -150,7 +150,7 @@
                 </div>
             </div>
             {% if user_data.get_role() != "developer" %}
-                <div class="badge badge-primary" style="margin: 5px 5px 0px 5px; text-align: left; font-size:13px;">
+                <div class="badge badge-{% if user_data.get_open_task_number(project_data.key)==0 %}success{% else %}primary{% endif %}" style="margin: 5px 5px 0px 5px; text-align: left; font-size:13px;">
                     {{ user_data.get_open_task_number(project_data.key) }}/{{ user_data.get_total_task_number(project_data.key) }}
                     Tasks Open
                 </div>

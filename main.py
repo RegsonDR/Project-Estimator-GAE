@@ -41,10 +41,15 @@ def check_late(date):
     check = datetime.strptime(date, '%d/%m/%Y').date()
     return check < today
 
+def format_date(date):
+    return datetime.strftime(date, '%H:%M %d/%m/%Y')
+
 app.jinja_env.filters['decodeb64'] = decode_base64
 app.jinja_env.filters['int_to_minhour'] = int_to_minhour
 app.jinja_env.filters['create_initials'] = create_initials
 app.jinja_env.filters['check_late'] = check_late
+app.jinja_env.filters['format_date'] = format_date
+
 app.jinja_env.trim_blocks = True
 app.jinja_env.lstrip_blocks = True
 

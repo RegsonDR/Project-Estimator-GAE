@@ -199,3 +199,10 @@ class UserSkill(ndb.Model):
         if profile.invitation_accepted:
                 return profile.disabled
         return True
+
+class PredictionData(ndb.Model):
+    Wks = ndb.KeyProperty(kind='WorkspaceDetails')
+    filename = ndb.StringProperty()
+    csv = ndb.BlobKeyProperty()
+    upload_time = ndb.DateTimeProperty()
+    calibration_time = ndb.DateTimeProperty()

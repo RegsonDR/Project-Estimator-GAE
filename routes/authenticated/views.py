@@ -2,7 +2,7 @@
 import gc
 import time
 from functools import wraps
-
+from google.appengine.ext import blobstore
 from app_statics import SIDEBAR
 from flask import Blueprint, session, abort, redirect
 from forms import *
@@ -44,6 +44,9 @@ class LoggedUser:
 
     def get_wks_data(self):
         return self.wks_data
+
+    def get_file(self):
+        return get_file(self.wks_data)
 
     def get_project_data(self):
         return self.projects_data
@@ -93,7 +96,8 @@ class LoggedUser:
         return account_data.first_name + " " + account_data.last_name
 
     def call_webhook(self):
-        call_webhook(self.wks_key.id(),False)
+        call_webhook(self.wks_key.id(), False)
+
 
 # Permissions decorator, used and re-checked on every page load, first check login, account active, then workspace + role.
 def login_required(roles=None):
@@ -174,31 +178,41 @@ def users_page(wks_id, **kwargs):
 @login_required('admin')
 def wk_settings(wks_id, **kwargs):
     form = WKSettings()
+    file_form = UploadHistorical()
 
     wk_data = kwargs['user'].get_wks_data()
-    if request.method == "POST" and form.validate_on_submit():
-        wk_data.workspace_name = form.workspace_name.data
-        if form.enable_api.data == "False":
-            wk_data.enable_api = False
-        else:
-            wk_data.enable_api = True
 
-        if form.allow_dev_skills.data == "False":
-            wk_data.allow_dev_skills = False
-        else:
-            wk_data.allow_dev_skills = True
+    print read_csv(wk_data)
 
-        if form.enable_webhook.data == "False":
-            wk_data.enable_webhook = False
-        else:
-            wk_data.enable_webhook = True
+    if request.method == "POST":
+        if 'save' in request.form and file_form.validate_on_submit():
+            if save_file(wk_data.key,file_form.file):
+                flash('File Upload, recalibrate algorithm to use new data!', 'success')
+                return redirect(url_for('authenticated.wk_settings', wks_id=wks_id))
+            flash('Error occurred, please try again!', 'danger')
+        if 'submit' in request.form and form.validate_on_submit():
+            wk_data.workspace_name = form.workspace_name.data
+            if form.enable_api.data == "False":
+                wk_data.enable_api = False
+            else:
+                wk_data.enable_api = True
 
-        wk_data.webhook_url = form.webhook_url.data
+            if form.allow_dev_skills.data == "False":
+                wk_data.allow_dev_skills = False
+            else:
+                wk_data.allow_dev_skills = True
 
-        if wk_data.put():
-            flash('Details updated!', 'success')
-            return redirect(url_for('authenticated.wk_settings', wks_id=wks_id))
-        flash('Error occurred, please try again!', 'danger')
+            if form.enable_webhook.data == "False":
+                wk_data.enable_webhook = False
+            else:
+                wk_data.enable_webhook = True
+
+            wk_data.webhook_url = form.webhook_url.data
+
+            if wk_data.put():
+                flash('Details updated!', 'success')
+                return redirect(url_for('authenticated.wk_settings', wks_id=wks_id))
+            flash('Error occurred, please try again!', 'danger')
 
     form.workspace_name.data = wk_data.workspace_name
     form.allow_dev_skills.data = str(wk_data.allow_dev_skills)
@@ -207,9 +221,12 @@ def wk_settings(wks_id, **kwargs):
     form.webhook_url.data = wk_data.webhook_url
     form.enable_webhook.data = str(wk_data.enable_webhook)
 
+    uploadUri = blobstore.create_upload_url(url_for('authenticated.wk_settings', wks_id=wks_id))
 
     return render_template('authenticated/html/wk_settings.html',
                            form=form,
+                           uploadUri = uploadUri,
+                           file_form=file_form,
                            user_data=kwargs['user'],
                            wks_data=kwargs['user'].get_wks_data(),
                            SIDEBAR=SIDEBAR)
@@ -308,9 +325,16 @@ def timelines(wks_id, **kwargs):
 
         project_start = datetime.strptime(project.project_start, '%d/%m/%Y').strftime('%Y-%m-%d')
         project_deadline = datetime.strptime(project.project_deadline, '%d/%m/%Y').strftime('%Y-%m-%d')
+        if project.project_status == "Running":
+            color = "green"
+        elif project.project_status == "Closed":
+            color = "yellow"
+        else:
+            color = "red"
         events.append({
             'resourceId': str(project.key.id()),
             'title': project.project_name,
+            'color': color,
             'start': project_start,
             'end': project_deadline,
             'url': url_for('authenticated.view_project_page', wks_id=wks_id, project_id=project.key.id())
@@ -323,45 +347,51 @@ def timelines(wks_id, **kwargs):
                            wks_data=kwargs['user'].get_wks_data(),
                            SIDEBAR=SIDEBAR)
 
+
 @authenticated.route('/Workspace/<int:wks_id>/Project/<int:project_id>/GanttChart', methods=['GET', 'POST'])
 @login_required({'admin', 'manager'})
-def ganttchart(wks_id,project_id, **kwargs):
+def ganttchart(wks_id, project_id, **kwargs):
     # only show if manager of project
     tasks = kwargs['user'].get_tasks()
     project_data = kwargs['user'].get_project_data()
     resources = [{
         'id': str(project_data.key.id()),
         'title': project_data.project_name,
-         'children':[]}]
+        'children': []}]
     events = []
     for task in tasks:
         resources[0]['children'].append({
             'id': str(task.key.id()),
             'title': task.task_name,
         })
-        task_start = datetime.strftime(task.task_startdate,'%Y-%m-%d')
-        task_deadline = datetime.strftime(task.task_finishbydate,'%Y-%m-%d')
+        task_start = datetime.strftime(task.task_startdate, '%Y-%m-%d')
+        task_deadline = datetime.strftime(task.task_finishbydate, '%Y-%m-%d')
+
+        color = "red"
+        if task.task_status == "Open":
+            color = "green"
 
         events.append({
             'resourceId': str(task.key.id()),
             'title': task.task_name,
+            'color': color,
             'start': task_start,
             'end': task_deadline,
-            'url': url_for('authenticated.view_task_page',wks_id=wks_id,project_id=project_id,task_id=task.key.id())
+            'url': url_for('authenticated.view_task_page', wks_id=wks_id, project_id=project_id, task_id=task.key.id())
         })
 
         project_start = datetime.strptime(project_data.project_start, '%d/%m/%Y').strftime('%Y-%m-%d')
         project_deadline = datetime.strptime(project_data.project_deadline, '%d/%m/%Y').strftime('%Y-%m-%d')
     events.append({
-        'resourceId':str(project_data.key.id()),
-        'title':  project_data.project_name,
-        'color':'green',
+        'resourceId': str(project_data.key.id()),
+        'title': project_data.project_name,
         'start': project_start,
         'end': project_deadline,
     })
 
     return render_template('authenticated/html/ganttchart.html',
                            user_data=kwargs['user'],
+                           project_data=project_data,
                            resources=resources,
                            events=events,
                            project_id=project_id,
@@ -462,7 +492,6 @@ def view_project_page(wks_id, project_id, **kwargs):
 
     tasks = convert_tasks(kwargs['user'].get_tasks())
 
-
     return render_template('authenticated/html/view_project_page.html',
                            # tasks=kwargs['user'].get_tasks(),
                            tasks=tasks,
@@ -514,8 +543,8 @@ def view_task_page(wks_id, project_id, task_id, **kwargs):
         if kwargs['user'].get_role() != "developer":
             task_data.task_name = task_form.task_name.data
             task_data.task_aminutes = task_form.task_aminutes.data
-            task_data.task_startdate = datetime.strptime(str(task_form.task_startdate.data),  '%d/%m/%Y')
-            task_data.task_finishbydate = datetime.strptime(str(task_form.task_finishbydate.data),  '%d/%m/%Y')
+            task_data.task_startdate = datetime.strptime(str(task_form.task_startdate.data), '%d/%m/%Y')
+            task_data.task_finishbydate = datetime.strptime(str(task_form.task_finishbydate.data), '%d/%m/%Y')
             task_data.task_description = task_form.task_description.data
             task_data.task_skills = map(int, task_form.task_skills.data)
             task_data.task_developers = map(int, task_form.task_developers.data)
@@ -532,8 +561,8 @@ def view_task_page(wks_id, project_id, task_id, **kwargs):
 
     task_form.task_name.data = task_data.task_name
     task_form.task_aminutes.data = task_data.task_aminutes
-    task_form.task_startdate.data = datetime.strftime(task_data.task_startdate,'%d/%m/%Y')
-    task_form.task_finishbydate.data = datetime.strftime(task_data.task_finishbydate,'%d/%m/%Y')
+    task_form.task_startdate.data = datetime.strftime(task_data.task_startdate, '%d/%m/%Y')
+    task_form.task_finishbydate.data = datetime.strftime(task_data.task_finishbydate, '%d/%m/%Y')
     task_form.task_status.data = task_data.task_status
     task_form.task_description.data = task_data.task_description
     task_form.task_skills.data = map(str, task_data.task_skills)
