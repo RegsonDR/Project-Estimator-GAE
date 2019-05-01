@@ -25,7 +25,8 @@ def call_webhook(wks_id, test):
         del project['Wks']
         for task in tasks:
             logs = get_logs(task['TaskID'])
-            request_data['logs'].append(logs)
+            if logs:
+                request_data['logs'].append(logs)
         request_data['tasks'].append(tasks)
 
     try:

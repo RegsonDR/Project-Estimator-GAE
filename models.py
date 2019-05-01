@@ -203,6 +203,8 @@ class UserSkill(ndb.Model):
 class PredictionData(ndb.Model):
     Wks = ndb.KeyProperty(kind='WorkspaceDetails')
     filename = ndb.StringProperty()
-    csv = ndb.BlobKeyProperty()
+    csv = ndb.BlobProperty()
+    accuracy = ndb.FloatProperty()
+    pickle = ndb.PickleProperty()
     upload_time = ndb.DateTimeProperty()
     calibration_time = ndb.DateTimeProperty()

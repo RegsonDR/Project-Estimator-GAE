@@ -2,7 +2,6 @@
 import gc
 import time
 from functools import wraps
-from google.appengine.ext import blobstore
 from app_statics import SIDEBAR
 from flask import Blueprint, session, abort, redirect
 from forms import *
@@ -45,8 +44,8 @@ class LoggedUser:
     def get_wks_data(self):
         return self.wks_data
 
-    def get_file(self):
-        return get_file(self.wks_data)
+    def get_file_meta(self):
+        return get_file_meta(self.wks_data)
 
     def get_project_data(self):
         return self.projects_data
@@ -182,8 +181,6 @@ def wk_settings(wks_id, **kwargs):
 
     wk_data = kwargs['user'].get_wks_data()
 
-    print read_csv(wk_data)
-
     if request.method == "POST":
         if 'save' in request.form and file_form.validate_on_submit():
             if save_file(wk_data.key,file_form.file):
@@ -221,11 +218,9 @@ def wk_settings(wks_id, **kwargs):
     form.webhook_url.data = wk_data.webhook_url
     form.enable_webhook.data = str(wk_data.enable_webhook)
 
-    uploadUri = blobstore.create_upload_url(url_for('authenticated.wk_settings', wks_id=wks_id))
 
     return render_template('authenticated/html/wk_settings.html',
                            form=form,
-                           uploadUri = uploadUri,
                            file_form=file_form,
                            user_data=kwargs['user'],
                            wks_data=kwargs['user'].get_wks_data(),

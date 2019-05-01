@@ -76,20 +76,22 @@
             </div>
             <br>
 
-            <form action="{{ uploadUri }}" method="POST" enctype="multipart/form-data">
+            <form method="POST" enctype="multipart/form-data">
                 <div class="form-row" style="justify-content:center">
                     {{ form.hidden_tag() }}
                     <div class="col-8 input-group mb-2">
                         <div class="custom-file">
                             {{ file_form.file(class="custom-file-input", id="inputGroupFile01") }}
                             <label class="custom-file-label" for="inputGroupFile01">
-                                {% if user_data.get_file() %}Old File ({{ user_data.get_file()[1]|format_date}}): {{user_data.get_file()[0] }}{% else %}Choose file to upload..{% endif %}
+                                {% if user_data.get_file_meta() %}Old File ({{ user_data.get_file_meta()[1]|format_date }}):
+                                    {{ user_data.get_file_meta()[0] }}{% else %}Choose file to upload..{% endif %}
                             </label>
                         </div>
                         <div class="input-group-append">
                             {{ file_form.save(class="input-group-text", id="inputGroupFileAddon01") }}
                         </div>
-sdfafa                </div>
+                    </div>
+                </div>
             </form>
 
 
@@ -102,8 +104,13 @@ sdfafa                </div>
                 </div>
             </div>
             <div class="form-row" style="justify-content:end">
-                <div class="col-5 input-group" style="text-align: right">
-                    <sub>Last Calibration Date:</sub>
+                <div class="col-5 input-group mb-1" style="text-align: right">
+                    <sup>Last Calibration Date:</sup>
+                </div>
+            </div>
+            <div class="form-row" style="justify-content:end">
+                <div class="col-5 input-group mb-1" style="text-align: right">
+                    <sub>Algorithm Accuracy:</sub>
                 </div>
             </div>
         </div>

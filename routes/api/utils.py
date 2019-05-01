@@ -280,8 +280,6 @@ def validate_task(wks_key, body):
     start = format_date(body['task_startdate'])
     deadline = format_date(body['task_finishbydate'])
     if start == False or deadline == False:
-        print start
-        print deadline
         return {'code': 400, 'message': "Dates must be in dd/mm/YYYY format."}
     if start > deadline:
         return {'code': 400, 'message': "task_startdate must be lower than task_finishbydate."}

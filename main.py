@@ -60,12 +60,12 @@ if __name__ == '__main__':
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return e
+    return redirect(url_for('unauthenticated.not_found_page'))
 
 
 @app.errorhandler(403)
 def forbidden(e):
-    return e
+    return redirect(url_for('unauthenticated.forbidden_page'))
 
 
 @app.errorhandler(401)

@@ -166,7 +166,9 @@ def user_profile(api_request,ProfileID, **kwargs):
     response['AccountID'] = user.get_id()
     del response['Wks']
     del response['workspace_name']
-    account= get_account(ProfileID)
+    account = get_account(ProfileID)
+    if account.get_user_key() == False:
+        return jsonify({'code': 400, 'message': 'User does not have an account.'})
     response['skills'] = get_user_skill(api_request.workspace_data.key,account.get_user_key())
     for item in response['skills']:
         del item['Wks']

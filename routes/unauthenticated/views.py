@@ -71,7 +71,7 @@ def reset_password_page():
 
     password_reset = PasswordResetForm()
     if request.method == "POST" and password_reset.validate_on_submit():
-        if update_password(user,password_reset.password.data):
+        if update_password(user, password_reset.password.data):
             flash('Password reset successful!', 'success')
         else:
             flash('Password reset unsuccessful.', 'danger')
@@ -79,3 +79,13 @@ def reset_password_page():
 
     return render_template('unauthenticated/html/reset_password.html',
                            form=password_reset)
+
+
+@unauthenticated.route('/404PageNotFound', methods=['GET'])
+def not_found_page():
+    return render_template('unauthenticated/html/404.html')
+
+
+@unauthenticated.route('/403ForbiddenAccess', methods=['GET'])
+def forbidden_page():
+    return render_template('unauthenticated/html/403.html')

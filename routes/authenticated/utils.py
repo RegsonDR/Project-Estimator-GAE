@@ -2,13 +2,13 @@ from models import WorkspaceDetails, AccountDetails, UserProfile, ProjectDetails
     UserSkill, PredictionData
 from flask import flash, request, url_for, render_template
 from google.appengine.api import mail
-from google.appengine.ext import blobstore
 from app_statics import APP_NAME
 from werkzeug import secure_filename, http
 import uuid
 from datetime import datetime, timedelta
 import csv
 import io
+
 def create_wks(workspace_name, user_email):
     workspace_data = WorkspaceDetails(
         workspace_name=workspace_name,
@@ -327,44 +327,42 @@ def save_file(wks_key,data_file):
     if not ext.lower() in valid_extensions:
         return False
 
-    key = get_blobkey(data_file.data)
-    print key
-    if not key:
-        return False
-
     save = PredictionData(
         Wks=wks_key,
         filename=filename,
-        csv=get_blobkey(data_file.data),
+        csv=data_file.data.stream.read(),
         upload_time=datetime.now() + timedelta(hours=1)
     )
     if save.put():
         return True
     return False
 
-def get_file(wks_data):
+def get_file_meta(wks_data):
     data = PredictionData.query(PredictionData.Wks == wks_data.key).get()
     if data:
         return data.filename, data.upload_time
     return False
 
-def read_csv(wks_data):
-    data = PredictionData.query(PredictionData.Wks == wks_data.key).get()
-    blob_info = blobstore.get(data.csv)
-
-    stream = io.StringIO(blob_info.open().read().decode("UTF8"), newline=None)
+def read_csv(wks_id):
+    wks_key = WorkspaceDetails.get_by_id(wks_id).key
+    data = PredictionData.query(PredictionData.Wks == wks_key).get()
+    stream = io.StringIO(data.csv.decode("UTF8"), newline=None)
     csv_input = csv.reader(stream)
 
-    for row in csv_input:
-        print(row)
+    # for row in csv_input:
+    #     print(row)
 
-    # content = BytesIO(blob_info.open().read())
-
+    print stream.read()
 
     return False
 
-def get_blobkey(file):
-    header = file.headers['Content-Type']
-    parsed_header = http.parse_options_header(header)
-    blob_key = blobstore.BlobKey(parsed_header[1]['blob-key'])
-    return blob_key
+
+
+
+# If blobstore storage is needed over the blob option in datastore.
+# def get_blobkey(file):
+#     header = file.headers['Content-Type']
+#     parsed_header = http.parse_options_header(header)[1]['blob-key']
+#     return blobstore.BlobKey(parsed_header)
+# Goes into the template!
+#    uploadUri = blobstore.create_upload_url(url_for('authenticated.wk_settings', wks_id=wks_id))
