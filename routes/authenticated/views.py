@@ -418,6 +418,7 @@ def workspace_homepage(wks_id, **kwargs):
                                         new_project.project_name.data)
 
             time.sleep(1)
+            kwargs['user'].call_webhook()
             return redirect(url_for('authenticated.view_project_page', wks_id=wks_id, project_id=project_id))
 
     return render_template('authenticated/html/workspace_homepage.html',
@@ -453,6 +454,7 @@ def view_project_page(wks_id, project_id, **kwargs):
         project_data.project_stage = project_form.project_stage.data
         project_data.project_status = project_form.project_status.data
         if project_data.put():
+            kwargs['user'].call_webhook()
             flash('Project details updated!', 'success')
             return redirect(url_for('authenticated.view_project_page', wks_id=wks_id, project_id=project_id))
         flash('Error occurred, please try again!', 'danger')
@@ -556,6 +558,7 @@ def view_task_page(wks_id, project_id, task_id, **kwargs):
                 task_data.parent_task = int(task_form.parent_task.data)
         task_data.task_status = task_form.task_status.data
         if task_data.put():
+            kwargs['user'].call_webhook()
             flash('Task details updated!', 'success')
             return redirect(
                 url_for('authenticated.view_task_page', wks_id=wks_id, project_id=project_id, task_id=task_id))

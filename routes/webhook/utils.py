@@ -5,10 +5,10 @@ from google.appengine.api import urlfetch
 import urllib
 
 
-def call_webhook(wks_id, test):
+def call_webhook(wks_id, testURL):
     wks_data = WorkspaceDetails.get_by_id(wks_id)
-    webhook_url = test
-    if not test:
+    webhook_url = testURL
+    if not testURL:
         if not wks_data.enable_webhook or wks_data.enable_webhook == False:
             return False
         if not wks_data.webhook_url or wks_data.webhook_url == "":
