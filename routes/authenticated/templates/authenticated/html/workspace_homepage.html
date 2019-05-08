@@ -12,6 +12,14 @@
 
 {% block page_content %}
 
+    {% macro ProduceNoRequestAlert() -%}
+    <div class="col-lg-11 my-3" style="margin: auto;">
+<div class="alert alert-info alert-dismissible fade show", style="margin-top: 1rem;   margin-bottom: 1rem;">
+   There are no requests in this category.
+</div>
+    </div>
+{%- endmacro %}
+
 {% macro ProduceProjectCards(ProjectsObject, DateCheck) -%}
     {% if not ProjectsObject %}
        {{ ProduceNoRequestAlert() }}
@@ -41,13 +49,7 @@
   {% endfor %}
 {%- endmacro %}
 
-{% macro ProduceNoRequestAlert() -%}
-    <div class="col-lg-11 my-3" style="margin: auto;">
-<div class="alert alert-info alert-dismissible fade show", style="margin-top: 1rem;   margin-bottom: 1rem;">
-   There are no requests in this category.
-</div>
-    </div>
-{%- endmacro %}
+
 <div class="container">
 
 <div class="card text-center" style=" border: 1px solid rgba(0,0,0,0.5);">
