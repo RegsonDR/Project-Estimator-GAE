@@ -97,6 +97,11 @@ class LoggedUser:
     def call_webhook(self):
         call_webhook(self.wks_key.id(), False)
 
+    def get_prediction(self, functional_points):
+        return self.projects_data.predict(functional_points)
+        # return get_prediction(self.wks_key, functional_points)
+
+
 
 # Permissions decorator, used and re-checked on every page load, first check login, account active, then workspace + role.
 def login_required(roles=None):
@@ -217,7 +222,6 @@ def wk_settings(wks_id, **kwargs):
     form.enable_api.data = str(wk_data.enable_api)
     form.webhook_url.data = wk_data.webhook_url
     form.enable_webhook.data = str(wk_data.enable_webhook)
-
 
     return render_template('authenticated/html/wk_settings.html',
                            form=form,
@@ -404,7 +408,7 @@ def workspace_homepage(wks_id, **kwargs):
         total = total + skill.usage()
 
     if total == 0:
-        flash("To begin, please let up skills for at least one user!", "warning")
+        flash("To begin, please let up skills for at least one user!", "info")
 
     if request.method == 'POST':
         if new_project.validate_on_submit() and kwargs['user'].get_role() != "developer":
@@ -443,6 +447,7 @@ def view_project_page(wks_id, project_id, **kwargs):
         project_data.project_name = project_form.project_name.data
         project_data.project_start = project_form.project_start.data
         project_data.project_deadline = project_form.project_deadline.data
+        project_data.project_function_points = project_form.project_function_points.data
         project_data.project_description = project_form.project_description.data
         project_data.project_manager = project_form.project_manager.data
         project_data.project_stage = project_form.project_stage.data
@@ -459,6 +464,7 @@ def view_project_page(wks_id, project_id, **kwargs):
     project_form.project_manager.data = project_data.project_manager
     project_form.project_stage.data = project_data.project_stage
     project_form.project_status.data = project_data.project_status
+    project_form.project_function_points.data = project_data.project_function_points
 
     if kwargs['user'].get_role() == "developer":
         project_form.project_name.render_kw = {"disabled": True}
@@ -467,6 +473,7 @@ def view_project_page(wks_id, project_id, **kwargs):
         project_form.project_description.render_kw = {"disabled": True}
         project_form.project_stage.render_kw = {"disabled": True}
         project_form.project_status.render_kw = {"disabled": True}
+        project_form.project_function_points.render_kw = {"disabled": True}
 
     skill_choices = [(skill.key.id(), skill.skill_name) for skill in
                      SkillData.query(SkillData.Wks == kwargs['user'].wks_key

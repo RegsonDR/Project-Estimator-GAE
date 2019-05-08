@@ -53,20 +53,27 @@
         <form method="POST" autocomplete="off" class="my-page">
             {{ form.hidden_tag() }}
             <div class="form-row" style="justify-content:center">
-                <div class="col-5 input-group mb-2">
+                <div class="col-11 input-group mb-2">
                     <div class="input-group-prepend">
                         {{ form.project_name.label(class="input-group-text") }}
                     </div>
                     {{ form.project_name(class="form-control") }}
                 </div>
-
-                <div class="col-3 input-group mb-2">
+            </div>
+            <div class="form-row" style="justify-content:center">
+              <div class="col-3 input-group mb-2">
+                    <div class="input-group-prepend">
+                        {{ form.project_function_points.label(class="input-group-text") }}
+                    </div>
+                    {{ form.project_function_points(class="form-control") }}
+                </div>
+                <div class="col-4 input-group mb-2">
                     <div class="input-group-prepend">
                         {{ form.project_start.label(class="input-group-text") }}
                     </div>
                     {{ form.project_start(class="form-control") }}
                 </div>
-                <div class="col-3 input-group mb-2">
+                <div class="col-4 input-group mb-2">
                     <div class="input-group-prepend">
                         {{ form.project_deadline.label(class="input-group-text") }}
                     </div>
@@ -162,6 +169,12 @@
                 <div class="badge badge-{% if l_time > a_time %}danger{% else %}primary{% endif %}"
                      style="margin: 5px 5px 0px 5px; text-align: left; font-size:13px;">
                     Logged Time: {{ l_time | int_to_minhour }}
+                </div>
+                <div class="badge badge-warning"
+                     style="margin: 5px 5px 0px 5px; text-align: left; font-size:13px;">
+                     {% set p_time = user_data.get_prediction(form.project_function_points.data) %}
+
+                     Predicted Time: {% if p_time > 0 %}{{ p_time | int_to_minhour  }}{% else %} More Data Required{% endif %}
                 </div>
                 {{ form.submit(class="fa btn save-button", value='') }}
                 <a class="fa btn delete-project" style="display: table;" data-toggle="modal"

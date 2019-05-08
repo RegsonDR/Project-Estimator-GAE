@@ -6,14 +6,13 @@ from app_statics import APP_NAME
 from werkzeug import secure_filename, http
 import uuid
 from datetime import datetime, timedelta
-import csv
-import io
+
 
 def create_wks(workspace_name, user_email):
     workspace_data = WorkspaceDetails(
         workspace_name=workspace_name,
         allow_dev_skills=True,
-        api_key = uuid.uuid4().hex,
+        api_key=uuid.uuid4().hex,
         enable_api=False
     )
     if not workspace_data.put():
@@ -36,16 +35,17 @@ def create_wks(workspace_name, user_email):
     return workspace_data
 
 
-def create_project(wks_key, user_email, description,start, deadline, name):
+def create_project(wks_key, user_email, description, start, deadline, name):
     project_data = ProjectDetails(
         Wks=wks_key,
         project_manager=user_email,
         project_name=name,
         project_description=description,
-        project_start = start,
+        project_start=start,
         project_deadline=deadline,
         project_status="Running",
-        project_stage="Planning"
+        project_stage="Planning",
+        project_function_points=0
     )
     if not project_data.put():
         flash('Project not created.', 'danger')
@@ -217,7 +217,8 @@ def get_chat_messages(project_id):
 
 def get_tasks(project_key, role, user_id):
     if role == "developer":
-        return TaskDetails.query(TaskDetails.Project == project_key, TaskDetails.task_developers == user_id).order(TaskDetails.task_startdate).fetch()
+        return TaskDetails.query(TaskDetails.Project == project_key, TaskDetails.task_developers == user_id).order(
+            TaskDetails.task_startdate).fetch()
     return TaskDetails.query(TaskDetails.Project == project_key).order(TaskDetails.task_startdate).fetch()
 
 
@@ -268,15 +269,13 @@ def get_total_logged_minutes(project_key):
     return total
 
 
-
-
 def convert_tasks(tasks):
     tasks_list = []
     level = 1
     for task in tasks:
         if not task.parent_task:
             tasks_list.append({
-                'level':level,
+                'level': level,
                 'id': task.key.id(),
                 'key': task.key,
                 'Project': task.Project,
@@ -289,19 +288,19 @@ def convert_tasks(tasks):
                 'task_startdate': task.task_startdate,
                 'task_finishbydate': task.task_finishbydate,
                 'task_status': task.task_status,
-                'children': get_children(task.key.id(), tasks,level)
+                'children': get_children(task.key.id(), tasks, level)
             })
-            level=level+1
+            level = level + 1
     return tasks_list
 
 
-def get_children(parent_id,tasks,level):
+def get_children(parent_id, tasks, level):
     data = []
     sublevel = 1
     for task in tasks:
         if task.parent_task == parent_id:
             data.append({
-                'level':str(level)+"."+str(sublevel),
+                'level': str(level) + "." + str(sublevel),
                 'id': task.key.id(),
                 'key': task.key,
                 'Project': task.Project,
@@ -314,49 +313,45 @@ def get_children(parent_id,tasks,level):
                 'task_startdate': task.task_startdate,
                 'task_finishbydate': task.task_finishbydate,
                 'task_status': task.task_status,
-                'children': get_children(task.key.id(),tasks,str(level)+"."+str(sublevel))
+                'children': get_children(task.key.id(), tasks, str(level) + "." + str(sublevel))
             })
-            sublevel = sublevel +1
+            sublevel = sublevel + 1
     return data
 
 
-def save_file(wks_key,data_file):
+def save_file(wks_key, data_file):
     filename = secure_filename(data_file.data.filename)
     ext = filename.split(".")[1]
     valid_extensions = ['csv']
     if not ext.lower() in valid_extensions:
+        flash('Invalid File Format uploaded. Allowed Type: csv', 'danger')
         return False
 
-    save = PredictionData(
-        Wks=wks_key,
-        filename=filename,
-        csv=data_file.data.stream.read(),
-        upload_time=datetime.now() + timedelta(hours=1)
-    )
-    if save.put():
-        return True
+    old_data = PredictionData.query(PredictionData.Wks == wks_key).get()
+    if old_data:
+        old_data.filename = filename
+        old_data.csv = data_file.data.stream.read()
+        old_data.upload_time = datetime.now() + timedelta(hours=1)
+        if old_data.put():
+            return True
+        return False
+    else:
+        save = PredictionData(
+            Wks=wks_key,
+            filename=filename,
+            csv=data_file.data.stream.read(),
+            upload_time=datetime.now() + timedelta(hours=1)
+        )
+        if save.put():
+            return True
     return False
+
 
 def get_file_meta(wks_data):
     data = PredictionData.query(PredictionData.Wks == wks_data.key).get()
     if data:
-        return data.filename, data.upload_time
+        return data.filename, data.upload_time, data.calibration_time, data.valid_rows
     return False
-
-def read_csv(wks_id):
-    wks_key = WorkspaceDetails.get_by_id(wks_id).key
-    data = PredictionData.query(PredictionData.Wks == wks_key).get()
-    stream = io.StringIO(data.csv.decode("UTF8"), newline=None)
-    csv_input = csv.reader(stream)
-
-    # for row in csv_input:
-    #     print(row)
-
-    print stream.read()
-
-    return False
-
-
 
 
 # If blobstore storage is needed over the blob option in datastore.

@@ -58,6 +58,7 @@ class Project(FlaskForm):
                                  validators=[DataRequired()])
     project_manager = SelectField('Project Manager', validators=[DataRequired()])
     project_stage = StringField('Project Stage', validators=[DataRequired()])
+    project_function_points = IntegerField('Functional Points')
     submit = SubmitField('Save')
 
 class Task(FlaskForm):
@@ -86,7 +87,7 @@ class WKSettings(FlaskForm):
     allow_dev_skills = SelectField('Allow Developers to set their skills', choices=[("False", "No"), ("True", "Yes")], validators=[DataRequired()])
     api_key = StringField('API Key', validators=[DataRequired()], render_kw ={'readonly': True})
     enable_api = SelectField('Enable API Access?', choices=[("False", "No"), ("True", "Yes")], validators=[DataRequired()])
-    webhook_url = URLField('Webhook URL', validators=[DataRequired()])
+    webhook_url = URLField('Webhook URL', validators=[])
     enable_webhook = SelectField('Enable Webhook?', choices=[("False", "No"), ("True", "Yes")], validators=[DataRequired()])
     submit = SubmitField('Save')
 

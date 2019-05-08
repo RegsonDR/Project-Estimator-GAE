@@ -76,6 +76,7 @@ class ProjectDetails(ndb.Model):
     project_deadline = ndb.StringProperty()
     project_status = ndb.StringProperty(choices={'Running', 'Closed', 'On Hold'})
     project_stage = ndb.StringProperty()
+    project_function_points = ndb.IntegerProperty()
     _use_memcache = False
     _use_cache = False
 
@@ -102,6 +103,12 @@ class ProjectDetails(ndb.Model):
         account_data = AccountDetails.query(AccountDetails.email == self.project_manager).get()
         if account_data:
             return account_data.first_name + " " + account_data.last_name
+        return False
+
+    def predict(self, functional_points):
+        data = PredictionData.query(PredictionData.Wks == self.Wks).get()
+        if data:
+            return int(round(data.b0 + data.b1 * functional_points))
         return False
 
 
@@ -204,7 +211,8 @@ class PredictionData(ndb.Model):
     Wks = ndb.KeyProperty(kind='WorkspaceDetails')
     filename = ndb.StringProperty()
     csv = ndb.BlobProperty()
-    accuracy = ndb.FloatProperty()
-    pickle = ndb.PickleProperty()
+    b0 = ndb.FloatProperty()
+    b1 = ndb.FloatProperty()
+    valid_rows = ndb.IntegerProperty()
     upload_time = ndb.DateTimeProperty()
     calibration_time = ndb.DateTimeProperty()

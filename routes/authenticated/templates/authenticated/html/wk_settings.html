@@ -83,8 +83,8 @@
                         <div class="custom-file">
                             {{ file_form.file(class="custom-file-input", id="inputGroupFile01") }}
                             <label class="custom-file-label" for="inputGroupFile01">
-                                {% if user_data.get_file_meta() %}Old File ({{ user_data.get_file_meta()[1]|format_date }}):
-                                    {{ user_data.get_file_meta()[0] }}{% else %}Choose file to upload..{% endif %}
+                                {% if user_data.get_file_meta()%}{{ user_data.get_file_meta()[0] }}
+                                    ({{ user_data.get_file_meta()[1]|format_date }}){% else %}Choose file to upload..{% endif %}
                             </label>
                         </div>
                         <div class="input-group-append">
@@ -105,12 +105,25 @@
             </div>
             <div class="form-row" style="justify-content:end">
                 <div class="col-5 input-group mb-1" style="text-align: right">
-                    <sup>Last Calibration Date:</sup>
+                    <sup>
+                        Valid Rows:
+                        {% if user_data.get_file_meta()[3]%}
+                            {{ user_data.get_file_meta()[3] }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </sup>
                 </div>
             </div>
             <div class="form-row" style="justify-content:end">
                 <div class="col-5 input-group mb-1" style="text-align: right">
-                    <sub>Algorithm Accuracy:</sub>
+                    <sub>Last Calibration Date:
+                        {% if user_data.get_file_meta()[2]%}
+                            {{ user_data.get_file_meta()[2]|format_date }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                        </sub>
                 </div>
             </div>
         </div>
@@ -138,6 +151,23 @@
                 var fileName = $(this).val().split("\\").pop();
                 $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
             });
+
+            $('#recalibrate').on('click', function () {
+                $.post("{{url_for('ajax.machine_learning',wks_id=wks_data.key.id())}}", {"action":"recalibrate"});
+                alert("Recalibration activated, please note that this will take a while for larger files.");
+                setTimeout(function () {
+                    location.reload()
+                }, 1000);
+            });
+
+            $('#delete').on('click', function () {
+                $.post("{{url_for('ajax.machine_learning',wks_id=wks_data.key.id())}}", {"action":"delete"});
+                setTimeout(function () {
+                    location.reload()
+                }, 1000);
+            });
+
+
         });
     </script>
 

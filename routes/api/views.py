@@ -261,6 +261,7 @@ def project(api_request, ProjectID, **kwargs):
 
     response = project.to_dict()
     response['Developers'] = project.get_developers()
+    response['Prediction'] = project.predict(project.project_function_points)
     del response['Wks']
     response['Tasks'] = get_tasks(project.key)
     if request.method == 'DELETE':

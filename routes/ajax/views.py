@@ -124,7 +124,7 @@ def regenerate_token(wks_id, **kwargs):
     try:
         currentAuth = request.form.get('currentAuth')
         regenerate(wks_id,currentAuth)
-        return jsonify({'Request': False})
+        return jsonify({'Request': True})
     except:
         return jsonify({'Request': False})
 
@@ -133,6 +133,16 @@ def regenerate_token(wks_id, **kwargs):
 def trigger_webhook(wks_id, **kwargs):
     try:
         call_webhook(wks_id, request.form.get('testURL'))
+        return jsonify({'Request': True})
+    except:
         return jsonify({'Request': False})
+
+
+@ajax.route('/Workspace/<int:wks_id>/ML', methods=['POST'])
+@login_required({'admin'})
+def machine_learning(wks_id, **kwargs):
+    try:
+        trigger_ml(wks_id, request.form.get('action'))
+        return jsonify({'Request': True})
     except:
         return jsonify({'Request': False})

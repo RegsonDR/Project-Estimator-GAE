@@ -1,4 +1,4 @@
-from models import AccountDetails, ProjectChat, TaskLog, UserProfile, UserSkill, TaskDetails, ProjectDetails,WorkspaceDetails
+from models import AccountDetails, ProjectChat, TaskLog, UserProfile, UserSkill, TaskDetails, ProjectDetails,WorkspaceDetails, PredictionData
 from flask import request, url_for, render_template
 from google.appengine.api import mail, urlfetch
 from app_statics import APP_NAME
@@ -9,7 +9,9 @@ import hmac
 import hashlib
 import json
 import time
-
+import csv
+import io
+import numpy as np
 
 def get_user_data_by_email(email):
     return AccountDetails.query(AccountDetails.email == email.lower()).get()
@@ -187,3 +189,66 @@ def regenerate(wk_id,key):
         if wk.put():
             return True
     return False
+
+def trigger_ml(wks_id, action):
+
+    if action == "recalibrate":
+        read_csv(wks_id)
+        return True
+    elif action == "delete":
+        wks_key = WorkspaceDetails.get_by_id(wks_id).key
+        data = PredictionData.query(PredictionData.Wks == wks_key).get()
+        data.key.delete()
+        return True
+    return False
+
+
+
+def read_csv(wks_id):
+    wks_key = WorkspaceDetails.get_by_id(wks_id).key
+    data = PredictionData.query(PredictionData.Wks == wks_key).get()
+    stream = io.StringIO(data.csv.decode("UTF8"), newline=None)
+    csv_input = csv.reader(stream)
+    functional_points = []
+    actual_minutes = []
+    for row in csv_input:
+        # Only add if is row contains integer, don't accept decimals or strings
+        if is_number(row[0]) and is_number(row[1]):
+            functional_points.append(int(row[0]))
+            actual_minutes.append(int(row[1]))
+    x = np.array(functional_points)
+    y = np.array(actual_minutes)
+    b = estimate_coef(x, y)
+    data.b0 = b[0]
+    data.b1 = b[1]
+    data.valid_rows = len(functional_points)
+    data.calibration_time = datetime.now() + timedelta(hours=1)
+    if data.put():
+        return True
+    return False
+
+
+def is_number(number):
+    try:
+        int(number)
+        return True
+    except ValueError:
+        return False
+
+
+def estimate_coef(x, y):
+    # number of observations/points
+    n = np.size(x)
+
+    # mean of x and y vector
+    m_x, m_y = np.mean(x), np.mean(y)
+
+    # calculating cross-deviation and deviation about x
+    SS_xy = np.sum(y * x) - n * m_y * m_x
+    SS_xx = np.sum(x * x) - n * m_x * m_x
+
+    # calculating regression coefficients
+    b_1 = SS_xy / SS_xx
+    b_0 = m_y - b_1 * m_x
+
+    return (b_0, b_1)

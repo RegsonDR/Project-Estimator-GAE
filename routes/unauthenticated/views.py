@@ -7,6 +7,9 @@ unauthenticated = Blueprint('unauthenticated', __name__, template_folder='templa
 
 @unauthenticated.route('/Login', methods=['GET', 'POST'])
 def login_page():
+    if 'Logged_In' in session:
+        return redirect(url_for('authenticated.my_workspaces_page'))
+
     login_form = LoginForm()
     #
     # Check if login request is valid
