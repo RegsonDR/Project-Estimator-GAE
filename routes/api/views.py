@@ -17,14 +17,11 @@ class user_api_request:
         return get_all_workspace_projects(self.workspace_data.key)
 
 
-
-
 def auth_request():
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            if not request.authorization or not request.authorization['username'] or not request.authorization[
-                'password']:
+            if not request.authorization or not request.authorization['username'] or not request.authorization['password']:
                 return jsonify(
                     {"code": 400, "message": "Your username is your Workspace ID and your password is your api key."})
             wks_id = int(request.authorization['username'])
@@ -35,20 +32,18 @@ def auth_request():
             if not workspace_data.enable_api:
                 return jsonify({"code": 401, "message": "API access disabled by your workspace administrator."})
             return func(user_api_request(workspace_data), *args, **kwargs)
-
         return wrapper
-
     return decorator
 
 
 @api.route('/Workspace', methods=['GET', 'PUT'])
 @auth_request()
 def workspace(api_request, **kwargs):
-
     message = None
     workspace_data = api_request.get_workspace()
     if request.method == 'PUT':
-        allowed_items = {'allow_dev_skills': bool, 'workspace_name': unicode,'webhook_url':unicode,'enable_webhook':bool}
+        allowed_items = {'allow_dev_skills': bool, 'workspace_name': unicode, 'webhook_url': unicode,
+                         'enable_webhook': bool}
         body = check_body(allowed_items)
         if 'code' in body:
             return jsonify(body)
@@ -60,7 +55,7 @@ def workspace(api_request, **kwargs):
             setattr(workspace_data, item, new_value)
         workspace_data.put()
 
-        message = {"information":str(body.keys())+" updated."}
+        message = {"information": str(body.keys()) + " updated."}
 
     response = workspace_data.to_dict()
     del response['api_key']
@@ -91,7 +86,8 @@ def skills(api_request, **kwargs):
         del item['Wks']
     return return_json(response, message)
 
-@api.route('/Users', methods=['GET','POST'])
+
+@api.route('/Users', methods=['GET', 'POST'])
 @auth_request()
 def users(api_request, **kwargs):
     message = None
@@ -141,26 +137,26 @@ def projects(api_request, **kwargs):
     return return_json(response, message)
 
 
-@api.route('/User/<int:ProfileID>', methods=['GET','PUT'])
+@api.route('/User/<int:ProfileID>', methods=['GET', 'PUT'])
 @auth_request()
-def user_profile(api_request,ProfileID, **kwargs):
+def user_profile(api_request, ProfileID, **kwargs):
     message = None
     user = get_user(api_request.workspace_data.key, ProfileID)
-    if isinstance(user,dict):
+    if isinstance(user, dict):
         return jsonify(user)
     if request.method == 'PUT':
         allowed_items = {'disabled': bool, 'role': unicode}
         body = check_body(allowed_items)
         if 'code' in body:
             return jsonify(body)
-        update = validate_profile_update(api_request.workspace_data.key,user.role,body)
+        update = validate_profile_update(api_request.workspace_data.key, user.role, body)
         if 'code' in update:
             return jsonify(update)
         for item in body:
             new_value = body[item]
             setattr(user, item, new_value)
         user.put()
-        message = {"information": str(body.keys()) +" updated."}
+        message = {"information": str(body.keys()) + " updated."}
 
     response = user.to_dict()
     response['AccountID'] = user.get_id()
@@ -169,14 +165,14 @@ def user_profile(api_request,ProfileID, **kwargs):
     account = get_account(ProfileID)
     if account.get_user_key() == False:
         return jsonify({'code': 400, 'message': 'User does not have an account.'})
-    response['skills'] = get_user_skill(api_request.workspace_data.key,account.get_user_key())
+    response['skills'] = get_user_skill(api_request.workspace_data.key, account.get_user_key())
     for item in response['skills']:
         del item['Wks']
         del item['User']
         item['SkillID'] = item['skill_id']
         del item['skill_id']
 
-    response['projects'] = get_user_projects(api_request.workspace_data.key,ProfileID)
+    response['projects'] = get_user_projects(api_request.workspace_data.key, ProfileID)
     for item in response['projects']:
         del item['Wks']
 
@@ -185,12 +181,12 @@ def user_profile(api_request,ProfileID, **kwargs):
 
 @api.route('/User/<int:ProfileID>/Skill', methods=['POST'])
 @auth_request()
-def new_skill(api_request,ProfileID, **kwargs):
+def new_skill(api_request, ProfileID, **kwargs):
     response = {}
     message = None
-    account=get_account(ProfileID)
+    account = get_account(ProfileID)
     user = get_user(api_request.workspace_data.key, ProfileID)
-    if isinstance(user,dict):
+    if isinstance(user, dict):
         return jsonify(user)
 
     if request.method == 'POST':
@@ -201,20 +197,21 @@ def new_skill(api_request,ProfileID, **kwargs):
         contains_all = mandatory(allowed_items, body)
         if contains_all != True:
             return jsonify(contains_all)
-        create = assign_skill(api_request.workspace_data.key,account,body)
+        create = assign_skill(api_request.workspace_data.key, account, body)
         if 'code' in create:
             return jsonify(create)
         message = create
     return return_json(response, message)
 
-@api.route('/User/<int:ProfileID>/Skill/<int:SkillID>', methods=['PUT','DELETE'])
+
+@api.route('/User/<int:ProfileID>/Skill/<int:SkillID>', methods=['PUT', 'DELETE'])
 @auth_request()
-def user_skills(api_request,ProfileID, SkillID,**kwargs):
+def user_skills(api_request, ProfileID, SkillID, **kwargs):
     response = {}
     message = None
-    account=get_account(ProfileID)
+    account = get_account(ProfileID)
     user = get_user(api_request.workspace_data.key, ProfileID)
-    if isinstance(user,dict):
+    if isinstance(user, dict):
         return jsonify(user)
 
     if request.method == 'DELETE':
@@ -231,33 +228,32 @@ def user_skills(api_request,ProfileID, SkillID,**kwargs):
         contains_all = mandatory(allowed_items, body)
         if contains_all != True:
             return jsonify(contains_all)
-        update = update_skill(api_request.workspace_data.key,account,body,SkillID)
+        update = update_skill(api_request.workspace_data.key, account, body, SkillID)
         if 'code' in update:
             return jsonify(update)
         message = update
-
 
     return return_json(response, message)
 
 
-@api.route('/Project/<int:ProjectID>', methods=['GET', 'PUT','DELETE'])
+@api.route('/Project/<int:ProjectID>', methods=['GET', 'PUT', 'DELETE'])
 @auth_request()
 def project(api_request, ProjectID, **kwargs):
     message = None
     project = get_project(api_request.workspace_data.key, ProjectID)
-    if isinstance(project,dict):
+    if isinstance(project, dict):
         return jsonify(project)
     if request.method == 'PUT':
         allowed_items = {'project_deadline': unicode, 'project_description': unicode, 'project_manager': unicode,
-                         'project_name': unicode, 'project_start': unicode,'project_stage':unicode,'project_status':unicode}
+                         'project_name': unicode, 'project_start': unicode, 'project_stage': unicode,
+                         'project_status': unicode}
         body = check_body(allowed_items)
         if 'code' in body:
             return jsonify(body)
-        update = update_project(allowed_items,project, body)
+        update = update_project(allowed_items, project, body)
         if 'code' in update:
             return jsonify(update)
         message = update
-
 
     response = project.to_dict()
     response['Developers'] = project.get_developers()
@@ -270,34 +266,35 @@ def project(api_request, ProjectID, **kwargs):
 
     return return_json(response, message)
 
+
 @api.route('/Project/<int:ProjectID>/Task', methods=['POST'])
 @auth_request()
 def project_tasks(api_request, ProjectID, **kwargs):
     response = {}
     message = None
     project = get_project(api_request.workspace_data.key, ProjectID)
-    if isinstance(project,dict):
+    if isinstance(project, dict):
         return jsonify(project)
 
     if request.method == 'POST':
         allowed_items = {'task_name': unicode, 'task_description': unicode, 'task_aminutes': int,
-                         'task_skills': list, 'task_developers': list,'task_startdate':unicode,'task_finishbydate':unicode}
+                         'task_skills': list, 'task_developers': list, 'task_startdate': unicode,
+                         'task_finishbydate': unicode}
         body = check_body(allowed_items)
         if 'code' in body:
             return jsonify(body)
         contains_all = mandatory(allowed_items, body)
         if contains_all != True:
             return jsonify(contains_all)
-        create = create_task(api_request.workspace_data.key,project,body)
+        create = create_task(api_request.workspace_data.key, project, body)
         if 'code' in create:
             return jsonify(create)
         message = create
 
-
     return return_json(response, message)
 
 
-@api.route('/Task/<int:TaskID>', methods=['GET','PUT','DELETE'])
+@api.route('/Task/<int:TaskID>', methods=['GET', 'PUT', 'DELETE'])
 @auth_request()
 def task(api_request, TaskID, **kwargs):
     message = None
@@ -305,15 +302,14 @@ def task(api_request, TaskID, **kwargs):
     if isinstance(task, dict):
         return jsonify(task)
 
-
     if request.method == 'PUT':
         allowed_items = {'task_name': unicode, 'task_description': unicode, 'task_aminutes': int,
                          'task_skills': list, 'task_developers': list, 'task_startdate': unicode,
-                         'task_finishbydate': unicode, 'parent_task':unicode, 'task_status':unicode}
+                         'task_finishbydate': unicode, 'parent_task': unicode, 'task_status': unicode}
         body = check_body(allowed_items)
         if 'code' in body:
             return jsonify(body)
-        update = update_task(allowed_items,api_request.workspace_data.key,task, body)
+        update = update_task(allowed_items, api_request.workspace_data.key, task, body)
         if 'code' in update:
             return jsonify(update)
         message = update
@@ -327,6 +323,7 @@ def task(api_request, TaskID, **kwargs):
 
     return return_json(response, message)
 
+
 @api.route('/Task/<int:TaskID>/Log', methods=['POST'])
 @auth_request()
 def new_log(api_request, TaskID, **kwargs):
@@ -336,7 +333,7 @@ def new_log(api_request, TaskID, **kwargs):
     if isinstance(task, dict):
         return jsonify(task)
     if request.method == 'POST':
-        allowed_items = {'log_developer': int, 'log_minutes': int,'log_comments':unicode}
+        allowed_items = {'log_developer': int, 'log_minutes': int, 'log_comments': unicode}
         body = check_body(allowed_items)
         if 'code' in body:
             return jsonify(body)
@@ -350,7 +347,8 @@ def new_log(api_request, TaskID, **kwargs):
 
     return return_json(response, message)
 
-@api.route('/Log/<int:LogID>', methods=['PUT','DELETE'])
+
+@api.route('/Log/<int:LogID>', methods=['PUT', 'DELETE'])
 @auth_request()
 def log(api_request, LogID, **kwargs):
     response = {}
@@ -362,11 +360,11 @@ def log(api_request, LogID, **kwargs):
         message = delete_log(log)
 
     if request.method == 'PUT':
-        allowed_items = {'log_developer': int, 'log_minutes': int,'log_comments':unicode}
+        allowed_items = {'log_developer': int, 'log_minutes': int, 'log_comments': unicode}
         body = check_body(allowed_items)
         if 'code' in body:
             return jsonify(body)
-        update = update_log(allowed_items,log,body)
+        update = update_log(allowed_items, log, body)
         if 'code' in update:
             return jsonify(update)
         message = update

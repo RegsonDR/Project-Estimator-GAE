@@ -679,8 +679,10 @@ def open_invitation(**kwargs):
 
     if request.method == "POST":
         if request.form['accepted']:
-            verify_invite(code, email).invitation_accepted = True
-            verify_invite(code, email).put()
+            print "hit"
+            invite = verify_invite(code, email)
+            invite.invitation_accepted = True
+            invite.put()
             time.sleep(1)
             flash('Invitation accepted! You can access your new workspace now!', 'success')
             return redirect(url_for('authenticated.my_workspaces_page'))
