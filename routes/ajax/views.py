@@ -36,6 +36,7 @@ def new_tasks(project_id, **kwargs):
         Skills = request.form.getlist('skills[]')
         Developers = request.form.getlist('developers[]')
         create_task(project_id, Title, aMinutes, start, finish, Description, Skills, Developers)
+        kwargs['user'].call_webhook()
         return jsonify({'Request': True})
     except:
         return jsonify({'Request': False})
