@@ -70,6 +70,12 @@ An API key is generated for workspaces, with the ability to regenerate it for se
 - Hash and Salted Passwords: Passwords were hashed which made it impossible for humans to read and difficult to crack. It was also a method of prevention if an attacker managed to get information from the datastore, they would not be able to log into any accounts.
 - Basic Header Authorization: API calls required workspace ID and API  key in order to execute any of the API commands. 
 
+## Improvements
+- Change the application to use flexible app enviroment, which would then allow usage of C dependencies libraries. Therefore, better known machine learning libaries like tensorflow or sklearn. 
+- Change datastore storage of CSV to blobstore if the CSVs are big file sizes.
+- Fully mobile responsive
+- Tool tips everywhere
+
 ## ERD
 <img src="https://image.prntscr.com/image/vOMKM2XaQyerayYRNppYmg.png" width="70%"></img>
 
