@@ -39,7 +39,7 @@ All Templates are designed in the following structure:
 ### Authorization and Error Handling
 A Python decorator function was used to authorize all user requests, the decorator used checked the role of the currently logged in user against the required for the page. Usage of the python decorator this was useful as it allowed for page pre-processing. The function also checked and only loaded projects and tasks available to that user. So, if the user wasn’t permitted, they would be redirected straight to 403 or 404 pages, if they were permitted, their unique data was temporarily stored in a class object and past to the page function for usage. 
 
-<img src="https://image.prntscr.com/image/MsUD5fGiRg6YoyOD8RWCGQ.png" width="30%"></img>
+<img src="https://image.prntscr.com/image/MsUD5fGiRg6YoyOD8RWCGQ.png" width="50%"></img>
 
 ### Project Chat
 The project chat was created with the usage of web sockets, which provide full-duplex communication with TCP connections. Web sockets were used because the project chat is a live chat and messages are pushed to the screen without the need to refresh the page. This functionality was achieved using Pusher API and AJAX. Each project has its own unique chatroom available to the admin, project manager and developer assigned. The messages are stored in base 64 in the datastore, to provide some privacy.  As the Pusher python library uses C extensions, the documentation following the Pusher REST API usage and authentication was followed
