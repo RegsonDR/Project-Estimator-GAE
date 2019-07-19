@@ -442,3 +442,31 @@ Parameters:
 
 ## Webhook
 It is also possible to set up a webhook which will allow of an external service to know of a change that has happened in the workspace. These events happen during, project, task, log creation, delete and updates. The webhook is not triggered by the API in order to prevent an infinite loop of payloads being send and APIs calls (changes) being made to the system. If the external services require additional data, then it should read the ID of the resource and make an API call to request it. The admin must enable this in the settings and provide a valid URL for the payload to be sent to.
+
+## Screenshots (Admin)
+### Workspaces
+<img src="https://image.prntscr.com/image/xk8v80BvQJCyMjAr0a3RYw.png" width="50%"></img>
+### Account Settings
+<img src="https://image.prntscr.com/image/C84Dtb1jQJ6A1DSibqWW2w.png" width="50%"></img>
+### Workspace Homepage
+<img src="https://image.prntscr.com/image/-T6ZtEGCTZ6_CjbgKzKIwA.png" width="50%"></img>
+### Project
+<img src="https://image.prntscr.com/image/xGlsrBFvQ9_ji-tz3QNwUw.png" width="50%"></img>
+### Example Project (with prediction)
+<img src="https://image.prntscr.com/image/6DE2W76jTDyKQaN1GnBguQ.png" width="50%"></img>
+### Task
+<img src="https://image.prntscr.com/image/Esh2srtLQpuUtcdU7qDWWQ.png" width="50%"></img>
+### User Skill
+<img src="https://image.prntscr.com/image/JPh463r1SwCEAA4CJIPrKg.png" width="50%"></img>
+### Skill Matrix
+<img src="https://image.prntscr.com/image/xtRGSFO-SMmR9GBSbeQexg.png" width="50%"></img>
+### Workspace Users
+<img src="https://image.prntscr.com/image/EjavSwuxRT2AGxbJ9KceYw.png" width="50%"></img>
+### Workspace Settings
+<img src="https://image.prntscr.com/image/awm9lKvLSnWOREMM1o9rGQ.png" width="50%"></img>
+### Project Timeline (developer & projects)
+<img src="https://image.prntscr.com/image/TWbYFEf8SDKRnoFI-9a9_Q.png" width="50%"></img>
+### Project Chat
+<img src="https://image.prntscr.com/image/51Ymc9QITCSWtMn_kX8NAQ.png" width="50%"></img>
+### Project Gantt Chart (developer & tasks)
+<img src="https://image.prntscr.com/image/E3ZYwjhQTmm-co8DuHHHww.png" width="50%"></img>
