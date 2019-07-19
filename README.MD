@@ -17,10 +17,7 @@ All the following auth tokens needs to be populated.
 - /routes/authenticated/templates/authenticated/html/project_chat.html:88   Pusher app key
 - /routes/unauthenticated/templates/unauthenticated/html/register_page.html:28 Google Recaptcha sitekey.
 
-
-
 Google App Engine SDK is required.
-
 
 ## Core Infrastructure
 A user is required to create an account, which would need to be confirmed with email verification before the ability to access the application. The user is presented with a page displaying all of their connected workspaces; these are workspaces the user created or have been invited to join. From this page, the user can also create a new workspace. 
@@ -106,27 +103,27 @@ In order to use the API, the admin of the workspace must log into their account 
 The application uses basic authorization header, the username is the workspace ID, which can be found in the URL of the any workspace (“Workspace/<Workspace_ID>/”) and the password is the API key. These parameters need to be in base 64 as per the requirements of basic authorization method.
 
 ## HTTP Methods
-GET – Used to obtain data.
-POST – Used to create new entities or to perform actions. Parameters must be provided in the HTTP body.
-PUT – Used to update entities. Parameters must be provided in the HTTP body.
-DELETE – Used to delete entities. Entity ID must be provided in the endpoint.
+- GET – Used to obtain data.
+- POST – Used to create new entities or to perform actions. Parameters must be provided in the HTTP body.
+- PUT – Used to update entities. Parameters must be provided in the HTTP body.
+- DELETE – Used to delete entities. Entity ID must be provided in the endpoint.
 
 ## Response
 All responses including errors will be in JSON format. Codes and data properties are returned at every API call. Errors will always be explained if there is a validation issue with the data provided.
 
 ## Codes
-200 – Successful Request
-400 – Bad request
-401 – Authentication failure (check username and password). 
-403 – Forbidden access (you don’t have access to this resource).
-404 – Resource not found.
-405 – HTTP Method is not permitted for the endpoint.
+- 200 – Successful Request
+- 400 – Bad request
+- 401 – Authentication failure (check username and password). 
+- 403 – Forbidden access (you don’t have access to this resource).
+- 404 – Resource not found.
+- 405 – HTTP Method is not permitted for the endpoint.
 
 ## Data Types
-Bool – Must be either True or False
-Unicode – Must a string of characters or numbers
-[List] – Only certain entries are accepted.
-Date – In the following format dd/mm/YYYY
+- Bool – Must be either True or False
+- Unicode – Must a string of characters or numbers
+- [List] – Only certain entries are accepted.
+- Date – In the following format dd/mm/YYYY
 
 ## API Calls
 ### /api/Workspaces [GET] - Returns data about the workspace.
@@ -145,10 +142,10 @@ Date – In the following format dd/mm/YYYY
 
 ### /api/Workspaces [PUT] - Updates the workspace data.
 Parameters:
-'allow_dev_skills': bool
-'workspace_name': unicode
-'webhook_url': unicode
-'enable_webhook': bool
+- 'allow_dev_skills': bool
+- 'workspace_name': unicode
+- 'webhook_url': unicode
+- 'enable_webhook': bool
 
 ### /api/Skills [GET] - Returns a list of skills within the workspace. 
 ```json
@@ -170,7 +167,7 @@ Parameters:
 ```
 ### /api/Skills [POST] - Creates a new skill.
 Parameters:
-'skill_name': unicode
+- 'skill_name': unicode
 
 ### /api/Users [GET] - Returns a list of users in the system with details of their profiles. A false AccountID indicates the user has not create any accounts yet.
 ```json
@@ -203,8 +200,8 @@ Parameters:
 
 ### /api/Users [POST] - Invites a new user into the system.
 Parameters: 
-'UserEmail': unicode
-'role': [‘admin’,’manager’,’developer’]
+- 'UserEmail': unicode
+- 'role': [‘admin’,’manager’,’developer’]
 
 ### /api/Projects [GET] - Returns a list of projects in the system and the developers permitted to access them.
 ```json
@@ -228,11 +225,11 @@ Parameters:
 ```
 ### /api/Projects [POST] - Creates a new project.
 Parameters:
-'project_deadline': date,
-'project_description': unicode,
-'project_manager': unicode,
-'project_name': unicode,
-'project_start': date
+- 'project_deadline': date,
+- 'project_description': unicode,
+- 'project_manager': unicode,
+- 'project_name': unicode,
+- 'project_start': date
 
 ### /api/User/:ProfileID: [GET] – Gets full details about the user including skills and projects.
 ``` json
@@ -269,17 +266,17 @@ Parameters:
 ```
 ### /api/User/:ProfileID: [PUT] – Updates the user’s access permissions to the workspace.
 Parameters:
-'disabled': bool
-'role': [‘admin’,’manager’,’developer’]
+- 'disabled': bool
+- 'role': [‘admin’,’manager’,’developer’]
 
 ### /api/User/:ProfileID:/Skill [POST] – Adds a new skill to a user.
 Parameters:
-'SkillID': SkillID
-'rating': [1,2,3,4,5]
+- 'SkillID': SkillID
+- 'rating': [1,2,3,4,5]
 
 ### /api/User/:ProfileID:/Skill/:SkillID: [PUT] – Updates a user’s skill rating.
 Parameters:
-'rating': [1,2,3,4,5]
+- 'rating': [1,2,3,4,5]
 
 ### /api/User/:ProfileID:/Skill/:SkillID: [DELETE] – Deletes the skill for that user.
 ### /api/Project/:ProjectID: [GET] – Returns project date, developers, tasks and children tasks.
@@ -363,25 +360,25 @@ Parameters:
 ```
 ### /api/Project/:ProjectID: [PUT] – Updates project details.
 Parameters:
-'project_deadline': unicode
-'project_description': unicode
-'project_manager': email address of the project manager
-'project_name': unicode,
-'project_start': date,
-'project_stage':unicode,
-'project_status':[‘Running’,’Closed’,’On Hold’]
+- 'project_deadline': unicode
+- 'project_description': unicode
+- 'project_manager': email address of the project manager
+- 'project_name': unicode,
+- 'project_start': date,
+- 'project_stage':unicode,
+- 'project_status':[‘Running’,’Closed’,’On Hold’]
 
 ### /api/Project/:ProjectID: [DELETE] – Deletes the project and corresponding tasks, logs and chat messages.
 
 ### /api/Project/:ProjectID:/Task [POST] – Creates a new task in the project.
 Paramaters:
-'task_name': unicode
-'task_description': unicode
-'task_aminutes': int
-'task_skills': [List of SkillIDs]
-'task_developers': [List of AccountIDs]
-'task_startdate':date
-'task_finishbydate':date
+- 'task_name': unicode
+- 'task_description': unicode
+- 'task_aminutes': int
+- 'task_skills': [List of SkillIDs]
+- 'task_developers': [List of AccountIDs]
+- 'task_startdate':date
+- 'task_finishbydate':date
 
 ### /api/Task/:TaskID: [GET] – Returns task details, including logs.
 ```json
@@ -418,28 +415,28 @@ Paramaters:
 }
 ```
 ### /api/Task/:TaskID: [PUT] – Updates task data.
-'task_name': unicode
-'task_description': unicode
-'task_aminutes': int
-'task_skills': [List of SkillIDs]
-'task_developers': [List of AccountIDs]
-'task_startdate': date,
-'task_finishbydate': date
-'parent_task': TaskID (Cannot be itself)
-'task_status':[‘Open’,’Closed’]
+- 'task_name': unicode
+- 'task_description': unicode
+- 'task_aminutes': int
+- 'task_skills': [List of SkillIDs]
+- 'task_developers': [List of AccountIDs]
+- 'task_startdate': date,
+- 'task_finishbydate': date
+- 'parent_task': TaskID (Cannot be itself)
+- 'task_status':[‘Open’,’Closed’]
 
 ### /api/Task/:TaskID: [DELETE] – Deletes tasks and logs.
 ### /api/Task/:TaskID:/Log [POST] – Creates a new log for the task.
 Parameters:
-'log_developer': AccountID
-'log_minutes': int
-'log_comments':unicode
+- 'log_developer': AccountID
+- 'log_minutes': int
+- 'log_comments':unicode
 
 ### /api/Log/:LogID: [PUT] – Creates a new log for the task.
 Parameters:
-'log_developer': AccountID
-'log_minutes': int
-'log_comments':unicode
+- 'log_developer': AccountID
+- 'log_minutes': int
+- 'log_comments':unicode
 
 ### /api/Log/:LogID: [DELETE] – Deletes log.
 
@@ -447,96 +444,96 @@ Parameters:
 It is also possible to set up a webhook which will allow of an external service to know of a change that has happened in the workspace. These events happen during, project, task, log creation, delete and updates. The webhook is not triggered by the API in order to prevent an infinite loop of payloads being send and APIs calls (changes) being made to the system. If the external services require additional data, then it should read the ID of the resource and make an API call to request it. The admin must enable this in the settings and provide a valid URL for the payload to be sent to. It is possible to test the URL to ensure the payload is being sent correctly, below is an example of the payload:
 ```json
 {
-   'tasks':[
+   "tasks":[
       [
          {
-            'TaskID':5092662981951488,
-            'task_description':'ffds',
-            'task_status':'Open',
-            'task_startdate':datetime.date(2019,5,14),
-            'level':1,
-            'task_name':'one more task',
-            'task_finishbydate':datetime.date(2019,5,31),
-            'task_skills':[
+            "TaskID":5092662981951488,
+            "task_description":"ffds",
+            "task_status":"Open",
+            "task_startdate":datetime.date(2019,5,14),
+            "level":1,
+            "task_name":"one more task",
+            "task_finishbydate":datetime.date(2019,5,31),
+            "task_skills":[
                6463753981788160
             ],
-            'task_logged_minutes':None,
-            'children':[
+            "task_logged_minutes":None,
+            "children":[
 
             ],
-            'task_developers':[
+            "task_developers":[
                5629499534213120
             ],
-            'task_aminutes':30
+            "task_aminutes":30
          },
          {
-            'TaskID':6067929795788800,
-            'task_description':'fdas',
-            'task_status':'Closed',
-            'task_startdate':datetime.date(2019,4,29),
-            'level':2,
-            'task_name':'Title',
-            'task_finishbydate':datetime.date(2019,5,9),
-            'task_skills':[
+            "TaskID":6067929795788800,
+            "task_description":"fdas",
+            "task_status":"Closed",
+            "task_startdate":datetime.date(2019,4,29),
+            "level":2,
+            "task_name":"Title",
+            "task_finishbydate":datetime.date(2019,5,9),
+            "task_skills":[
                5337854074945536,
                6463753981788160
             ],
-            'task_logged_minutes':20,
-            'children':[
+            "task_logged_minutes":20,
+            "children":[
                {
-                  'TaskID':5655612935372800,
-                  'task_description':'Desc',
-                  'task_status':'Open',
-                  'task_startdate':datetime.date(2019,5,17),
-                  'level':'2.1',
-                  'task_name':'another task',
-                  'task_finishbydate':datetime.date(2019,5,21),
-                  'task_skills':[
+                  "TaskID":5655612935372800,
+                  "task_description":"Desc",
+                  "task_status":"Open",
+                  "task_startdate":datetime.date(2019,5,17),
+                  "level":"2.1",
+                  "task_name":"another task",
+                  "task_finishbydate":datetime.date(2019,5,21),
+                  "task_skills":[
                      5337854074945536
                   ],
-                  'task_logged_minutes':None,
-                  'children':[
+                  "task_logged_minutes":None,
+                  "children":[
 
                   ],
-                  'task_developers':[
+                  "task_developers":[
                      6420323272491008
                   ],
-                  'task_aminutes':40
+                  "task_aminutes":40
                }
             ],
-            'task_developers':[
+            "task_developers":[
                5629499534213120
             ],
-            'task_aminutes':1
+            "task_aminutes":1
          }
       ]
    ],
-   'projects':[
+   "projects":[
       {
-         'project_description':'Description',
-         'project_start':'29/04/2019',
-         'project_manager':'regsondr@live.co.uk',
-         'project_stage':'Planning',
-         'project_name':'Name',
-         'project_deadline':'04/05/2019',
-         'ProjectID':4942029888946176,
-         'Developers':[
+         "project_description":"Description",
+         "project_start":"29/04/2019",
+         "project_manager":"regsondr@live.co.uk",
+         "project_stage":"Planning",
+         "project_name":"Name",
+         "project_deadline":"04/05/2019",
+         "ProjectID":4942029888946176,
+         "Developers":[
             5629499534213120,
             6420323272491008
          ],
-         'project_status':'Running'
+         "project_status":"Running"
       }
    ],
-   'logs':[
+   "logs":[
       [
          {
-            'log_comments':'did some work',
-            'log_developer':5629499534213120,
-            'developer_name':'Regson Dr',
-            'log_minutes':20,
-            'task_id':6067929795788800,
-            'LogID':6218562888794112,
-            'log_time':datetime.datetime(2019,5,1,16,30,0,204000)
+            "log_comments":"did some work",
+            "log_developer":5629499534213120,
+            "developer_name":"Regson Dr",
+            "log_minutes":20,
+            "task_id":6067929795788800,
+            "LogID":6218562888794112,
+            "log_time":datetime.datetime(2019,5,1,16,30,0,204000)
          }
       ]
    ]
