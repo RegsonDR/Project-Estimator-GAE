@@ -445,28 +445,28 @@ It is also possible to set up a webhook which will allow of an external service 
 
 ## Screenshots (Admin)
 ### Workspaces
-<img src="https://image.prntscr.com/image/xk8v80BvQJCyMjAr0a3RYw.png" width="50%"></img>
+<img src="https://image.prntscr.com/image/xk8v80BvQJCyMjAr0a3RYw.png" width="70%"></img>
 ### Account Settings
-<img src="https://image.prntscr.com/image/C84Dtb1jQJ6A1DSibqWW2w.png" width="50%"></img>
+<img src="https://image.prntscr.com/image/C84Dtb1jQJ6A1DSibqWW2w.png" width="70%"></img>
 ### Workspace Homepage
-<img src="https://image.prntscr.com/image/-T6ZtEGCTZ6_CjbgKzKIwA.png" width="50%"></img>
+<img src="https://image.prntscr.com/image/-T6ZtEGCTZ6_CjbgKzKIwA.png" width="70%"></img>
 ### Project
-<img src="https://image.prntscr.com/image/xGlsrBFvQ9_ji-tz3QNwUw.png" width="50%"></img>
+<img src="https://image.prntscr.com/image/xGlsrBFvQ9_ji-tz3QNwUw.png" width="70%"></img>
 ### Example Project (with prediction)
-<img src="https://image.prntscr.com/image/6DE2W76jTDyKQaN1GnBguQ.png" width="50%"></img>
+<img src="https://image.prntscr.com/image/6DE2W76jTDyKQaN1GnBguQ.png" width="70%"></img>
 ### Task
-<img src="https://image.prntscr.com/image/Esh2srtLQpuUtcdU7qDWWQ.png" width="50%"></img>
+<img src="https://image.prntscr.com/image/Esh2srtLQpuUtcdU7qDWWQ.png" width="70%"></img>
 ### User Skill
-<img src="https://image.prntscr.com/image/JPh463r1SwCEAA4CJIPrKg.png" width="50%"></img>
+<img src="https://image.prntscr.com/image/JPh463r1SwCEAA4CJIPrKg.png" width="70%"></img>
 ### Skill Matrix
-<img src="https://image.prntscr.com/image/xtRGSFO-SMmR9GBSbeQexg.png" width="50%"></img>
+<img src="https://image.prntscr.com/image/xtRGSFO-SMmR9GBSbeQexg.png" width="70%"></img>
 ### Workspace Users
-<img src="https://image.prntscr.com/image/EjavSwuxRT2AGxbJ9KceYw.png" width="50%"></img>
+<img src="https://image.prntscr.com/image/EjavSwuxRT2AGxbJ9KceYw.png" width="70%"></img>
 ### Workspace Settings
-<img src="https://image.prntscr.com/image/awm9lKvLSnWOREMM1o9rGQ.png" width="50%"></img>
+<img src="https://image.prntscr.com/image/awm9lKvLSnWOREMM1o9rGQ.png" width="70%"></img>
 ### Project Timeline (developer & projects)
-<img src="https://image.prntscr.com/image/TWbYFEf8SDKRnoFI-9a9_Q.png" width="50%"></img>
+<img src="https://image.prntscr.com/image/TWbYFEf8SDKRnoFI-9a9_Q.png" width="70%"></img>
 ### Project Chat
-<img src="https://image.prntscr.com/image/51Ymc9QITCSWtMn_kX8NAQ.png" width="50%"></img>
+<img src="https://image.prntscr.com/image/51Ymc9QITCSWtMn_kX8NAQ.png" width="70%"></img>
 ### Project Gantt Chart (developer & tasks)
-<img src="https://image.prntscr.com/image/E3ZYwjhQTmm-co8DuHHHww.png" width="50%"></img>
+<img src="https://image.prntscr.com/image/E3ZYwjhQTmm-co8DuHHHww.png" width="70%"></img>
