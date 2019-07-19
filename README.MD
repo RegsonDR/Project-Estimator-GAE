@@ -1,7 +1,7 @@
 # Project Estimator
 This is a project management tool I built for my final year project; the application allows managers to set up projects and tasks for developers to complete. Using machine learning, a time estimate for effort is produced for the completion of the project. In this initial version, linear regression is used as the model; however, other models can be experimented with and substituted. The application helps guide managers to choose developers most suited for specific tasks and gives graphs to help them manage the projects better. An API for the system has been produced for extendabilty. 
 
-The application is written with Python using Flask on Google App Engine. 
+The application is written with Python using Flask on Google App Engine (standard enviroment). 
 An example of the site is deployed at https://project-application-231720.appspot.com/ (you can contact me for the login details).
 
 ## Set up
