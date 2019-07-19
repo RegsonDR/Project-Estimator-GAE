@@ -27,7 +27,7 @@ After a project has been created and tasks have been assigned, the developers ca
 
 ## Development
 ### Frontend
-Through the functionality of Flask and Jinja2, all templates were created primarily using DRY principle (figure 20). Application context was used to pass information from the backend to the frontend, so pages are dynamic and based on the role of the user currently logged in, so they only access and view content permitted to them. HTML Templates can be found in the relevant /routes folder. For example, the homepage can be found in /routes\authenticated\templates\authenticated\html
+Through the functionality of Flask and Jinja2, all templates were created primarily using DRY principle. Application context was used to pass information from the backend to the frontend, so pages are dynamic and based on the role of the user currently logged in, so they only access and view content permitted to them. HTML Templates can be found in the relevant /routes folder. For example, the homepage can be found in /routes\authenticated\templates\authenticated\html
 
 All Templates are designed in the following structure:
 
