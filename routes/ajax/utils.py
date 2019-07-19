@@ -58,9 +58,9 @@ def log_message(project_id, username, message, message_time, email, role):
 
 
 def create_pusher_auth_signature(timestamp, md5):
-    app_id = "766185"
-    key = "08d09cb027a29bc3cb55"
-    secret = "25554a6393a0cbbb0814"
+    app_id = ""
+    key = ""
+    secret = ""
     string = "POST\n/apps/" + app_id + "/events\nauth_key=" + key + "&auth_timestamp=" + timestamp + "&auth_version=1.0&body_md5=" + md5
     return hmac.new(secret, string, hashlib.sha256).hexdigest()
 
@@ -69,10 +69,10 @@ def pusher_request(parameters):
     body_md5 = hashlib.md5(parameters).hexdigest()
     auth_timestamp = '%.0f' % time.time()
     auth_signature = create_pusher_auth_signature(auth_timestamp, body_md5)
-    url_endpoint = ("https://api-eu.pusher.com/apps/766185/events?" +
+    url_endpoint = ("https://api-eu.pusher.com/apps/app id/events?" +
                     "body_md5=" + body_md5 + "&" +
                     "auth_version=1.0&" +
-                    "auth_key=08d09cb027a29bc3cb55&" +
+                    "auth_key=pusher app key&" +
                     "auth_timestamp=" + auth_timestamp + "&" +
                     "auth_signature=" + auth_signature)
     resp = urlfetch.fetch(

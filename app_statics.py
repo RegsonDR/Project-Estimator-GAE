@@ -1,5 +1,5 @@
 APP_NAME = "Project Estimator"
-RECAPTCHA_SECRET = "6LeTmZMUAAAAAPsfXDZJWpxP2Q1A2e9XhOCA1zlf"
+RECAPTCHA_SECRET = "change me"
 SIDEBAR = {
     'admin':[
         {
