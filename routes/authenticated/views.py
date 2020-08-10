@@ -530,7 +530,7 @@ def view_task_page(wks_id, project_id, task_id, **kwargs):
 
     users_choices = [(str(u_s.User.id()), u_s.user_name(), u_s.skill_name(), u_s.disabled_check()) for u_s in
                      UserSkill.query().fetch()]
-
+    #TODO: Filter to only users in that workspace
     dev_options = DictMissKey()
     for choice in users_choices:
         dev_options[choice[0]]['name'] = choice[1]
