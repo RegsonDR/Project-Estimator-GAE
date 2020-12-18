@@ -195,7 +195,7 @@ Parameters:
         {
             "AccountID": 5629499534213120,
             "ProfileID": 5900804028366848,
-            "UserEmail": "regsondr@live.co.uk",
+            "UserEmail": "regsondr@example.co.uk",
             "disabled": false,
             "invitation_accepted": true,
             "invitation_token": null,
